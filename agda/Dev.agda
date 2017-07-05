@@ -6,6 +6,7 @@ open import Tm
 open import Env
 open import Subst
 open import Par
+open import Star
 
 NoRadFun : forall {n} -> Tm n syn -> Set
 NoRadFun (lam _ :: pi _ _) = Zero
@@ -86,3 +87,9 @@ dev2 .((lam _ :: pi _ _) $ _) ._ (beta rt rS rT rs) | beta
   = parStab (parzRefl si , (dev2 _ _ rs :: dev2 _ _ rS)) (dev2 _ _ rt :: dev2 _ _ rT)
 dev2 .([ _ :: _ ]) .([ _ :: _ ]) [ r :: r' ] | upsi = upsi (dev2 _ _ r)
 dev2 .([ _ :: _ ]) t' (upsi r) | upsi = dev2 _ _ r
+
+_~>>*_ : forall {d n} -> Tm n d -> Tm n d -> Set
+s ~>>* t = Star _~>>_ s t
+
+confluence : forall {d n} -> Diamond {Tm n d} _~>>*_
+confluence = diamondLemma (\ {t} r s -> dev t , dev2 t _ r , dev2 t _ s)

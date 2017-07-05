@@ -28,6 +28,7 @@ record Sg (S : Set)(T : S -> Set) : Set where
     snd : T fst
 _*_ : Set -> Set -> Set
 S * T = Sg S \ _ -> T
+infixr 4 _,_ _*_
 
 record One : Set where
   constructor <>

@@ -1,0 +1,33 @@
+module Star where
+
+open import Basics
+
+data Star {X}(R : X -> X -> Set)(x : X) : X -> Set where
+  [] : Star R x x
+  _,-_ : forall {y z} -> R x y -> Star R y z -> Star R x z
+
+_++_ : forall {X}{R : X -> X -> Set}{x y z} ->
+       Star R x y -> Star R y z -> Star R x z
+[] ++ ss = ss
+(r ,- rs) ++ ss = r ,- (rs ++ ss)
+
+Parallelogram : forall {X}(R S : X -> X -> Set) -> Set
+Parallelogram {X} R S = forall {x y z} ->
+  R x y -> S x z -> Sg X \ w -> S y w * R z w
+
+Diamond : forall {X}(R : X -> X -> Set) -> Set
+Diamond R = Parallelogram R R
+
+stripLemma : forall {X}{R : X -> X -> Set} ->
+             Diamond R -> Parallelogram R (Star R)
+stripLemma d s [] = _ , [] , s
+stripLemma d s (r ,- rs) with d s r
+... | _ , t , u with stripLemma d u rs
+... | _ , ts , v = _ , ((t ,- ts)) , v
+
+diamondLemma : forall {X}{R : X -> X -> Set} ->
+             Diamond R -> Diamond (Star R)
+diamondLemma d [] ss = _ , ss , []
+diamondLemma d (r ,- rs) ss with stripLemma d r ss
+... | _ , ts , u with diamondLemma d rs ts
+... | _ , vs , us = _ , vs , (u ,- us)
