@@ -45,6 +45,13 @@ presSYN : forall {n}{Ga Ga' : Cx n}{e e' : Tm n syn}{S : Tm n chk} ->
   Ga ~~>>* Ga' -> e ~>> e' ->
   SYN Ga e S -> Sg (Tm n chk) \ S' -> (S ~>>* S') * SYN Ga' e' S'
 
+presCxTy : forall {n}{Ga Ga' : Cx n} ->
+  Ga ~~>>* Ga' -> (i : Fin n) -> cxTy Ga i ~>>* cxTy Ga' i
+presCxTy {Ga = Ga -, S} {Ga' -, S'} (rGa , SS') ze
+  = starm (Th.act (o' oi)) (parThin (o' oi)) SS'
+presCxTy {Ga = Ga -, S} {Ga' -, S'} (rGa , SS') (su i)
+  = starm (Th.act (o' oi)) (parThin (o' oi)) (presCxTy rGa i)
+
 presCHK rGa rT0 rt (pre rT1 Tt) with confluence rT0 (rT1 ,- [])
 ... | _ , rT2 , rT3 = pre* rT2 (presCHK rGa rT3 rt Tt)
 presCHK rGa rT star star with starInv rT
@@ -65,4 +72,18 @@ presCHK {n} rGa rT (upsi rt) ([ e ] refl) = help rGa rT rt e where
   help rGa UV tt' (post tTS SU) = help rGa (SU ,- UV) tt' tTS
   help rGa UV tt' (T :: t) = presCHK rGa UV tt' t 
 
-presSYN rGa re eS = {!!}
+presSYN rGa re (post eS S0S') with presSYN rGa re eS
+... | _ , S0S1 , eS1 with confluence S0S1 (S0S' ,- [])
+... | _ , S1Sw , S'Sw = _ , S'Sw , post* eS1 S1Sw
+presSYN rGa (var .i) (var i) = _ , presCxTy rGa i , var i
+presSYN rGa (rf $ rs) (fST $ Ss) with presSYN rGa rf fST
+... | _ , STS'T' , f'S'T' with piInv STS'T'
+presSYN rGa (rf $ rs) (fST $ Ss)
+  | .(pi S' T') , STS'T' , f'S'T'
+  | (S' , T' , refl , SS' , TT')
+  with presCHK rGa SS' rs Ss
+... | S's'
+    = _ , {!!} , (f'S'T' $ S's')
+presSYN rGa (beta re re₁ re₂ re₃) (fST $ Ss) = {!!}
+presSYN rGa (rt :: rT) (T :: t) =
+  _ , (rT ,- []) , (presCHK rGa [] rT T :: presCHK rGa (rT ,- []) rt t)

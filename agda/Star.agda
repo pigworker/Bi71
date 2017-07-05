@@ -11,6 +11,12 @@ _++_ : forall {X}{R : X -> X -> Set}{x y z} ->
 [] ++ ss = ss
 (r ,- rs) ++ ss = r ,- (rs ++ ss)
 
+starm : forall {X Y}(f : X -> Y){R : X -> X -> Set}{R' : Y -> Y -> Set} ->
+  ({x x' : X} -> R x x' -> R' (f x) (f x')) ->
+  {x x' : X} -> Star R x x' -> Star R' (f x) (f x')
+starm f g [] = []
+starm f g (r ,- rz) = g r ,- starm f g rz
+
 Parallelogram : forall {X}(R S : X -> X -> Set) -> Set
 Parallelogram {X} R S = forall {x y z} ->
   R x y -> S x z -> Sg X \ w -> S y w * R z w
