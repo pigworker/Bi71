@@ -93,3 +93,11 @@ s ~>>* t = Star _~>>_ s t
 
 confluence : forall {d n} -> Diamond {Tm n d} _~>>*_
 confluence = diamondLemma (\ {t} r s -> dev t , dev2 t _ r , dev2 t _ s)
+
+consensus : forall {d n}(s : Tm n d)
+            (ts : List (Tm n d)) -> All (s ~>>*_) ts ->
+            Sg (Tm n d) \ u -> (s ~>>* u) * All (_~>>* u) ts
+consensus s [] <> = s , [] , <>
+consensus s (t ,- ts) (st , sts) with consensus s ts sts
+... | v , sv , tvs with confluence st sv
+... | w , tw , vw = w , (sv ++ vw) , tw , all (_++ vw) tvs

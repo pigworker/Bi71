@@ -34,3 +34,6 @@ record One : Set where
   constructor <>
 
 data Zero : Set where
+
+the : forall {l}(X : Set l) -> X -> X
+the X x = x

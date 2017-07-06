@@ -6,6 +6,20 @@ data Star {X}(R : X -> X -> Set)(x : X) : X -> Set where
   [] : Star R x x
   _,-_ : forall {y z} -> R x y -> Star R y z -> Star R x z
 
+infixr 4 _,-_
+
+List : Set -> Set
+List X = Star {One} (\ _ _ -> X) _ _
+
+All : forall {X} -> (X -> Set) -> List X -> Set
+All P [] = One
+All P (x ,- xs) = P x * All P xs
+
+all : forall {X}{P Q : X -> Set} ->
+      (forall {x} -> P x -> Q x) -> forall {xs} -> All P xs -> All Q xs
+all f {[]} <> = <>
+all f {x ,- xs} (p , ps) = f p , all f ps
+
 _++_ : forall {X}{R : X -> X -> Set}{x y z} ->
        Star R x y -> Star R y z -> Star R x z
 [] ++ ss = ss
