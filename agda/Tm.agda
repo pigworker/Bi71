@@ -2,7 +2,6 @@ module Tm where
 
 open import Basics
 open import OPE
-open import Env
 
 data Dir : Set where chk syn : Dir
 
