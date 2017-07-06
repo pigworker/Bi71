@@ -1,6 +1,5 @@
 module Basics where
 
-
 data _==_ {l}{X : Set l}(x : X) : X -> Set l where
   refl : x == x
 {-# BUILTIN EQUALITY _==_ #-}
@@ -34,6 +33,8 @@ record One : Set where
   constructor <>
 
 data Zero : Set where
+naughty : forall {l}{X : Set l} -> Zero -> X
+naughty ()
 
 the : forall {l}(X : Set l) -> X -> X
 the X x = x

@@ -31,6 +31,12 @@ starm : forall {X Y}(f : X -> Y){R : X -> X -> Set}{R' : Y -> Y -> Set} ->
 starm f g [] = []
 starm f g (r ,- rz) = g r ,- starm f g rz
 
+starb : forall {X}{R : X -> X -> Set}{R' : X -> X -> Set} ->
+  ({x x' : X} -> R x x' -> Star R' x x') ->
+  {x x' : X} -> Star R x x' -> Star R' x x'
+starb f [] = []
+starb f (r ,- rs) = f r ++ starb f rs
+
 Parallelogram : forall {X}(R S : X -> X -> Set) -> Set
 Parallelogram {X} R S = forall {x y z} ->
   R x y -> S x z -> Sg X \ w -> S y w * R z w

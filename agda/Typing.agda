@@ -1,6 +1,7 @@
 module Typing where
 
 open import Basics
+open import Star
 open import OPE
 open import Tm
 open import Env
@@ -207,3 +208,55 @@ substSYN ez ezok (_$_ {f}{s}{S}{T} fST Ss)
         | subsiQ ez
   = h
 substSYN ez ezok (*T :~: Tt) = substCHK ez ezok *T :~: substCHK ez ezok Tt
+
+killPiPi : forall {n}{Ga : Cx n}{S S' T T'} ->
+           CHK Ga (pi S T) (pi S' T') -> Zero
+killPiPi (pre (pi _ _) bad) = killPiPi bad
+
+killPi* : forall {n}{Ga : Cx n}{S T} ->
+           CHK Ga (pi S T) star -> Zero
+killPi* (pre (pi _ _) bad) = killPi* bad
+
+_!~>>*_ : forall {n} -> Cx n -> Cx n -> Set
+[] !~>>* [] = One
+(Ga -, S) !~>>* (De -, T) = (Ga !~>>* De) * (S ~>>* T)
+
+pre* : forall {n}{Ga : Cx n}{T T' t} ->
+         T ~>>* T' -> CHK Ga T' t ->
+         CHK Ga T t
+pre* [] Tt = Tt
+pre* (rT ,- rTs) T't = pre rT (pre* rTs T't)
+
+post* : forall {n}{Ga : Cx n}{e S S'} ->
+        SYN Ga e S -> S ~>>* S' -> SYN Ga e S'
+post* eS [] = eS
+post* eS (r ,- rs) = post* (post eS r) rs
+
+annInv : forall {n}{Ga}{t T T' : Tm n chk} ->
+         SYN Ga (t :: T) T' ->
+         CHK Ga star T * CHK Ga T t * (T ~>>* T')
+annInv (post tT r) with annInv tT
+... | T , t , rs = T , t , (rs ++ (r ,- []))
+annInv (T :~: t)   = T , t , []
+
+lamInv : forall {n}{Ga}{S : Tm n chk}{T t} ->
+         CHK Ga (pi S T) (lam t) ->
+         Sg (Tm n chk) \ S' -> Sg (Tm (su n) chk) \ T' ->
+         (S ~>>* S') * (T ~>>* T') *
+         CHK (Ga -, S') T' t
+lamInv (pre (pi rS rT) d) with lamInv d
+... | _ , _ , rsS , rsT , d' = _ , _ , (rS ,- rsS) , (rT ,- rsT) , d'
+lamInv (lam d) = _ , _ , [] , [] , d
+
+piInv : forall {n}{Ga}{S : Tm n chk}{T} ->
+        CHK Ga star (pi S T) ->
+        CHK Ga star S * CHK (Ga -, S) star T
+piInv (pre star *piST) = piInv *piST
+piInv (pi *S *T) = *S , *T
+
+zeMor : forall {n}{Ga : Cx n}{s S S'} ->
+        CHK Ga star S -> CHK Ga S s -> S ~>>* S' ->
+        CxMor Ga (Ga -, S') (si -, (s :: S))
+zeMor {n}{Ga}{s}{S}{S'} *S Ss SS'
+  rewrite ActId.actId SUBSTID S'
+        = idCxMor Ga , post* (*S :~: Ss) SS'

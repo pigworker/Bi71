@@ -2,80 +2,13 @@ module Preservation where
 
 open import Basics
 open import OPE
-open import Tm
+open import Star
 open import Env
+open import Tm
 open import Subst
 open import Par
-open import Star
 open import Dev
 open import Typing
-
-_~~>>*_ : forall {n m} -> Env (Tm m syn) n -> Env (Tm m syn) n -> Set
-_~~>>*_ = Star _~~>>_
-
-parsStab : forall {d n m}{sz tz : Env (Tm m syn) n}{s t : Tm n d} ->
-           sz ~~>>* tz -> s ~>>* t -> Sb.act sz s ~>>* Sb.act tz t
-parsStab {sz = sz} {.sz} [] [] = []
-parsStab {sz = sz} {.sz} [] (r ,- rs)
-  = parStab (parzRefl sz) r ,- parsStab [] rs
-parsStab {sz = sz} {tz} {s = s} (rz ,- rzs) rs
-  = parStab rz (parRefl s) ,- parsStab rzs rs
-
-_!~>>*_ : forall {n} -> Cx n -> Cx n -> Set
-[] !~>>* [] = One
-(Ga -, S) !~>>* (De -, T) = (Ga !~>>* De) * (S ~>>* T)
-
-pre* : forall {n}{Ga : Cx n}{T T' t} ->
-         T ~>>* T' -> CHK Ga T' t ->
-         CHK Ga T t
-pre* [] Tt = Tt
-pre* (rT ,- rTs) T't = pre rT (pre* rTs T't)
-
-post* : forall {n}{Ga : Cx n}{e S S'} ->
-        SYN Ga e S -> S ~>>* S' -> SYN Ga e S'
-post* eS [] = eS
-post* eS (r ,- rs) = post* (post eS r) rs
-
-starInvRed : forall {n}{U : Tm n chk} -> star ~>>* U -> U == star
-starInvRed [] = refl
-starInvRed (star ,- rs) = starInvRed rs
-
-annInv : forall {n}{Ga}{t T T' : Tm n chk} ->
-         SYN Ga (t :: T) T' ->
-         CHK Ga star T * CHK Ga T t * (T ~>>* T')
-annInv (post tT r) with annInv tT
-... | T , t , rs = T , t , (rs ++ (r ,- []))
-annInv (T :~: t)   = T , t , []
-
-piInvRed : forall {n}{S U : Tm n chk}{T : Tm (su n) chk} ->
-  pi S T ~>>* U ->
-  Sg (Tm n chk) \ S' -> Sg (Tm (su n) chk) \ T' ->
-  (U == pi S' T') * (S ~>>* S') * (T ~>>* T')
-piInvRed [] = _ , _ , refl , [] , []
-piInvRed (pi S T ,- rs) with piInvRed rs
-... | _ , _ , refl , SS' , TT' = _ , _ , refl , (S ,- SS') , (T ,- TT')
-
-lamInv : forall {n}{Ga}{S : Tm n chk}{T t} ->
-         CHK Ga (pi S T) (lam t) ->
-         Sg (Tm n chk) \ S' -> Sg (Tm (su n) chk) \ T' ->
-         (S ~>>* S') * (T ~>>* T') *
-         CHK (Ga -, S') T' t
-lamInv (pre (pi rS rT) d) with lamInv d
-... | _ , _ , rsS , rsT , d' = _ , _ , (rS ,- rsS) , (rT ,- rsT) , d'
-lamInv (lam d) = _ , _ , [] , [] , d
-
-piInv : forall {n}{Ga}{S : Tm n chk}{T} ->
-        CHK Ga star (pi S T) ->
-        CHK Ga star S * CHK (Ga -, S) star T
-piInv (pre star *piST) = piInv *piST
-piInv (pi *S *T) = *S , *T
-
-zeMor : forall {n}{Ga : Cx n}{s S S'} ->
-        CHK Ga star S -> CHK Ga S s -> S ~>>* S' ->
-        CxMor Ga (Ga -, S') (si -, (s :: S))
-zeMor {n}{Ga}{s}{S}{S'} *S Ss SS'
-  rewrite ActId.actId SUBSTID S'
-        = idCxMor Ga , post* (*S :~: Ss) SS'
 
 presCHK : forall {n}{Ga Ga' : Cx n}{T T' : Tm n chk}{t t' : Tm n chk} ->
   Ga !~>>* Ga' -> T ~>>* T' -> t ~>> t' ->
