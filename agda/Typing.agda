@@ -141,6 +141,13 @@ CxMorW {De = De} ez ezok S
   rewrite ActCo.actCo THINSUBSTSUBST (o' oi) ez S
   = thinCxMor (o' oi) (idThinC De) ez ezok , h
 
+idCxMor : forall {n}(Ga : Cx n) -> CxMor Ga Ga si
+idCxMor [] = <>
+idCxMor (Ga -, S) with CxMorW si (idCxMor Ga) S
+... | h
+    rewrite ActId.actId SUBSTID S
+    = h
+
 yelp : forall {n m}(ez : Env (Tm m syn) n) s S ->
        env (Sb.act (si -, Sb.act ez (s :: S))) (env (Th.act (o' oi)) ez)
        == ez
