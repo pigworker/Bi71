@@ -15,7 +15,7 @@ being a bidirectional reformulation of Martin-Löf's 1971 type theory
 
 `Star` (importing `Basics`) develops the basic theory of reflexive-transitive closure, including the diamond lemma
 
-`Dev` (importing `Basics`, `OPE`, `Env`, `Tm`, `Subst`, `Par`, `Star`) equips terms with their notion of "development" (maximal parallel reduction) and proves (1) that development computes a parallel reduct, (2) that any parallel reduct parallel-reduces to the development; hence confluence
+`Dev` (importing `Basics`, `OPE`, `Env`, `Tm`, `Subst`, `Par`, `Star`) equips terms with their notion of "development" (maximal parallel reduction) and proves (1) that development computes a parallel reduct, (2) that any parallel reduct parallel-reduces to the development; hence confluence (by the diamond lemma)
 
 `Typing` (importing `Basics`, `OPE`, `Env`, `Tm`, `Subst`, `Par`) gives the typing rules
 
