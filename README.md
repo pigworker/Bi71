@@ -19,4 +19,4 @@ being a bidirectional reformulation of Martin-Löf's 1971 type theory
 
 `Typing` (importing `Basics`, `OPE`, `Env`, `Tm`, `Subst`, `Par`) gives the typing rules and proves they are stable under thinning, then under substitution
 
-`Preservation` (importing `Basics`, `OPE`, `Env`, `Tm`, `Subst`, `Par`, `Dev`) gives the (currently incomplete) proof of type preservation
+`Preservation` (importing `Basics`, `OPE`, `Env`, `Tm`, `Subst`, `Par`, `Dev`) gives the proof of type preservation
