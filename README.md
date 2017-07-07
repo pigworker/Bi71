@@ -1,7 +1,7 @@
 # Bi71
 being a bidirectional reformulation of Martin-Löf's 1971 type theory
 
-The `agda` directory contains the formalisation, using Agda 2.5.2.
+The `agda-v1` directory contains the formalisation, using Agda 2.5.2.
 
 `Basics` has the definitions of numbers, pairs, equality, etc (fixing notation)
 
