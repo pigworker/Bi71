@@ -22,7 +22,7 @@
 
 \section{Introduction}
 
-This paper documents a formalization of the basic metatheory for a bidirectional presentation of Martin-L\"of's small and beautiful, but notoriously inconsistent, dependent type theory from 1971~\cite{martinloef:atheoryoftypes}. Perhaps more significantly, it introduces a methodology for constructing and validating bidirectional type systems, illustrated with a nontrivial running example. Crucially, the fact that the system is not strongly normalizing is exploited to demonstrate concretely that the methodology relies in no way on strong normalization, which is perhaps peculiar, given that bidirectional type systems are often (but not here) given only for terms in $\beta$-normal form~\cite{DBLP:journals/toplas/PierceT00}.
+This paper documents a formalization of the basic metatheory for a bidirectional presentation of Martin-L\"of's small and beautiful, but notoriously inconsistent dependent type theory from 1971~\cite{martinloef:atheoryoftypes}. Perhaps more significantly, it introduces a methodology for constructing and validating bidirectional type systems, illustrated with a nontrivial running example. Crucially, the fact that the system is not strongly normalizing is exploited to demonstrate concretely that the methodology relies in no way on strong normalization, which is perhaps peculiar given that bidirectional type systems are often (but not here) given only for terms in $\beta$-normal form~\cite{DBLP:journals/toplas/PierceT00}.
 
 
 \section{The 1971 Rules}
@@ -79,7 +79,7 @@ We have two judgment forms
        {\MLSYN\Gamma tT} \\
 \end{array}\]
 
-I do not write explicit variable freshness requirements. Rather, I think of the turnstile as equipped with a supply of fresh names for free variables, while bound variables names are arbitrary. So, for example, in the rule for typing an abstraction, it is not that we hope for a coincidence of bound names but that we impose a standard choice of a free name when we extend the context.
+I do not write explicit variable freshness requirements. Rather, I think of the turnstile as equipped with a supply of fresh names for free variables, while bound names are arbitrary. So, for example, in the rule for typing an abstraction, it is not that we hope for a coincidence of bound names but that we impose a standard choice of a free name when we extend the context.
 
 The system has one rule for each syntactic construct and one rule (the `conversion' rule) to impose the identification of types up to convertability. If you look carefully at the rules for the syntax, you will
 see that the data left of the colon in the conclusion determine the data left of the colon in the premises;
