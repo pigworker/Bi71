@@ -147,7 +147,7 @@ We have two judgment forms:
 \item[type synthesis] $\SYN\Gamma eS$ ~ eliminations have their types synthesized, from the type of their head variable, which is given in the context
 \end{description}
 The `forward' $\in$ of type synthesis is pronounced ``in'', with \LaTeX{} macro {\tt $\backslash$in}; its reverse, used for checking, may be pronounced ``ni'', for its \LaTeX{} macro is {\tt $\backslash$ni}, but
-might be more intelligibly pronounced ``has''.
+might be more intelligibly pronounced ``has'' or ``accepts''.
 
 Many other authors keep terms to the left of types and use arrows (directions vary) to make the checking/synthesis distinction. I insist on retaining the left-to-right flow of \emph{time} through the
 syntax of judgments, which means that when checking, the type must come before the term.
@@ -197,6 +197,28 @@ The type checking and context validity rules are as follows:
   \Rule{\VALID\Gamma\quad \CHK\Gamma \type S}
        {\VALID{\Gamma,x\hb S}}
 \end{array}\]
+More rules will follow, but for now we have `Type-has-Type', without revalidating the context (for we \emph{presume} its validity, given that the context is an input to the conclusion). To check a function type,
+we check its components: once the domain has been checked, we may extend the context (maintaining its validity) and check the range. To check an abstraction, we presume that the function type is indeed a type, and hence by inversion that its domain and range are types in the relevant contexts: we may thus proceed directly to checking that the range type accepts the body of the untyped abstraction, using the input domain as the type of the bound variable. Finally, to \emph{check} an embedded elimination, we first \emph{synthesize} the type of the elimination, and then insist that the two candidate types match \emph{exactly} (i.e., that they are $\alpha$-equivalent, which is just syntactic identity for a de Bruijn representation), rather than up to some (so far unspecified, in any case) notion of conversion.
+
+Now, some of you may wonder why we do not synthesize the types for $\type$ and $\PI xS T[x]$, given that they clearly inhabit $\type$ if they inhabit anything at all. While that works for this system with one universe, it is unstable with respect to overloading: type checking allows us to overload introduction forms for distinct types, including the overloading of type formation constructs within different universes. Such overloading rules out type synthesis but has no impact on type checking. The fix to restore normalization exactly requires us to introduce multiple universes and overload the function type constructor, so let us stick with type checking for these things.
+
+Meanwhile, the heart of type synthesis is the variable rule, extracting the type of the head of an elimination from the context.
+\[
+\Axiom{\SYN{\Gamma,x\hb S,\Delta}{x}{S}}
+\]
+The synthesized type comes directly from the input context which is presumed valid, and must thus confirm that $S$ is indeed a type, which is what we must guarantee.
+
+For application, we can get most of the way round before we run into trouble:
+\[
+\Rule{\SYN\Gamma f {\PI xS T[x]} \quad \CHK\Gamma Ss}
+     {\SYN\Gamma{f\:s}{?}}
+\]
+Synthesizing the type (and we are guaranteed that it is a type) of the function, we may extract the (by inversion also a type) domain and use it to check the argument. However, when we come to give the output type of the whole application, the wheel comes off. We may be sure that $\CHK{\Gamma,x\hb S}\type{T[x]}$, and we surely want to give a type by choosing a suitable replacement for that $x$, but we may not give $T[s]$, as $s$ is not in the same syntactic category as $x$. Indeed, substituting such an $s$ for $x$ might create $\beta$-redexes which we have thus far excluded.
+
+One possibility is to seek a derived notion of \emph{hereditary} substitution~\cite{DBLP:conf/types/WatkinsCPW03} which computes out the any such $\beta$-redexes on the fly, restoring syntactic legitimacy. However, we know that any such operation will not be well defined, as it can be persuaded to require the normalization of anything, and this language is surely non-normalizing. We might deal with the partiality of hereditary substitution by defining it \emph{relationally}, but that is only to postpone the problem: in a non-normalizing calculus, hereditary substitution is not stable under hereditary substitution, as we can substitute an inert variable with just the term required to kick off an infinite computation. Correspondingly, the key stability property that drives the proof of type preservation will fail.
+
+We had better think it out again.
+
 
 \bibliographystyle{plainnat}
 \bibliography{TypesNi}
