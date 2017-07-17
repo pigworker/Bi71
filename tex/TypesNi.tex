@@ -212,7 +212,8 @@ Meanwhile, the heart of type synthesis is the variable rule, extracting the type
 \]
 The synthesized type comes directly from the input context which is presumed valid, and must thus confirm that $S$ is indeed a type, which is what we must guarantee.
 
-For application, we can get most of the way round before we run into trouble:
+For application, we \emph{synthesize} the type of the function (which is being eliminated), then \emph{check} that it is being eliminated in a manner consistent with its type.
+We can get most of the way round before we run into trouble:
 \[
 \Rule{\SYN\Gamma f {\PI xS T[x]} \quad \CHK\Gamma Ss}
      {\SYN\Gamma{f\:s}{?}}
@@ -234,6 +235,62 @@ The associated typing rule allows us to change direction in the other direction 
 \[\Rule{\CHK\Gamma\type T\quad \CHK\Gamma Tt}
        {\SYN\Gamma{t\hb T}T}
 \]
+
+We may now complete the application rule:
+\[
+\Rule{\SYN\Gamma f {\PI xS T[x]} \quad \CHK\Gamma Ss}
+     {\SYN\Gamma{f\:s}{T[s\hb S}}
+\]
+
+However, we have opened a further door at the same time. A radical can stand at the head of an elimination, taking its type not from the context but from its own explicit annotation. In particular, we can form something which looks a touch like a $\beta$-redex:
+\[
+(\LA xt[x] : \PI xS T[x])\:s
+\]
+Inversion tells us that for this to be well typed in some context $\Gamma$, we must know the following:
+\[
+\CHK\Gamma\type S \qquad
+\CHK{\Gamma,x\hb S}\type{T[x]} \qquad
+\CHK{\Gamma,x\hb S}{T[x]}{t[x]} \qquad
+\CHK\Gamma Ss
+\]
+and have synthesized the type $T[s\hb S]$ for the whole application
+We can thus give this would-be $\beta$-redex a computational behaviour:
+\[
+(\LA xt[x] : \PI xS T[x])\:s \;\leadsto_\beta\; t[s\hb S]:T[s\hb S]
+\]
+Note that, on the one hand, the type annotation on the contractum is essential (for the redex is an elimination, hence so must be its contractum), but on the other hand, the type annotation is helpful: a radical at a function type has `reacted' to release radicals at both domain and range types (which might be function types, causing further computation). It is easy to check (once we have established stability under substitution, that
+\[
+\CHK\Gamma\type{T[s\hb S]} \qquad
+\CHK\Gamma{T[s\hb S]}{t[s\hb S]}
+\]
+and hence the reduct gives us the same type as the contractum.
+
+However, as soon as a radical is being embedded rather than eliminated, its computational role is finished, so the type annotation is no longer required. We acquire the $\upsilon$-reduction scheme
+\[
+\el{t\hb T} \;\leadsto_\upsilon\; t
+\]
+That is, an introduction form is activated by annotation with its type, allowing its elimination form to compute, then eventually (we hope) deactivated once all the eliminations in its spine have been completed. In a \emph{predicative} system, the types get visibly smaller (in some suitably ramified sense) at each step. In our impredicative, indeed inconsistent system, we have no such guarantee. However, we must have checked (in the relevant context $\Gamma$) that $\CHK\Gamma\type T$ $\CHK\Gamma Tt$, allowing us to check both
+\[
+\CHK\Gamma T{\el{t\hb T}} \qquad \CHK\Gamma Tt
+\]
+again suggesting we have some chance of achieving type preservation.
+
+But there's a but. Now that we have introduced a small-step computation system, we must ensure that typing respects it. Let us write an unlabelled $\leadsto$ for small-step reduction---the closure of either contraction scheme under all contexts---and add the rules
+\[
+\Rule{T\leadsto T'\quad \CHK\Gamma{T'}t}
+     {\CHK\Gamma Tt}
+\qquad
+\Rule{\SYN\Gamma eS \quad S\leadsto S'}
+     {\SYN\Gamma e{S'}}
+\]
+These rules obey the requirements of our mode-religion if we consider reduction to be moded
+\[
+\mbox{input}\leadsto\mbox{output}
+\]
+even though reduction is not deterministic. There is often a choice as to which redex to contract.
+
+I have chosen the orientation of these rules carefully. We may precompute a type before checking it, e.g., ensuring that a type has the form of a function type before checking an abstraction; we may post-compute the type of a function being applied, so that it reduces to the form of a function type, allowing us to check the argument.
+
 
 \bibliographystyle{plainnat}
 \bibliography{TypesNi}
