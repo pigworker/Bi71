@@ -10,6 +10,7 @@
 \newcommand{\hb}{\!:\!}
 \newcommand{\PI}[2]{\blue{(\black{#1}\hb \black{#2})\to\;}}
 \newcommand{\LT}[2]{\red{\uplambda\black{#1}\hb \black{#2}.\;}}
+\newcommand{\LA}[1]{\red{\uplambda\black{#1}.\;}}
 \newcommand{\conv}{\cong}
 \newcommand{\EC}{\mathcal{E}}
 \newcommand{\VALID}[1]{#1 \vdash \textsc{ok}}
@@ -103,9 +104,99 @@ A further point of note is that the type synthesis rules have no axioms. The \em
 \qquad
 \Rule{\MLSYN\Gamma tT}{\MLSYN\Gamma T\type}
 \]
-You can see that both of the rules which extend the context directly check the validity condition for so doing. Meanwhile, to see why synthesized types are well formed (for application in particular), we need stability of typing under substitution, which is as much as to say that we can substitute a (suitably weakened) typing derivation for some $s:S$ in place of all uses of the variable rule which witness $x:S$. Stability of typing
+You can see that both of the rules which extend the context directly check the validity condition for so doing: the type synthesis rule for abstraction makes crucial use of the type annotation in $\LT xS t[x]$, without which it would be necessary to guess the type of $x$ from its uses. The type of the abstraction body, being generic
+in the argument, allows us to form the correct function type unproblematically.
+Meanwhile, to see why synthesized types are well formed (for application in particular), we need stability of typing under substitution, which is as much as to say that we can substitute a (suitably weakened) typing derivation for some $s:S$ in place of all uses of the variable rule which witness $x:S$. Stability of typing
 under substitution relies, of course, on stability of computation under substitution. However, our computation
 rule never makes any requirements about the presence of free variables, matching only syntactic constructs which are preserved by substitution, so it would be quite a surprise if stability under substitution were to fail.
+
+
+The rule for $\type$, often called `Type-in-Type', opens the door to paradox. Famously, Girard had shown that the Burali-Forti paradox could be embedded in System U, which has two impredicative layers. Martin-L\"of's system offered arbitrary impredicativity, making it easy to embed System U. However, despite being inconsistent and non-normalizing, this theory does enjoy the basic type preservation and progress properties we expect of functional programming languages, and many of the type theories we have today are effectively refinements with sufficient paranoia to prevent loops.
+
+\textbf{Stick in the Hurkens construction?}
+
+
+\section{Type-\emph{has}-Type}
+
+\newcommand{\CHK}[3]{#1 \vdash #2 \ni #3}
+\newcommand{\SYN}[3]{#1 \vdash #2 \in #3}
+\newcommand{\el}[1]{\green{\underline{\black{#1}}}}
+
+The idea behind bidirectional type systems is to make use of the way we sometimes know type information in advance. If we start from a type, there may be fewer choices to determine an inhabiting term. The type represents a \emph{requirement}, rather than a \emph{measurement}. We work a little more precisely at managing the flow of type information, and we gain some convenience and cleanliness. I like to start by separating the syntactic categories into checkable \emph{constructions} and synthesizable \emph{eliminations}.
+\[\begin{array}{rrl@{\qquad}l}
+s,t,S,T & ::= & \type & \mbox{the type of all types} \\
+        &   | & \PI xS T[x] & \mbox{dependent function spaces} \\
+        &   | & \LA x t[x] & \mbox{untyped abstraction} \\
+        &   | & \el e & \mbox{embedded elimination} \medskip \\
+e,f     & ::= & x     & \mbox{variable} \\
+        &   | & f\:s  & \mbox{application} \\
+        &   \vdots &  & \mbox{to be continued\ldots}
+\end{array}\]
+I have omitted one elimination form by way of generating a little suspense: let us see how we get along without it. Type formation and value introduction syntax sits on the \emph{construction} side; variable usage and application sit on the \emph{elimination} side. Eliminations embed into constructions, with a relatively unobtrusive but nontrivial underline: in a real implementation, there is no need to spend characters on this feature, but when studying metatheory, it helps to see where it is used. The reverse embedding is \emph{not} available, and we shall see why when we study the rules.
+
+At this stage, however, it is worth noting the following:
+\begin{itemize}
+\item the syntax forbids the expression of $\beta$-redexes;
+\item every elimination has a variable at its head, with a spine of arguments;
+\item it is syntactically invalid to substitute a construction for a variable.
+\end{itemize}
+
+We have two judgment forms:
+\begin{description}
+\item[type checking] $\CHK\Gamma Tt$ ~ constructions are checked with respect to a given type
+\item[type synthesis] $\SYN\Gamma eS$ ~ eliminations have their types synthesized, from the type of their head variable, which is given in the context
+\end{description}
+The `forward' $\in$ of type synthesis is pronounced ``in'', with \LaTeX{} macro {\tt $\backslash$in}; its reverse, used for checking, may be pronounced ``ni'', for its \LaTeX{} macro is {\tt $\backslash$ni}, but
+might be more intelligibly pronounced ``has''.
+
+Many other authors keep terms to the left of types and use arrows (directions vary) to make the checking/synthesis distinction. I insist on retaining the left-to-right flow of \emph{time} through the
+syntax of judgments, which means that when checking, the type must come before the term.
+
+In fact, I classify the schematic positions in judgment forms as having one of three \emph{modes}:
+\begin{description}
+\item[inputs] are given in advance and \emph{required} to be valid (in some sense which should be specified);
+\item[subjects] are the things under scrutiny, whose validity is the question;
+\item[outputs] are data synthesized in the validation process and \emph{guaranteed} to be valid
+  (in some sense which should be clearly specified).
+\end{description}
+
+For the above judgment forms, we shall have
+\[\begin{array}{ccccc@{\qquad\qquad}ccccc}
+\CHK{\Gamma&}{&T&}{&t} & \SYN{\Gamma&}{&e&}{&S}\\
+\mbox{input} && \mbox{input} && \mbox{subject} &
+\mbox{input} && \mbox{subject} && \mbox{output}
+\end{array}\]
+
+In order to specify the requirements and guarantees (but not to give the rules themselves), we shall also
+need a context validity judgment, \framebox{$\VALID\Gamma$}, for which $\Gamma$ is considered the subject.
+We should expect every judgment input to have a requirement for which it is the subject and every judgment output to have a guarantee for which it is the subject. Here,
+\[\begin{array}{lrl}
+\CHK\Gamma Tt & \mbox{requires} & \VALID\Gamma \\
+              & \mbox{requires} & \CHK\Gamma \type T \medskip \\
+\SYN\Gamma eS & \mbox{requires} & \VALID\Gamma \\
+              & \mbox{guarantees} & \CHK\Gamma \type S
+\end{array}\]
+and we are correspondingly not free to write down any old rubbish by way of typing rules. Each rule gives
+rise to proof obligations which we must check. However, in the rule to establish a particular judgment,
+the requirements even to propose the judgment are \emph{presumed}, not revalidated: as it were, ``We would not be asking this question if we did not already know so-and-so.''.
+
+There is more to say about the impact of \emph{mode} on valid notions of typing rule. Firstly, the inputs of conclusions and the outputs of premises must be \emph{patterns}, which may match against any construct of the calculus \emph{except free variables} and are the binding sites for the schematic variables of the rules.  Secondly, the outputs of conclusions and the inputs of premises must be \emph{expressions}, making use of the schematic variables in scope and instantiating any bound variables they may have. Scope flows clockwise round the rules, starting from the inputs of the conclusion, accumulating left-to-right through the premises, finishing with the outputs of the conclusion. Thirdly, only the schematic variables in the conclusion's \emph{subjects} are
+in scope for the subjects of the premises, and they must all occur in at least one premise. Fourthly, a schematic subject variable becomes in scope for \emph{expressions} only after it has been the subject of a premise (and thus achieved some measure of trust). These four conditions form the basis of a kind of `religion' of typing rules: let us obey them for now and consider breaking them when we are older and more aware of the consequences of our actions.
+
+The type checking and context validity rules are as follows:
+\[\begin{array}{l@{\qquad}c}
+\framebox{$\CHK\Gamma Tt$} & \Axiom{\CHK\Gamma\type\type} \qquad
+  \Rule{\CHK\Gamma\type S \quad \CHK{\Gamma,x\hb S}\type T[x]}
+       {\CHK\Gamma\type \PI xS T[x]} \qquad
+  \Rule{\CHK{\Gamma,x\hb S}{T[x]}{t[x]}}
+       {\CHK\Gamma{\PI xS T[x]}{\LA x t[x]}} \\
+  & \Rule{\SYN\Gamma e S \quad S\equiv T}
+         {\CHK\Gamma T{\el e}} \bigskip \\
+\framebox{$\VALID\Gamma$}&
+  \Axiom{\VALID\EC}\qquad
+  \Rule{\VALID\Gamma\quad \CHK\Gamma \type S}
+       {\VALID{\Gamma,x\hb S}}
+\end{array}\]
 
 \bibliographystyle{plainnat}
 \bibliography{TypesNi}
