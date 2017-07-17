@@ -224,6 +224,17 @@ One possibility is to seek a derived notion of \emph{hereditary} substitution~\c
 We had better think it out again.
 
 
+\section{Radicals Recover Small-Step Behaviour}
+
+When we come to instantiate $T[x]$ with $s$, we do at least know $S$, the type of $s$. We can reacquire the ability to substitute if we extend the language of \emph{eliminations} with type-annotated terms, which I call \emph{radicals} by analogy with the chemical notion.
+\[
+e,f ::= \ldots \;|\; t\hb T
+\]
+The associated typing rule allows us to change direction in the other direction from embedding, at the cost of making the intermediate type explicit: the type we synthesize is exactly the type we supply.
+\[\Rule{\CHK\Gamma\type T\quad \CHK\Gamma Tt}
+       {\SYN\Gamma{t\hb T}T}
+\]
+
 \bibliographystyle{plainnat}
 \bibliography{TypesNi}
 
