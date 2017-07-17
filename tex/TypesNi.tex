@@ -1,0 +1,113 @@
+\documentclass[natbib]{article}
+\usepackage{a4wide}
+\usepackage{upgreek}
+\usepackage{stmaryrd}
+\usepackage{latexsym}
+\usepackage{pig}
+\ColourEpigram
+
+\newcommand{\type}{\ast}
+\newcommand{\hb}{\!:\!}
+\newcommand{\PI}[2]{\blue{(\black{#1}\hb \black{#2})\to\;}}
+\newcommand{\LT}[2]{\red{\uplambda\black{#1}\hb \black{#2}.\;}}
+\newcommand{\conv}{\cong}
+\newcommand{\EC}{\mathcal{E}}
+\newcommand{\VALID}[1]{#1 \vdash \textsc{ok}}
+\newcommand{\MLSYN}[3]{#1 \vdash #2 \,:\, #3}
+
+\begin{document}
+\title{The Types Who Say `$\backslash$ni'}
+\author{Conor McBride}
+\maketitle
+
+\section{Introduction}
+
+This paper documents a formalization of the basic metatheory for a bidirectional presentation of Martin-L\"of's small and beautiful, but notoriously inconsistent, dependent type theory from 1971~\cite{martinloef:atheoryoftypes}. Perhaps more significantly, it introduces a methodology for constructing and validating bidirectional type systems, illustrated with a nontrivial running example. Crucially, the fact that the system is not strongly normalizing is exploited to demonstrate concretely that the methodology relies in no way on strong normalization, which is perhaps peculiar, given that bidirectional type systems are often (but not here) given only for terms in $\beta$-normal form~\cite{DBLP:journals/toplas/PierceT00}.
+
+
+\section{The 1971 Rules}
+
+Let us first see the system which we are about to reorganise.
+
+\textbf{Really? Actually, I'm just guessing.}
+
+\[\begin{array}{rrl@{\qquad}l}
+f,s,t,S,T & ::= & \type & \mbox{the type of all types} \\
+          &   | & \PI xS T[x] & \mbox{dependent function spaces} \\
+          &   | & \LT xS t[x] & \mbox{typed abstraction} \\
+          &   | & f\:s        & \mbox{application} \\
+          &   | & x           & \mbox{variable} medskip\\
+\Gamma,\Delta & ::= & \EC & \mbox{empty context} \\
+              &   | & \Gamma,x\hb S & \mbox{context extension, with freshly chosen $x$}
+\end{array}\]
+
+It is my habit to be explicit (with square brackets) when introducing schematic variables in the scope of a binder: here, $T[x]$ and $t[x]$ may depend on the $x$ bound just before, whereas the domain type $S$ may not. It is, moreover, my habit to substitute such bound variables just by writing terms in the square brackets. For example, the $\beta$-contraction scheme is given thus:
+\[
+(\LT xS t[x])\:s \leadsto t[s]
+\]
+The left-hand side is a \emph{pattern}, which establishes schematic variables and makes clear their scope;
+the right-hand side is an \emph{expression}, which must explain how the bound variable is instantiated.
+
+Terms are identified up to $\alpha$-conversion and substitution is capture-avoiding: the formalization uses a scope-safe de Bruijn index representation~\cite{deBruijn:dummies}.
+
+Let us define $\conv$, `$\beta$-convertability', to be the equivalence and contextual closure of $\leadsto$. The typing rules will identify types up to $\conv$.
+
+We have two judgment forms
+\begin{description}
+\item[context validity] \framebox{$\VALID\Gamma$} ~ asserts that $\Gamma$ is an assignment of types to distinct variables, where each type may depend on the variables given before;
+\item[type synthesis] \framebox{$\MLSYN\Gamma tT$} ~ asserts that the type $T$ can be \emph{synthesized} for the term $t$.
+\end{description}
+
+\[\begin{array}{l@{\qquad}c}
+\framebox{$\VALID\Gamma$}&
+  \Axiom{\VALID\EC}\qquad
+  \Rule{\VALID\Gamma\quad \MLSYN\Gamma S\type}
+       {\VALID{\Gamma,x\hb S}}
+\bigskip\\
+\framebox{$\MLSYN\Gamma tT$}&
+  \Rule{\VALID{\Gamma,x\hb S,\Delta}}
+       {\MLSYN{\Gamma,x\hb S,\Delta}xS} \qquad
+  \Rule{\VALID\Gamma}{\MLSYN\Gamma\type\type}
+\\ &
+  \Rule{\MLSYN\Gamma S\type\quad \MLSYN{\Gamma,x\hb S}{T[x]}\type}
+       {\MLSYN\Gamma{\PI xS T[x]}\type} \qquad
+  \Rule{\MLSYN\Gamma S\type\quad \MLSYN{\Gamma,x\hb S}{t[x]}{T[x]}}
+       {\MLSYN\Gamma{\LT xS t[x]}{\PI xS T[x]}}\\
+& \Rule{\MLSYN\Gamma f {\PI xS T[x]} \quad \MLSYN\Gamma sS}
+       {\MLSYN\Gamma{f\:s}{T[s]}} \\
+&  \Rule{\MLSYN\Gamma tS \quad \MLSYN\Gamma T\type\quad S\conv T}
+       {\MLSYN\Gamma tT} \\
+\end{array}\]
+
+I do not write explicit variable freshness requirements. Rather, I think of the turnstile as equipped with a supply of fresh names for free variables, while bound variables names are arbitrary. So, for example, in the rule for typing an abstraction, it is not that we hope for a coincidence of bound names but that we impose a standard choice of a free name when we extend the context.
+
+The system has one rule for each syntactic construct and one rule (the `conversion' rule) to impose the identification of types up to convertability. If you look carefully at the rules for the syntax, you will
+see that the data left of the colon in the conclusion determine the data left of the colon in the premises;
+moreover, the data right of the colon in the premises determine the data right of the colon in the conclusion.
+That is to say that these five rules can be read as instructions for type synthesis. Only the conversion rule
+comes with no clear syntactic guidance: the essence of writing a type synthesis \emph{algorithm} is to fix a
+particular strategy for deploying the conversion rule, then proving that strategy complete.
+
+It is worth noting that the application rule has \emph{two} occurrences of $S$ right of the colon: implicitly, such a rule demands that two synthesized types agree precisely, but the conversion rule allows them to be brought into precise agreement by computation. Meanwhile, the conversion rule allows a type, once synthesized, to be modified by any amount of forward \emph{or backward} computation. Backward creates an opportunity to introduce
+any old nonsense, as
+\[
+  (\LT X\type \type)\:(\type\:\type\:\type\:\type) \leadsto \type
+\]
+To prevent infection with such nonsense, the conversion rule insists that we check we end up with a valid type.
+Now, as it happens, our reduction system is confluent and moreover, forward computation preserves type. As a result, if we know that $S \conv T$ are valid types, then they have a common reduct $R$: we can compute $S$ to $R$ and $T$ to $R$ without stepping outside the valid types at any point. Hence, the conversion rule's check
+that $T$ is a type is both necessary and sufficient.
+
+A further point of note is that the type synthesis rules have no axioms. The \emph{only} axiom is that the empty context is uncontroversially valid. The two `base cases' of typing, for $\type$ and for variables, have premises ensuring context validity. The following `sanity clauses' are admissible:
+\[
+\Rule{\MLSYN\Gamma tT}{\VALID\Gamma}
+\qquad
+\Rule{\MLSYN\Gamma tT}{\MLSYN\Gamma T\type}
+\]
+You can see that both of the rules which extend the context directly check the validity condition for so doing. Meanwhile, to see why synthesized types are well formed (for application in particular), we need stability of typing under substitution, which is as much as to say that we can substitute a (suitably weakened) typing derivation for some $s:S$ in place of all uses of the variable rule which witness $x:S$. Stability of typing
+under substitution relies, of course, on stability of computation under substitution. However, our computation
+rule never makes any requirements about the presence of free variables, matching only syntactic constructs which are preserved by substitution, so it would be quite a surprise if stability under substitution were to fail.
+
+\bibliographystyle{plainnat}
+\bibliography{TypesNi}
+
+\end{document}
