@@ -51,7 +51,7 @@ the right-hand side is an \emph{expression}, which must explain how the bound va
 
 Terms are identified up to $\alpha$-conversion and substitution is capture-avoiding: the formalization uses a scope-safe de Bruijn index representation~\cite{deBruijn:dummies}.
 
-Let us define $\conv$, `$\beta$-convertability', to be the equivalence and contextual closure of $\leadsto$. The typing rules will identify types up to $\conv$.
+Let us define $\conv$, `$\beta$-convertibility', to be the equivalence and contextual closure of $\leadsto$. The typing rules will identify types up to $\conv$.
 
 We have two judgment forms
 \begin{description}
@@ -82,7 +82,7 @@ We have two judgment forms
 
 I do not write explicit variable freshness requirements. Rather, I think of the turnstile as equipped with a supply of fresh names for free variables, while bound names are arbitrary. So, for example, in the rule for typing an abstraction, it is not that we hope for a coincidence of bound names but that we impose a standard choice of a free name when we extend the context.
 
-The system has one rule for each syntactic construct and one rule (the `conversion' rule) to impose the identification of types up to convertability. If you look carefully at the rules for the syntax, you will
+The system has one rule for each syntactic construct and one rule (the `conversion' rule) to impose the identification of types up to convertibility. If you look carefully at the rules for the syntax, you will
 see that the data left of the colon in the conclusion determine the data left of the colon in the premises;
 moreover, the data right of the colon in the premises determine the data right of the colon in the conclusion.
 That is to say that these five rules can be read as instructions for type synthesis. Only the conversion rule
@@ -275,7 +275,7 @@ That is, an introduction form is activated by annotation with its type, allowing
 \]
 again suggesting we have some chance of achieving type preservation.
 
-But there's a but. Now that we have introduced a small-step computation system, we must ensure that typing respects it. Let us write an unlabelled $\leadsto$ for small-step reduction---the closure of either contraction scheme under all contexts---and add the rules
+But there's a but. Now that we have introduced a small-step computation system, we must ensure that typing respects it. Let us write an unlabelled $\leadsto$ for small-step reduction---the closure of either contraction scheme under all contexts---and add the \emph{pre-} and \emph{post-computation} rules, respectively,
 \[
 \Rule{T\leadsto T'\quad \CHK\Gamma{T'}t}
      {\CHK\Gamma Tt}
@@ -291,6 +291,24 @@ even though reduction is not deterministic. There is often a choice as to which 
 
 I have chosen the orientation of these rules carefully. We may precompute a type before checking it, e.g., ensuring that a type has the form of a function type before checking an abstraction; we may post-compute the type of a function being applied, so that it reduces to the form of a function type, allowing us to check the argument.
 
+If you are paying attention, you will have spotted a catch or two. These two rules, governing the interaction of computation and types, are not syntax-directed, just as the conversion rule was not in the 1971 system. They can be invoked anytime, which also seems to derail or at least complicate the informal appeals to inversion in the arguments above. We shall need to work a little to make sure we have not introduced a problem as we try to establish type preservation. \textbf{Can we show systematically that it is enough to establish type preservation for the contraction schemes in the absence pre and post, by making use of confluence and modes? I suspect so.}
+
+The other catch is that we acquire some type annotation flotsam in our normal forms. The annotation in
+\[
+  (\el y : \PI xS T[x])\:s
+\]
+will not compute away either by $\beta$ or by $\upsilon$. We might consider simplifying $\el e : T$ to $e$,
+but that would give us nasty critical pairs; we might insist that such an $e$ have a free variable at its head, but that property is not stable under substitution. We shall do neither of these things and yet come to no harm.
+However, we might find it frustrating if such flotsam makes types incompatible, so let us return to this question later.
+
+One positive, however, is that there is no longer any \emph{backward} computation in our calculus. The anarchic 1971 conversion rule has become the rather more controlled observation that the following is now admissible (by recursion on reduction sequences):
+\[\Rule{\SYN\Gamma eS \quad S\leadsto^\ast R \quad T\leadsto^\ast R}
+       {\CHK\Gamma T{\el e}}
+\]
+A synthesized type is good for a checked type if they have a common reduct, which is just as good as convertibility in a confluent system.
+
+The bidirectional system offers us fewer opportunities to deploy convertibility as opposed to reduction. Here, we rely on a crucial property brought to prominence by Geuvers~\cite{geuvers:dunnoyet}. If a term is \emph{convertible} with a canonical form (with a given head constructor and whatever substructures), then it \emph{reduces} to a canonical form (with that constructor and convertible corresponding substructures). That is, reduction is good for conversion when seeking to establish that a type is $\type$, or that it is $\PI xS T[x]$,
+as happens both when checking types for introductions and synthesizing types for eliminations.
 
 \bibliographystyle{plainnat}
 \bibliography{TypesNi}
