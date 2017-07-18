@@ -352,6 +352,8 @@ For any kind-indexed family of sets $T(\kappa)$ (for `term'), we may give the se
 \[
   \Sgc T\iota = \{c\;\vec{t} \;|\; c\:\vec{\kappa}\in \Sg(\iota), \forall i.\,t_i\in T(\kappa_i)\}
 \]
+These are prefix-Polish terms with $T$s as subterms. Our construction of terms will instantiate $T$ recursively,
+`tying the knot'.
 
 Now let us define scoped and kinded syntax.
 
@@ -420,6 +422,10 @@ look like
 \]
 selecting exactly one from however many, so they make a good representation of de Bruijn variables. Let us refer to such things by Roman letters ($x$, $y$).
 
+Of course, as variables are thinnings, for any such $x\in\kappa\fae\gamma$, we may construct $\tct x \in \tcs x\le\gamma$ and observe that every variable in $\kappa'\fae\gamma$ is either $x$ (in which case $\kappa=\kappa'$) or some $y;\tct x$, where $y\in \kappa'\fae\tcs x$. Let us consider ourselves entitled to treat $x$ and
+$y;\tct x$ as a valid covering of patterns for $\kappa'\fae\gamma$.
+
+
 \subsection{Terms}
 \newcommand{\Sgt}[2]{\Sg^{\mathsf{t}}(#1,#2)} 
 \newcommand{\Sgs}[2]{\Sg^{\mathsf{s}}(#1,#2)}
@@ -433,11 +439,11 @@ $\Sgs\gamma\delta$ for scope $\delta$ in scope $\gamma$, are given thus:
 \Sgs\gamma\EC & = & \{\EC\} \\
 \Sgs\gamma{(\delta,\kappa)} & = & \{\sss,t \;|\; \sss\in \Sgs\gamma\delta,\; t\in \Sgt\gamma\kappa\}
 \end{array}\]
-When a variable has object sort, $x\in\iota\fae\Gamma$, its argument spine is empty, and we may abbreviate the term $x[\EC]$ to plain old $x$.
+When a variable has object sort, $x\in\iota\fae\Gamma$, its argument spine is empty, and we may abbreviate the term $x[\EC]$ to plain old $x$. The idea is that to construct a term of a given kind, we bring all of its bound variables into scope, then give either a construction allowed by the signature or a variable suitably instantiated.
 
-This construction is designed to ensure that $\Sgt-\kappa$ and $\Sgs-\kappa$ are functors from the category of scopes and thinnings to the category of sets and functions. As you can see, the scope $\gamma$ occurs only to the right of $\le$ in the definition, allowing thinning to act by composition. Meanwhile, the only time the scope changes is to bind a variable with $-,\kappa$ which acts functorially on thinnings. Let us write $t\theta$ and $\sss\theta$ for the actions of thinning $\theta$ on term $t$ and spine $\sss$, respectively.
+This definition is designed to ensure that $\Sgt-\kappa$ and $\Sgs-\kappa$ are functors from the category of scopes and thinnings to the category of sets and functions. As you can see, the scope $\gamma$ occurs only to the right of $\le$ in the definition, allowing thinning to act by composition. Meanwhile, the only time the scope changes is to bind a variable with $-,\kappa$ which acts functorially on thinnings. Let us write $t\theta$ and $\sss\theta$ for the actions of thinning $\theta$ on term $t$ and spine $\sss$, respectively.
 
-For human readability, let us continue to write example terms by binding \emph{names}, $\bnd xt$. A $\beta$-redex looks like
+For human readability, let us continue to write example terms by binding \emph{names}, $\bnd xt$. A $\beta$-redex looks like this:
 \[
 \apc\;(\tyc\;(\lac\;\bnd xt)\;(\pic\:S\:\bnd xT))\;s
 \]
