@@ -6,7 +6,7 @@
 \usepackage{pig}
 \ColourEpigram
 
-\newcommand{\type}{\ast}
+\newcommand{\type}{\blue{\ast}}
 \newcommand{\hb}{\!:\!}
 \newcommand{\PI}[2]{\blue{(\black{#1}\hb \black{#2})\to\;}}
 \newcommand{\LT}[2]{\red{\uplambda\black{#1}\hb \black{#2}.\;}}
@@ -309,6 +309,87 @@ A synthesized type is good for a checked type if they have a common reduct, whic
 
 The bidirectional system offers us fewer opportunities to deploy convertibility as opposed to reduction. Here, we rely on a crucial property brought to prominence by Geuvers~\cite{geuvers:dunnoyet}. If a term is \emph{convertible} with a canonical form (with a given head constructor and whatever substructures), then it \emph{reduces} to a canonical form (with that constructor and convertible corresponding substructures). That is, reduction is good for conversion when seeking to establish that a type is $\type$, or that it is $\PI xS T[x]$,
 as happens both when checking types for introductions and synthesizing types for eliminations.
+
+
+\section{Syntax, Formally}
+
+\newcommand{\cns}{\mathsf{cn}}
+\newcommand{\elm}{\mathsf{el}}
+\newcommand{\bnd}[1]{\purple{[\black{#1}]}}
+\newcommand{\pic}{\blue{\Uppi}}
+\newcommand{\lac}{\red{\uplambda}}
+\newcommand{\elc}{\green{\upupsilon}}
+\newcommand{\apc}{\green{\upalpha}}
+\newcommand{\tyc}{\green{\upepsilon}}
+
+\textbf{There's an inevitable dilemma about whether to do this explicitly in Agda.}
+
+It's always struck me as an intensely frustrating business, defining an inductive datatype to represent some syntax of terms, and then showing that it really works like a syntax by defining operations such as substitution and proving that they exhibit the appropriate structure. These types are syntactic by construction.
+
+When we model a syntax, an `object language', its terms can be classified into object \emph{sorts}, $\iota$. (Sometimes, we may even identify the notion of `sort' with the object language's notion of `type', but that is far from crucial.) The object sorts for our language are constructions and eliminations.
+\[
+  \iota \quad::=\quad \cns \quad|\quad \elm
+\]
+To account for variable binding, we construct a \emph{meta}-level notion of \emph{kind}, $\kappa$, by closing sorts under what might look to the casual observer like a function space, but is most emphatically weaker than that.
+\[
+  \kappa \quad::=\quad \iota \quad|\quad \bnd\kappa \kappa'
+\]
+The kind $\bnd\kappa \kappa'$ means `terms in $\kappa$ which bind a variable of kind $\kappa$', not `functions from terms of kind $\kappa$ to terms of kind $\kappa'$'. The only functions thus represented are those which
+\emph{substitute} the bound variable: functions which do the common functional thing of inspecting their input are absolutely ruled out.
+
+\newcommand{\Sg}{\Upsigma}
+For each \emph{sort}, $\iota$, we must give the \emph{signature}, $\Sg(\iota)$, of its constructs, specifying the \emph{kind} of each subterm. Here, we may give this translation of our earlier grammar, omitting variables (which are not a notion specific to this theory), and giving explicit prefix forms for the remainder.
+\[\begin{array}{rrl}
+\Sg(\cns) & ::= & \type \\
+          &   | & \pic\; \cns\; \bnd\elm\cns \\
+          &   | & \lac\; \bnd\elm\cns \\
+          &   | & \elc\;\elm \medskip \\
+\Sg(\elm) & ::= & \apc\;\elm\;\cns \\
+          &   | & \tyc\;\cns\;\cns
+\end{array}\]
+\newcommand{\Sgc}[2]{\Sg^{\mathsf{c}}(#1,#2)}
+For any kind-indexed family of sets $T(\kappa)$ (for `term'), we may give the set of constructions, $\Sgc T\iota$
+\[
+  \Sgc T\iota = \{c\;\vec{t} \;|\; c\:\vec{\kappa}\in \Sg(\iota), \forall i.\,t_i\in T(\kappa_i)\}
+\]
+
+Now let us define scoped and kinded syntax. A \emph{scope} ($\gamma, \delta$) is a list of kinds, growing on the right:
+\[
+\gamma \quad::=\quad \EC \quad|\quad \gamma,\kappa
+\]
+It will sometimes be convenient to give kinds in \emph{spine} form, $\bnd\delta\iota$, loading all the bound variable kinds into a scope, leaving an object sort.
+
+We make crucial use of the notion of \emph{thinnings} ($\theta, \phi$) between scopes, $\gamma\le\delta$:
+\[
+\Axiom{\EC \in \EC\le\EC}
+\qquad
+\Rule{\theta \in \gamma\le\delta}
+     {\theta\ddag \in (\gamma,\kappa)\le(\delta,\kappa)}
+\qquad
+\Rule{\theta \in \gamma\le\delta}
+     {\theta\dag \in \gamma\le(\delta,\kappa)}
+\]
+\newcommand{\fae}{\leftarrow}
+Let us write $\kappa\fae\gamma$ for the set of \emph{singleton} thinnings $(\EC,\kappa)\le\gamma$. These
+look like
+\[
+\EC\dag\ldots\dag\ddag\dag\ldots\dag
+\]
+selecting exactly one from however many, so they make a good representation of de Bruijn variables. Let us refer to such things by Roman letters ($x$, $y$).
+
+\newcommand{\Sgt}[2]{\Sg^{\mathsf{t}}(#1,#2)} 
+\newcommand{\Sgs}[2]{\Sg^{\mathsf{s}}(#1,#2)}
+\newcommand{\sss}{\mathit{s\!s}} 
+The \emph{terms} $\Sgt\gamma\kappa$ of kind $\kappa$ in scope $\gamma$, and the \emph{spines}
+$\Sgs\gamma\delta$ for scope $\delta$ in scope $\gamma$, are given thus:
+\[\begin{array}{rrl}
+\Sgt\gamma{\bnd\kappa\kappa'} & = & \Sgt{(\gamma,\kappa)}{\kappa'} \\
+\Sgt\gamma{\iota} & = & \Sgc{\Sgt\gamma-}\iota \\
+                  & \cup & \{x[\sss] \;|\; x\in\bnd\delta\iota\fae\gamma,\; \sss\in\Sgs\gamma\delta\} \medskip \\
+\Sgs\gamma\EC & = & \{\EC\} \\
+\Sgs\gamma{(\delta,\kappa)} & = & \{\sss,t \;|\; \sss\in \Sgs\gamma\delta,\; t\in \Sgt\gamma\kappa\}
+\end{array}\]
+
 
 \bibliographystyle{plainnat}
 \bibliography{TypesNi}
