@@ -88,4 +88,15 @@ ThinVarLaws {x} = record
   ; funCo = \ { .(< th -<- ph ]) < th ] < ph ] refl -> thinCo th ph }
   }
 
+_<<-_ : X -> Bwd X -> Set
+x <<- xz = ([] -, x) <= xz
 
+op : forall {Ga De} -> Ga <= De -> Bwd X
+op oz      = []
+op (os th) = op th
+op (o'{x} th) = op th -, x
+
+comp : forall {Ga De}(th : Ga <= De) -> op th <= De
+comp oz      = oz
+comp (os th) = o' (comp th)
+comp (o' th) = os (comp th)

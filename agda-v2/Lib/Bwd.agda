@@ -12,6 +12,13 @@ data Bwd (X : Set) : Set where
 
 infixl 4 _-,_
 
+_-+_ : forall {X} -> Bwd X -> Bwd X -> Bwd X
+xz -+ [] = xz
+xz -+ (yz -, y) = (xz -+ yz) -, y
+
+infixl 4 _-+_
+
+
 data _<-_ {X}(x : X) : Bwd X -> Set where
   ze : forall {xz}   ->  x <- (xz -, x)
   su : forall {xz y} ->  x <- xz  ->  x <- (xz -, y)
