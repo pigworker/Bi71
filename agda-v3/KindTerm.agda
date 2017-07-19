@@ -73,10 +73,10 @@ module KINDTERM (I : Set) where
     thAct (th -, k) = thAct th -, k
     thAct (th -^ j) = thAct th -^ j
 
-    jig : forall {ga de ze} ->
-          Sp de ze -> ga <= de -> Act ze (ga +B ze) de
-    jig [] th = thAct th
-    jig (ss -, s) th = jig ss th -$ s
+    _+ThSp_ : forall {ga de ze} ->
+          ga <= de -> Sp de ze -> Act ze (ga +B ze) de
+    th +ThSp []        = thAct th
+    th +ThSp (ss -, s) = (th +ThSp ss) -$ s
 
     vaAct : forall {ga' ga de ze k}
               -> (k <- ga)
@@ -93,7 +93,7 @@ module KINDTERM (I : Set) where
     vaAct (x -, .k) (sg -, k) ph ss = ((in<= _ -, k) =<= ph) $ ss
     vaAct (x -^ .k) (sg -, k) ph ss = vaAct x sg (peel ph) ss
     vaAct x (sg -^ k) ph ss = vaAct x sg (peel ph) ss
-    vaAct (x -, k) (sg -$ s) ph ss = tmAct s (jig ss ph)
+    vaAct (x -, k) (sg -$ s) ph ss = tmAct s (ph +ThSp ss)
     vaAct (x -^ j) (sg -$ s) ph ss = vaAct x sg ph ss
     tmAct (x $ ss) sg = vaAct x sg (id<= _) (spAct ss sg)
     tmAct < ts > sg = < noAct (F _) ts sg >
