@@ -58,9 +58,9 @@ module KINDTERM (I : Set) where
                forall k -> Act ga' (ga -, k) (de -, k)
       _-^_ : forall {ga' ga de} -> Act ga' ga de ->
                forall k -> Act ga'  ga       (de -, k)
-      _-$_ : forall {ga' ga de de' k} ->
+      _-$_ : forall {ga' ga de k} ->
                Act ga' ga de ->
-                 Tm (de' +B scope k) (sort k) * (de' <= de) ->
+                 Tm (de +B scope k) (sort k) ->
                  Act (ga' -, k) (ga -, k) de
 
     _+Act_ : forall {ga' ga de}(sg : Act ga' ga de) ze ->
@@ -76,7 +76,7 @@ module KINDTERM (I : Set) where
     jig : forall {ga de ze} ->
           Sp de ze -> ga <= de -> Act ze (ga +B ze) de
     jig [] th = thAct th
-    jig (ss -, s) th = jig ss th -$ (s , id<= _)
+    jig (ss -, s) th = jig ss th -$ s
 
     vaAct : forall {ga' ga de ze k}
               -> (k <- ga)
@@ -93,7 +93,7 @@ module KINDTERM (I : Set) where
     vaAct (x -, .k) (sg -, k) ph ss = ((in<= _ -, k) =<= ph) $ ss
     vaAct (x -^ .k) (sg -, k) ph ss = vaAct x sg (peel ph) ss
     vaAct x (sg -^ k) ph ss = vaAct x sg (peel ph) ss
-    vaAct (x -, k) (sg -$ (t , th)) ph ss = tmAct t (jig ss (th =<= ph))
+    vaAct (x -, k) (sg -$ s) ph ss = tmAct s (jig ss ph)
     vaAct (x -^ j) (sg -$ s) ph ss = vaAct x sg ph ss
     tmAct (x $ ss) sg = vaAct x sg (id<= _) (spAct ss sg)
     tmAct < ts > sg = < noAct (F _) ts sg >
@@ -145,9 +145,9 @@ module KINDTERM (I : Set) where
     ... | ga'' , up = ga'' , (up -, k)
     coAct (sg -^ .k) (ta -, k) with coAct sg ta
     ... | ga'' , up = ga'' , (up -^ k)
-    coAct {ga' = _ -, k} (sg -$ (t , th)) ta with coAct sg ta | reAct th ta
-    ... | ga'' , up | _ , ta'
-        = (ga'' -, _) , (up -$ (tmAct t (ta' +Act scope k) , id<= _))
+    coAct {ga' = _ -, k} (sg -$ s) ta with coAct sg ta
+    ... | ga'' , up
+        = (ga'' -, _) , (up -$ tmAct s (ta +Act scope k))
     coAct (sg -, k) (ta -$ t) with coAct sg ta
     ... | ga'' , up = (ga'' -, k) , (up -$ t)
     coAct (sg -^ k) (ta -$ t) = coAct sg ta
@@ -219,4 +219,3 @@ module KINDTERM (I : Set) where
       tmACT (tmACT t sg) ta == tmACT t (coACT sg ta)
     tmACTCo (x $ ss) sg ta = {!!}
     tmACTCo < x > sg ta = {!!}
-      
