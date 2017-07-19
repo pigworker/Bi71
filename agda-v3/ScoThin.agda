@@ -88,8 +88,13 @@ record Sg (S : Set)(T : S -> Set) : Set where
   field
     fst : S
     snd : T fst
-open Sg
+open Sg public
 infixr 4 _,_
+data Two : Set where tt ff : Two
+_*_ : Set -> Set -> Set
+S * T = Sg S \ _ -> T
+_+_ : Set -> Set -> Set
+S + T = Sg Two \ { tt -> S ; ff -> T }
 
 in<=inQ : forall {X}{ga de : Bwd X}(th : ga <= de) ->
           ((in<= ga) =<= th) == in<= de
@@ -118,8 +123,34 @@ Qid<= (th -^ j) rewrite Qid<= th = refl
 =<=<=Q (th01 -, .k) (th12 -, .k) (th23 -, k) rewrite =<=<=Q th01 th12 th23 = refl
 =<=<=Q [] [] [] = refl
 
+peelQ : forall {X}{ga de ze}{k : X}(th : ga <= de)(ph : (de -, k) <= ze) ->
+         (th =<= peel ph) == ((th -^ k) =<= ph)
+peelQ th (ph -, k) = refl
+peelQ th (ph -^ j) rewrite peelQ th ph = refl
+
+prod : forall {X}{ga0 ga1 de : Bwd X} -> ga0 <= de -> ga1 <= de -> Bwd X
+prod [] [] = []
+prod (th0 -, k) (th1 -, .k) = prod th0 th1 -, k
+prod (th0 -, k) (th1 -^ .k) = prod th0 th1
+prod (th0 -^ j) (th1 -, .j) = prod th0 th1
+prod (th0 -^ j) (th1 -^ .j) = prod th0 th1
+
+prod<= : forall {X}{ga0 ga1 de : Bwd X}(th0 : ga0 <= de)(th1 : ga1 <= de) ->
+         (prod th0 th1 <= ga0) * (prod th0 th1 <= ga1)
+prod<= [] [] = [] , []
+prod<= (th0 -, k) (th1 -, .k) with prod<= th0 th1
+... | ph0 , ph1 = (ph0 -, k) , (ph1 -, k)
+prod<= (th0 -, k) (th1 -^ .k) with prod<= th0 th1
+... | ph0 , ph1 = (ph0 -^ k) , ph1
+prod<= (th0 -^ j) (th1 -, .j) with prod<= th0 th1
+... | ph0 , ph1 = ph0 , (ph1 -^ j)
+prod<= (th0 -^ j) (th1 -^ .j) with prod<= th0 th1
+... | ph0 , ph1 = ph0 , ph1
+
+-- universal property?
+
 data Complement {X} : forall {ga0 ga1 de : Bwd X}
-                      (ga0 : ga0 <= de)(ga1 : ga1 <= de) -> Set
+                      (th0 : ga0 <= de)(th1 : ga1 <= de) -> Set
  where
   [] : Complement [] []
   _-,_ : forall {ga0 ga1 de}{th : ga0 <= de}{ph : ga1 <= de} ->
@@ -132,6 +163,26 @@ complement : forall {X}{ga0 de : Bwd X}(th : ga0 <= de) ->
 complement [] = []
 complement (th -, k) = complement th -, k
 complement (th -^ j) = complement th -^ j
+
+selComp : forall {X}{ga0 ga1 de ze : Bwd X}
+             {th0 : ga0 <= ze}{th1 : ga1 <= ze}(ph : de <= ze) ->
+             Complement th0 th1 ->
+             Sg _ \ ga0' -> Sg _ \ ga1' ->
+             Sg (ga0' <= de) \ ph0 -> Sg (ga1' <= de) \ ph1 ->
+             Complement ph0 ph1 * ((ga0' <= ga0) * (ga1' <= ga1))
+selComp [] [] = [] , [] , [] , [] , [] , [] , []
+selComp (ph -, k) (c -, .k) with selComp ph c
+... | ga0' , ga1' , ph0 , ph1 , c' , ps0 , ps1
+    = (ga0' -, k) , ga1' , (ph0 -, k) , (ph1 -^ k) , (c' -, k) , (ps0 -, k) , ps1
+selComp (ph -, k) (c -^ .k) with selComp ph c
+... | ga0' , ga1' , ph0 , ph1 , c' , ps0 , ps1
+    = ga0' , (ga1' -, k) , (ph0 -^ k) , (ph1 -, k) , (c' -^ k) , ps0 , (ps1 -, k)
+selComp (ph -^ j) (c -, .j) with selComp ph c
+... | ga0' , ga1' , ph0 , ph1 , c' , ps0 , ps1
+    = ga0' , ga1' , ph0 , ph1 , c' , (ps0 -^ j) , ps1
+selComp (ph -^ j) (c -^ .j) with selComp ph c
+... | ga0' , ga1' , ph0 , ph1 , c' , ps0 , ps1
+    = ga0' , ga1' , ph0 , ph1 , c' , ps0 , (ps1 -^ j)
 
 data Cover {X}{ga0 ga1 de : Bwd X}(th0 : ga0 <= de)(th1 : ga1 <= de){k} :
     (k <- de) -> Set where
@@ -174,3 +225,31 @@ _+Th_ : forall {X}{ga ga' : Bwd X}(th : ga <= ga') de -> (ga +B de) <= (ga' +B d
 th +Th [] = th
 th +Th (de -, k) = (th +Th de) -, k
 
+id+ThQ : forall {X}(ga de : Bwd X) -> (id<= ga +Th de) == id<= (ga +B de)
+id+ThQ ga [] = refl
+id+ThQ ga (de -, k) rewrite id+ThQ ga de = refl
+
+_+^_ : forall {X}{ga ga' : Bwd X}(th : ga <= ga') de -> ga <= (ga' +B de)
+th +^ [] = th
+th +^ (de -, k) = (th +^ de) -^ k
+
+in+^Q : forall {X}(ga de : Bwd X) -> (in<= ga +^ de) == in<= (ga +B de)
+in+^Q ga [] = refl
+in+^Q ga (de -, k) rewrite in+^Q ga de = refl
+
+moreLeft : forall {X}{ga0 ga1 de : Bwd X}
+             {th0 : ga0 <= de}{th1 : ga1 <= de}
+             (c : Complement th0 th1) ze -> Complement (th0 +Th ze) (th1 +^ ze)
+moreLeft c [] = c
+moreLeft c (ze -, k) = moreLeft c ze -, k
+
+data JM {l}{X : Set l}(x : X) : {Y : Set l} -> Y -> Set l where
+  refl : JM x x
+jmQ : forall {l}{X : Set l}{x y : X} -> JM x y -> x == y
+jmQ refl = refl
+
+moreAllLeftQ : forall {X} (ga de : Bwd X) ->
+               JM (moreLeft (allLeft ga) de) (allLeft (ga +B de))
+moreAllLeftQ ga [] = refl
+moreAllLeftQ ga (de -, x) with moreLeft (allLeft ga) de | moreAllLeftQ ga de
+... | c | j rewrite id+ThQ ga de | in+^Q ga de | jmQ j = refl
