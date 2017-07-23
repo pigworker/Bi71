@@ -2,6 +2,9 @@ module KindTerm where
 
 open import ScoThin
 
+trans : forall {l}{X : Set l}{x y z : X} -> x == y -> y == z -> x == z
+trans refl q = q
+
 data Zero : Set where
 record One : Set where
   constructor <>
@@ -54,17 +57,72 @@ module KINDTERM (I : Set) where
 
     data Act : Bwd Kind -> Bwd Kind -> Bwd Kind -> Set where
       []   : Act [] [] []
-      _-,_ : forall {ga' ga de} -> Act ga' ga de ->
-               forall k -> Act ga' (ga -, k) (de -, k)
-      _-^_ : forall {ga' ga de} -> Act ga' ga de ->
-               forall k -> Act ga'  ga       (de -, k)
-      _-$_ : forall {ga' ga de k} ->
-               Act ga' ga de ->
+      _-,_ : forall {gas ga de} -> Act gas ga de ->
+               forall k -> Act gas (ga -, k) (de -, k)
+      _-^_ : forall {gas ga de} -> Act gas ga de ->
+               forall k -> Act gas ga       (de -, k)
+      _-$_ : forall {gas ga de k} ->
+               Act gas ga de ->
                  Tm (de +B scope k) (sort k) ->
-                 Act (ga' -, k) (ga -, k) de
+                 Act (gas -, k) (ga -, k) de
 
-    _+Act_ : forall {ga' ga de}(sg : Act ga' ga de) ze ->
-            Act ga' (ga +B ze) (de +B ze)
+    data Tca (gas ga de : Bwd Kind) : Bwd Kind -> Bwd Kind -> Bwd Kind -> Set where
+      []   : Tca gas ga de gas ga de
+      _,-_ : forall {gas' ga' de'} k
+               -> Tca gas (ga -, k) (de -, k) gas' ga' de'
+               -> Tca gas ga de gas' ga' de'
+      _^-_ : forall {gas' ga' de'} k
+               -> Tca  gas ga       (de -, k) gas' ga' de'
+               -> Tca gas ga de gas' ga' de'
+      _$-_ : forall {gas' ga' de' k} -> Tm (de +B scope k) (sort k)
+               -> Tca (gas -, k) (ga -, k) de gas' ga' de'
+               -> Tca gas ga de gas' ga' de'
+
+    _<><_ : forall {gas ga de gas' ga' de'} ->
+              Act gas ga de -> Tca gas ga de gas' ga' de' -> Act gas' ga' de'
+    sg <>< [] = sg
+    sg <>< (k ,- ta) = (sg -, k) <>< ta
+    sg <>< (k ^- ta) = (sg -^ k) <>< ta
+    sg <>< (t $- ta) = (sg -$ t) <>< ta
+
+    _+ThTca_ : forall {de0 gas ga de gas' ga' de'} ->
+              de0 <= de -> Tca gas ga de gas' ga' de' -> de0 <= de'
+    th +ThTca []        = th
+    th +ThTca (k ,- ta) = (th -^ k) +ThTca ta
+    th +ThTca (k ^- ta) = (th -^ k) +ThTca ta
+    th +ThTca (_ $- ta) = th +ThTca ta
+
+    tcaTh : forall {gas ga de gas' ga' de'} ->
+              Tca gas ga de gas' ga' de' -> de <= de'
+    tcaTh []        = id<= _
+    tcaTh (k ,- ta) = (id<= _ -^ k) =<= tcaTh ta
+    tcaTh (k ^- ta) = (id<= _ -^ k) =<= tcaTh ta
+    tcaTh (_ $- ta) = tcaTh ta
+
+    tcaFact : forall {de0 gas ga de gas' ga' de'} ->
+              (th : de0 <= de)(ta : Tca gas ga de gas' ga' de') ->
+              (th +ThTca ta) == (th =<= tcaTh ta)
+    tcaFact th [] rewrite Qid<= th = refl
+    tcaFact th (k ,- ta)
+      rewrite sym (=<=<=Q th (id<= _ -^ k) (tcaTh ta))
+            | Qid<= th
+            = tcaFact (th -^ k) ta
+    tcaFact th (k ^- ta)
+      rewrite sym (=<=<=Q th (id<= _ -^ k) (tcaTh ta))
+            | Qid<= th
+      = tcaFact (th -^ k) ta
+    tcaFact th (x $- ta) = tcaFact th ta
+
+    tcaLemma : forall {gas ga de gas' ga' de'} ->
+              (ta : Tca gas ga de gas' ga' de') ->
+              (id<= _ +ThTca ta) == tcaTh ta
+    tcaLemma ta
+      rewrite tcaFact (id<= _) ta
+            | id<=Q (tcaTh ta)
+            = refl
+
+    _+Act_ : forall {gas ga de}(sg : Act gas ga de) ze ->
+            Act gas (ga +B ze) (de +B ze)
     sg +Act [] = sg
     sg +Act (ze -, k) = (sg +Act ze) -, k
 
@@ -78,23 +136,25 @@ module KINDTERM (I : Set) where
     th +ThSp []        = thAct th
     th +ThSp (ss -, s) = (th +ThSp ss) -$ s
 
-    vaAct : forall {ga' ga de ze k}
+    vaAct : forall {gas ga de de' k}
               -> (k <- ga)
-              -> Act ga' ga de
-              -> de <= ze
-              -> Sp ze (scope k) -> Tm ze (sort k)
-    tmAct : forall {ga' ga de i} ->
-            Tm ga i -> Act ga' ga de -> Tm de i
-    spAct : forall {ga' ga de ze} ->
-            Sp ga ze -> Act ga' ga de -> Sp de ze
-    noAct : forall {ga' ga de} D -> Node D (TmK ga)
-              -> Act ga' ga de -> Node D (TmK de)
+              -> Act gas ga de
+              -> de <= de'
+              -> Sp de' (scope k) -> Tm de' (sort k)
+    tmAct : forall {gas ga de i} ->
+            Tm ga i -> Act gas ga de -> Tm de i
+    spAct : forall {gas ga de ze} ->
+            Sp ga ze -> Act gas ga de -> Sp de ze
+    noAct : forall {gas ga de} D -> Node D (TmK ga)
+              -> Act gas ga de -> Node D (TmK de)
     vaAct () [] ph ss
-    vaAct (x -, .k) (sg -, k) ph ss = ((in<= _ -, k) =<= ph) $ ss
-    vaAct (x -^ .k) (sg -, k) ph ss = vaAct x sg (peel ph) ss
-    vaAct x (sg -^ k) ph ss = vaAct x sg (peel ph) ss
-    vaAct (x -, k) (sg -$ s) ph ss = tmAct s (ph +ThSp ss)
-    vaAct (x -^ j) (sg -$ s) ph ss = vaAct x sg ph ss
+    vaAct x (sg -^ k) ph ss = vaAct x sg ((id<= _ -^ k) =<= ph) ss
+    vaAct (x -, .k) (sg -, k) ph ss
+      = ((in<= _ -, k) =<= ph) $ ss
+    vaAct (x -^ .k) (sg -, k) ph ss = vaAct x sg ((id<= _ -^ k) =<= ph) ss
+    vaAct (x -, k) (sg -$ t) ph ss = tmAct t (ph +ThSp ss)
+    vaAct (x -^ j) (sg -$ t) ph ss = vaAct x sg ph ss
+
     tmAct (x $ ss) sg = vaAct x sg (id<= _) (spAct ss sg)
     tmAct < ts > sg = < noAct (F _) ts sg >
     spAct [] sg = []
@@ -104,50 +164,48 @@ module KINDTERM (I : Set) where
     noAct (D *' D') (ts , ts') sg = noAct D ts sg , noAct D' ts' sg
     noAct one' <> sg = <>
 
-    reAct : forall {ga de' de ze} ->
-            ga <= de -> Act de' de ze -> Sg _ \ ga' -> Act ga' ga ze
-    reAct th (sg -^ k) with reAct th sg
-    ... | ga' , ta = ga' , (ta -^ k)
-    reAct [] [] = [] , []
-    reAct (th -, k) (sg -, .k) with reAct th sg
-    ... | ga' , ta = ga' , (ta -, k)
-    reAct (th -, k) (sg -$ s) with reAct th sg
-    ... | ga' , ta = (ga' -, k) , (ta -$ s)
-    reAct (th -^ j) (sg -, .j) with reAct th sg
-    ... | ga' , ta = ga' , (ta -^ j)
-    reAct (th -^ j) (sg -$ x) = reAct th sg
+    ActIm : Bwd Kind -> Kind -> Set
+    ActIm de k = (k <- de) + Sg _ \ dei -> TmK dei k * (dei <= de)
+
+    actImTh : forall {de k ze} -> ActIm de k -> de <= ze -> ActIm ze k
+    actImTh (tt , y) ph = tt , (y =<= ph)
+    actImTh (ff , dei , t , th) ph = ff , dei , t , (th =<= ph)
+
+    actImThId : forall {de k}(w : ActIm de k) ->
+      actImTh w (id<= _) == w
+    actImThId (tt , y) rewrite Qid<= y = refl
+    actImThId (ff , dei , t , th) rewrite Qid<= th = refl
+
+    actImThCo : forall {ga k de ze}(w : ActIm ga k)(th : ga <= de)(ph : de <= ze)
+      -> actImTh (actImTh w th) ph == actImTh w (th =<= ph)
+    actImThCo (tt , y) th ph rewrite =<=<=Q y th ph = refl
+    actImThCo (ff , dei , t , ps) th ph rewrite =<=<=Q ps th ph = refl
 
     ACT : Bwd Kind -> Bwd Kind -> Set
     ACT ga de = Sg _ \ ga' -> Act ga' ga de
 
-    vaACT : forall {ga de ze k}
-              -> (k <- ga)
-              -> ACT ga de
-              -> de <= ze
-              -> Sp ze (scope k) -> Tm ze (sort k)
     tmACT : forall {ga de i} ->
             Tm ga i -> ACT ga de -> Tm de i
     spACT : forall {ga de ze} ->
             Sp ga ze -> ACT ga de -> Sp de ze
     noACT : forall {ga de} D -> Node D (TmK ga)
               -> ACT ga de -> Node D (TmK de)
-    vaACT x (_ , sg) = vaAct x sg
     tmACT t (_ , sg) = tmAct t sg
     spACT ss (_ , sg) = spAct ss sg
     noACT D ts (_ , sg) = noAct D ts sg
 
     coAct : forall {ga' ga de de' ze} -> Act ga' ga de -> Act de' de ze ->
               ACT ga ze
+    coAct [] ta = _ , ta
+    coAct {ga' = _ -, k} (sg -$ s) ta with coAct sg ta
+    ... | ga'' , up
+        = (ga'' -, _) , (up -$ tmAct s (ta +Act scope k))
     coAct sg (ta -^ k) with coAct sg ta
     ... | ga'' , up = ga'' , (up -^ k)
-    coAct [] ta = _ , ta
     coAct (sg -, .k) (ta -, k) with coAct sg ta
     ... | ga'' , up = ga'' , (up -, k)
     coAct (sg -^ .k) (ta -, k) with coAct sg ta
     ... | ga'' , up = ga'' , (up -^ k)
-    coAct {ga' = _ -, k} (sg -$ s) ta with coAct sg ta
-    ... | ga'' , up
-        = (ga'' -, _) , (up -$ tmAct s (ta +Act scope k))
     coAct (sg -, k) (ta -$ t) with coAct sg ta
     ... | ga'' , up = (ga'' -, k) , (up -$ t)
     coAct (sg -^ k) (ta -$ t) = coAct sg ta
@@ -164,7 +222,35 @@ module KINDTERM (I : Set) where
               (coACT sg ta +ACT ze')
     coACTLemma sg ta [] = refl
     coACTLemma sg ta (ze' -, x) rewrite coACTLemma sg ta ze' = refl
-              
+
+    wk : (ga de : Bwd Kind) -> ga <= (ga +B de)
+    wk ga [] = id<= ga
+    wk ga (de -, k) = wk ga de -^ k
+
+    coActHig : forall {ga de}(th : ga <= de)
+                {des' xi' des xi}
+                (sg : Act des' ga xi')(ta : Tca des' ga xi' des de xi) ->
+                coAct (thAct th) (sg <>< ta)
+                  ==
+                coAct sg (thAct (tcaTh ta))
+    coActHig th sg [] = {!!}
+    coActHig th sg (k ,- ta)
+      -- rewrite coActHig th (sg -, k) ta
+      = {!!}
+    coActHig th sg (k ^- ta) = {!!}
+    coActHig th sg (x $- ta) = {!!}
+
+    coActJig : forall {ga de ze}(th : ga <= de)(ss : Sp de ze)
+                {des' xi' des xi}
+                (sg : Act des' ga xi')(ta : Tca des' ga xi' des de xi) ->
+      coAct (th +ThSp ss) {- Act ze (ga +B ze) de -}
+            (sg <>< ta) {- Act des de xi -} ==
+      coAct (sg +Act ze) ((tcaTh ta) +ThSp spAct ss (sg <>< ta) {- Sp xi ze -})
+          {- Act des' (de' +B ze) (xi' +B ze) -}
+              {- Act ze (xi' +B ze)   xi -}
+    coActJig th [] sg ta = coActHig th sg ta
+    coActJig th (ss -, s) sg ta rewrite coActJig th ss sg ta = refl
+
     idAct : forall ga -> Act [] ga ga
     idAct ga = thAct (id<= ga)
 
@@ -172,33 +258,23 @@ module KINDTERM (I : Set) where
     idActLemma ga [] = refl
     idActLemma ga (de -, k) rewrite idActLemma ga de = refl
 
-    thActLemma : forall {ga de ze k}
-                 (x : k <- ga)(th : ga <= de)(ph : de <= ze)(ss : Sp ze (scope k)) ->
-                 vaAct x (thAct th) ph ss == ((x =<= (th =<= ph)) $ ss)
-    thActLemma () [] ph ss
-    thActLemma (x -, .k) (th -, k) ph ss with initial x
-    thActLemma (.(in<= _) -, .k) (th -, k) ph ss | init
-      rewrite sym (=<=<=Q (in<= _ -, k) (th -, k) ph)
-            | in<=inQ th
-            = refl
-    thActLemma (x -^ .k) (th -, k) ph ss
-      rewrite thActLemma x th (peel ph) ss
-            | sym (=<=<=Q (x -^ k) (th -, k) ph)
-            | sym (=<=<=Q x th (peel ph))
-            | peelQ (x =<= th) ph
-            = refl
-    thActLemma x (th -^ j) ph ss
-      rewrite thActLemma x th (peel ph) ss
-            | peelQ th ph
-            = refl
-
+    vaActId : forall {ga ga' k}
+               (x : k <- ga)(ta : Tca [] ga ga [] ga' ga')
+               (ss : Sp ga' (scope k))
+               (q : (idAct ga <>< ta) == idAct ga')
+              -> vaAct x (idAct ga) (tcaTh ta) ss == ((x +ThTca ta) $ ss)
     tmActId : forall {ga i}(t : Tm ga i) -> tmAct t (idAct ga) == t
     spActId : forall {ga de}(ss : Sp ga de) -> spAct ss (idAct ga) == ss
     noActId : forall {ga} D (ts : Node D (TmK ga)) -> noAct D ts (idAct ga) == ts
+    vaActId (x -, k) ta ss q with initial x
+    vaActId (.(in<= _) -, k) ta ss q | init
+      rewrite tcaFact (in<= _ -, k) ta
+            = refl
+    vaActId (x -^ j) ta ss q = vaActId x (j ,- ta) ss q
+
     tmActId {ga} (x $ ss)
       rewrite spActId ss
-            | thActLemma x (id<= ga) (id<= ga) ss
-            | id<=Q (id<= ga)
+            | vaActId x [] ss refl
             | Qid<= x
             = refl
     tmActId < ts > rewrite noActId (F _) ts = refl
@@ -215,7 +291,57 @@ module KINDTERM (I : Set) where
             = refl
     noActId one' <> = refl
 
-    tmACTCo : forall {ga de ze i}(t : Tm ga i)(sg : ACT ga de)(ta : ACT de ze) ->
-      tmACT (tmACT t sg) ta == tmACT t (coACT sg ta)
-    tmACTCo (x $ ss) sg ta = {!!}
-    tmACTCo < x > sg ta = {!!}
+    tmActCo : forall {gas ga des de ze i}
+      (t : Tm ga i)(sg : Act gas ga de)(ta : Act des de ze) ->
+      tmAct (tmAct t sg) ta == tmACT t (coACT (gas , sg) (des , ta))
+    spActCo : forall {gas ga des de ze xi}
+      (ss : Sp ga xi)(sg : Act gas ga de)(ta : Act des de ze) ->
+      spAct (spAct ss sg) ta == spACT ss (coACT (gas , sg) (des , ta))
+    vaActCo : forall {gas ga de k}  (x : k <- ga)(sg : Act gas ga de)
+                     {gas1 ga1 de1} (ta : Tca gas ga de gas1 ga1 de1)
+                                    (ss : Sp de1 (scope k))
+                     {des ze}       (sg1 : Act des de ze)
+                     {des1 ze1}     (ta1 : Tca des de ze des1 de1 ze1) ->
+                     ((x : k <- de) ->
+                       vaAct (x +ThTca ta) (sg1 <>< ta1) (id<= _)
+                          (spAct ss (sg1 <>< ta1))
+                       ==
+                       vaAct x sg1 (tcaTh ta1)
+                          (spAct ss (sg1 <>< ta1)))
+                       ->
+        tmAct (vaAct x sg (tcaTh ta) ss) (sg1 <>< ta1) ==
+          vaAct x (snd (coAct sg sg1)) (tcaTh ta1) (spAct ss (sg1 <>< ta1))
+
+    vaActCo () [] ta ss sg1 ta1 q1
+    vaActCo (x -^ j) (sg -$ t) ta ss sg1 ta1 q1
+      = vaActCo x sg (t $- ta) ss sg1 ta1 q1
+    vaActCo (x -, k) (sg -$ t) ta ss sg1 ta1 q1
+      rewrite tmActCo t (tcaTh ta +ThSp ss) (sg1 <>< ta1)
+            | tmActCo t (sg1 +Act scope k) (tcaTh ta1 +ThSp spAct ss (sg1 <>< ta1))
+         --   | coActJig (tcaTh ta) ss sg1 ta1
+      = {!!}
+    vaActCo x sg@(_ -, _) ta ss (sg1 -^ k) ta1 q1
+      = vaActCo x sg ta ss sg1 (k ^- ta1) q1
+    vaActCo x sg@(_ -^ _) ta ss (sg1 -^ k) ta1 q1
+      = vaActCo x sg ta ss sg1 (k ^- ta1) q1
+    vaActCo (x -, .k) (sg -, k) ta ss (sg1 -, .k) ta1 q1
+      rewrite sym (tcaFact (in<= _ -, k) ta)
+      = q1 (in<= _ -, k)
+    vaActCo (x -^ .k) (sg -, k) ta ss (sg1 -, .k) ta1 q1
+      = vaActCo x sg (k ,- ta) ss sg1 (k ,- ta1) (q1 - (_-^ k))
+    vaActCo (x -, .k) (sg -, k) ta ss (sg1 -$ t) ta1 q1
+      rewrite sym (tcaFact (in<= _ -, k) ta)
+      = q1 (in<= _ -, k) 
+    vaActCo (x -^ .k) (sg -, k) ta ss (sg1 -$ t) ta1 q1
+      = vaActCo x sg (k ,- ta) ss sg1 (t $- ta1) (q1 - (_-^ k))
+    vaActCo x (sg -^ k) ta ss (sg1 -, .k) ta1 q1
+      = vaActCo x sg (k ^- ta) ss sg1 (k ,- ta1) (q1 - (_-^ k))
+    vaActCo x (sg -^ k) ta ss (sg1 -$ t) ta1 q1
+      = vaActCo x sg (k ^- ta) ss sg1 (t $- ta1) (q1 - (_-^ k))
+
+    tmActCo (x $ ss) sg ta
+      rewrite vaActCo x sg [] (spAct ss sg) ta [] (\ _ -> refl)
+            | spActCo ss sg ta
+      = refl
+    tmActCo < x > sg ta = {!!}
+    spActCo ss sg ta = {!!}

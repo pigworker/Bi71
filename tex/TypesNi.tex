@@ -315,7 +315,9 @@ as happens both when checking types for introductions and synthesizing types for
 
 \newcommand{\cns}{\mathsf{cn}}
 \newcommand{\elm}{\mathsf{el}}
+\newcommand{\V}{\purple}
 \newcommand{\bnd}[1]{\purple{[\black{#1}]}}
+\newcommand{\bv}[1]{\V{#1}.\,}
 \newcommand{\pic}{\blue{\Uppi}}
 \newcommand{\lac}{\red{\uplambda}}
 \newcommand{\elc}{\green{\upupsilon}}
@@ -353,17 +355,18 @@ For any kind-indexed family of sets $T(\kappa)$ (for `term'), we may give the se
   \Sgc T\iota = \{c\;\vec{t} \;|\; c\:\vec{\kappa}\in \Sg(\iota), \forall i.\,t_i\in T(\kappa_i)\}
 \]
 These are prefix-Polish terms with $T$s as subterms. Our construction of terms will instantiate $T$ recursively,
-`tying the knot'.
+`tying the knot'. We should note that $\Sgc-\iota$ is a functor from the category of kind-indexed sets with kind-preserving
+functions to the category of sets, acting structurally on the subterms.
 
 Now let us define scoped and kinded syntax.
 
 \subsection{The Category of Scopes and Thinnings}
 
-A \emph{scope} ($\gamma, \delta$) is a list of kinds, growing on the right:
+A \emph{scope} is a list of kinds, growing on the right:
 \[
-\gamma \quad::=\quad \EC \quad|\quad \gamma,\kappa
+\gamma, \delta, \zeta \quad::=\quad \EC \quad|\quad \gamma,\kappa
 \]
-It will sometimes be convenient to give kinds in \emph{spine} form, $\bnd\delta\iota$, loading all the bound variable kinds into a scope, leaving an object sort. These scopes form the objects of a category.
+It will often be convenient to give kinds in \emph{spine} form, $\bnd\delta\iota$, loading all the bound variable kinds into a scope, leaving an object sort. These scopes form the objects of a category.
 
 The morphisms of this category are the \emph{thinnings} ($\theta, \phi$) between scopes, $\gamma\le\delta$:
 \[
@@ -426,7 +429,7 @@ Of course, as variables are thinnings, for any such $x\in\kappa\fae\gamma$, we m
 $y;\tct x$ as a valid covering of patterns for $\kappa'\fae\gamma$.
 
 
-\subsection{Terms}
+\subsection{Terms with Schematic Variables}
 \newcommand{\Sgt}[2]{\Sg^{\mathsf{t}}(#1,#2)} 
 \newcommand{\Sgs}[2]{\Sg^{\mathsf{s}}(#1,#2)}
 \newcommand{\sss}{\mathit{s\!s}} 
@@ -441,12 +444,83 @@ $\Sgs\gamma\delta$ for scope $\delta$ in scope $\gamma$, are given thus:
 \end{array}\]
 When a variable has object sort, $x\in\iota\fae\Gamma$, its argument spine is empty, and we may abbreviate the term $x[\EC]$ to plain old $x$. The idea is that to construct a term of a given kind, we bring all of its bound variables into scope, then give either a construction allowed by the signature or a variable suitably instantiated.
 
-This definition is designed to ensure that $\Sgt-\kappa$ and $\Sgs-\kappa$ are functors from the category of scopes and thinnings to the category of sets and functions. As you can see, the scope $\gamma$ occurs only to the right of $\le$ in the definition, allowing thinning to act by composition. Meanwhile, the only time the scope changes is to bind a variable with $-,\kappa$ which acts functorially on thinnings. Let us write $t\theta$ and $\sss\theta$ for the actions of thinning $\theta$ on term $t$ and spine $\sss$, respectively.
+This definition is designed to ensure that $\Sgt-\kappa$ and $\Sgs-\delta$ are functors from the category of scopes and thinnings to the category of sets and functions. As you can see, the scope $\gamma$ occurs only to the right of $\le$ in the definition, allowing thinning to act by composition. Meanwhile, the only time the scope changes is to bind a variable with $-,\kappa$ which acts functorially on thinnings. Let us write $t\theta$ and $\sss\theta$ for the actions of thinning $\theta$ on term $t$ and spine $\sss$, respectively.
 
-For human readability, let us continue to write example terms by binding \emph{names}, $\bnd xt$. A $\beta$-redex looks like this:
+For human readability, let us continue to mark the growing of the scope in example terms by binding \emph{names}, $\bnd x\mathit{term}$. When we use a variable $\V t$ of kind $\bnd\delta\iota$, we must
+instantiate it as $\V t[\sss]$ with a spine $\sss$ for the scope $\delta$ given by its kind. We may write $\V t$ for $\V t[]$ when $\V t$'s kind
+makes it of object sort without further instantiation. The $\beta$-contraction scheme looks like this:
 \[
-\apc\;(\tyc\;(\lac\;\bnd xt)\;(\pic\:S\:\bnd xT))\;s
+\apc\;(\tyc\;(\lac\;\bv xt[\V x])\;(\pic\:\V S\:\bv x\V T[\V x]))\;\V s \;\leadsto_\beta\;
+\tyc\;\V t[\tyc\;\V s\;\V S]\;\V T[\tyc\;\V s\;\V S]
 \]
+The point is that the \emph{schematic} variables in the presentation of the contractions are now directly represented as variables in our
+syntax. Some of them have kinds which are not just object sorts, indicating that they bind variables and must be instantiated in the construction of object terms.
+
+
+\subsection{Parallel Action, Hereditary Substitution}
+
+We shall need to do more to terms than mere thinning. In particular, we shall need to instantiate variables with terms of appropriate kind. For example, when we instantiate $\beta$-contraction, we shall need to replace $\V t$ with some actual term that binds a variable, putting
+$\tyc\;\V s\;\V S$ in the place of that bound variable. Substitution begets substitution: will it ever end? We know from Watkins et al.~\cite{DBLP:conf/types/WatkinsCPW03} that hereditary substitution for the logical framework amounts to $\beta\eta$-long-normalisation for simply typed $\lambda$-calculus, and thus terminates satisfactorily. Andreas Abel~\cite{DBLP:conf/mpc/000106} used Agda's \emph{sized types}
+to implement \emph{simultaneous} (replacing all variables in scope) hereditary substitution for simply typed $\lambda$-calculus. I edited the volume in which that paper appears, so it should not be a surprise that an anonymous reviewer offered an implementation of \emph{single} (replacing just one variable in scope) hereditary substitution without sized types, using only \emph{structural recursion} (on the type of the substituted variable). The grapevine being what it is, that program was the seed for C. Keller and Altenkirch's normalisation formalisation, with full soundness and completeness proofs~\cite{DBLP:conf/icfp/KellerA10}.
+
+The usual approach is to make sure thinning works (which is clear from our construction) and then use thinning to manage the de Bruijn shifting required for substitution (when a term is used in a larger scope than the scope that it came from): it has long been observed~\cite{Goguen97candidatesfor,DBLP:phd/ethos/McBride00} that thinning (or renaming, more generally) and substitution can be implemented by instantiating the parameters of \emph{one} structural recursion on terms in \emph{two} different ways (accounting for how to act on a variable and how to go under a binder).
+
+Here, then, is how to implement \emph{simultaneous} (no need to focus on one variable!) hereditary substitution (or rather, something slightly more general) for our simply kinded calculus by structural recursion on \emph{scopes} (no sized types!) in one pass (no need for a prior implementation of thinning!).
+\newcommand{\act}[3]{#1 \left[#2\right> #3}
+
+The key is to define a notion of \emph{parallel action}, explaining how to either thin or substitute each variable. Read $\act\gamma\zeta\delta$ as an action mapping $\gamma$-terms to $\delta$-terms by substituting some subscope $\zeta\le\gamma$ and thinning the rest.
+\[
+\Axiom{\EC \in \act\EC\EC\EC}
+\qquad
+\Rule{\sigma \in \act\gamma\zeta\delta}
+     {\sigma,\kappa \in \act{(\gamma,\kappa)}\zeta{(\delta,\kappa)}}
+\qquad
+\Rule{\sigma \in \act\gamma\zeta\delta}
+     {\sigma\dag_\kappa \in \act\gamma\zeta{(\delta,\kappa)}}
+\qquad
+\Rule{\sigma \in \act\gamma\zeta\delta\quad s\in\Sgt\delta\kappa}
+     {\sigma/s \in \act{(\gamma,\kappa)}{\zeta,\kappa}\delta}
+\]
+The first three rules tell us that every thinning is an action; the fourth tells us that actions can also substitute.
+Crucially, given some $\theta\in\delta_0\le\delta$ and some $\sss\in\Sgs\delta\zeta$, we may construct
+$\theta+\sss\in\act{\delta_0,\zeta}\zeta\delta$, just by copying $\theta$ to get an action in $\act{\delta_0}\EC\delta$,
+then adding the terms from the spine, extending the source scope to $\delta_0,\zeta$ and the substitutive subscope to $\zeta$,
+keeping the target at $\delta$ (which is the scope of the terms in the spine).
+
+Now let us define
+\newcommand{\vact}{\mathsf{vact}}
+\[\begin{array}{c}
+\Rule{t\in\Sgt\gamma\kappa\quad \sigma\in\act\gamma\zeta\delta}
+     {t\{\kappa | \zeta\}\sigma\in\Sgt\delta\kappa}
+\qquad
+\Rule{\sss\in\Sgs\gamma{\delta'}\quad \sigma\in\act\gamma\zeta\delta}
+     {\sss\{\delta' | \zeta\}\sigma\in\Sgs\delta{\delta'}}
+\\
+\Rule{x\in \bnd{\zeta_x}\iota\fae\gamma \quad \sigma\in\act\gamma\zeta{\delta_0} \quad \theta\in\delta_0\le\delta \quad
+      \sss\in\Sgs\delta{\zeta_x}}
+     {\vact\{\zeta\}\:x\:\sigma\:\theta\:\sss \in \Sgt\delta\iota}
+\end{array}\]
+In casual usage, I shall omit the details given in $\{\ldots\}$, but for purposes of definition, it is crucial to observe them,
+as they justify the recursion.
+\[\begin{array}{r@{}c@{}lcl@{\qquad}l}
+t&\{ \zeta | \bnd\kappa\kappa'\}&\sigma & = & t\{\zeta | \kappa'\}(\sigma,\kappa) \\
+c\:\vec{t}&\{\zeta | \iota\}&\sigma & = & c\:\vec{t}\{\zeta | -\}\sigma & \mbox{functoriality of $\Sgc-\iota$}\\
+x[\sss]&\{\zeta | \iota\}&\sigma & = & \vact\{\zeta\}\:x\:\sigma\:\delta\:(\sss\{\zeta|\zeta_x\}\sigma)
+  & \mbox{where}\;\sss\in \Sgs\gamma{\zeta_x} \medskip \\
+\vact\{\zeta\}\;&x\:&(\sigma\dag_\kappa)\:\theta\;\sss & = &
+  \vact\{\zeta\}\:x\:&\sigma\:(\dag_\kappa;\theta)\;\sss \\
+\vact\{\zeta\}\:&(x\dag_\kappa)\:&(\sigma\dag,\kappa)\:\theta\;\sss & =
+   &\vact\{\zeta\}\:x\:\sigma\:(\dag_\kappa;\theta)\;\sss \\
+\vact\{\zeta,\kappa\}\:&(x\dag_\kappa)\:&(\sigma/t)\:\theta\;\sss & =
+   &\vact\{\zeta\}\:x\:\sigma\:\theta\;\sss \\
+\vact\{\zeta\}\:&(x,\kappa)\:&(\sigma\dag,\kappa)\:\theta\;\sss & =
+   &((\tct{\,},\kappa);\theta)[\sss] & \mbox{act by thinning}\\
+\vact\{\zeta,\bnd{\zeta_x}\iota\}\:&(x,\bnd{\zeta_x}\iota)\:&(\sigma\dag/t)\:\theta\;\sss & =
+   & t\{\zeta_x|\iota\}(\theta+\sss) & \mbox{act by substituting}\medskip\\
+\EC & \{\zeta | \EC\} & \sigma & = & \EC\\
+(\sss,s) & \{\zeta | \delta',\kappa\} & \sigma & = & \sss \{\zeta | \delta'\}\sigma, s\{\zeta | \kappa\}\sigma \\
+\end{array}\]
+The recursion is lexicographic, first on $\zeta$, then on terms. Thinning an action to go under a binder does not alter $\zeta$. As soon as we hit $x[\sss]$, we substitute the spine immediately, then we search the action, $\sigma$ to find the fate of $x$. The $\vact$ operation tears down $\sigma$ and $x$, building up a thinning, $\theta$. As soon as the variable we are looking for is found on top, we must either thin it and reattach the spine, or substitute it, acting hereditarily on its image with an action constructed from the spine. As $\vact$ searches, $\zeta$ is torn down, and in the hereditary substitution case, the substituted scope for the new substitution sits within the kind of the substituted variable.
 
 
 \bibliographystyle{plainnat}

@@ -1,5 +1,14 @@
 module ScoThin where
 
+id : forall {l}{X : Set l} -> X -> X
+id x = x
+
+_-_ : forall {j k l}{A : Set j}{B : A -> Set k}{C : (a : A)(b : B a) -> Set l}
+         (f : {a : A}(b : B a) -> C a b)
+         (g : (a : A) -> B a)
+         (a : A) -> C a (g a)
+(f - g) a = f (g a)
+
 data _==_ {l}{X : Set l}(x : X) : X -> Set l where
   refl : x == x
 {-# BUILTIN EQUALITY _==_ #-}
