@@ -1,4 +1,9 @@
 
+%if False
+\begin{code}
+module TypesNi where
+\end{code}
+%endif
 
 \documentclass[natbib]{article}
 \usepackage{a4wide}
@@ -8,268 +13,17 @@
 \usepackage{pig}
 \ColourEpigram
 
-%% ODER: format ==         = "\mathrel{==}"
-%% ODER: format /=         = "\neq "
-%
-%
-\makeatletter
-\@ifundefined{lhs2tex.lhs2tex.sty.read}%
-  {\@namedef{lhs2tex.lhs2tex.sty.read}{}%
-   \newcommand\SkipToFmtEnd{}%
-   \newcommand\EndFmtInput{}%
-   \long\def\SkipToFmtEnd#1\EndFmtInput{}%
-  }\SkipToFmtEnd
-
-\newcommand\ReadOnlyOnce[1]{\@ifundefined{#1}{\@namedef{#1}{}}\SkipToFmtEnd}
-\usepackage{amstext}
-\usepackage{amssymb}
-\usepackage{stmaryrd}
-\DeclareFontFamily{OT1}{cmtex}{}
-\DeclareFontShape{OT1}{cmtex}{m}{n}
-  {<5><6><7><8>cmtex8
-   <9>cmtex9
-   <10><10.95><12><14.4><17.28><20.74><24.88>cmtex10}{}
-\DeclareFontShape{OT1}{cmtex}{m}{it}
-  {<-> ssub * cmtt/m/it}{}
-\newcommand{\texfamily}{\fontfamily{cmtex}\selectfont}
-\DeclareFontShape{OT1}{cmtt}{bx}{n}
-  {<5><6><7><8>cmtt8
-   <9>cmbtt9
-   <10><10.95><12><14.4><17.28><20.74><24.88>cmbtt10}{}
-\DeclareFontShape{OT1}{cmtex}{bx}{n}
-  {<-> ssub * cmtt/bx/n}{}
-\newcommand{\tex}[1]{\text{\texfamily#1}}	% NEU
-
-\newcommand{\Sp}{\hskip.33334em\relax}
-
-
-\newcommand{\Conid}[1]{\mathit{#1}}
-\newcommand{\Varid}[1]{\mathit{#1}}
-\newcommand{\anonymous}{\kern0.06em \vbox{\hrule\@width.5em}}
-\newcommand{\plus}{\mathbin{+\!\!\!+}}
-\newcommand{\bind}{\mathbin{>\!\!\!>\mkern-6.7mu=}}
-\newcommand{\rbind}{\mathbin{=\mkern-6.7mu<\!\!\!<}}% suggested by Neil Mitchell
-\newcommand{\sequ}{\mathbin{>\!\!\!>}}
-\renewcommand{\leq}{\leqslant}
-\renewcommand{\geq}{\geqslant}
-\usepackage{polytable}
-
-%mathindent has to be defined
-\@ifundefined{mathindent}%
-  {\newdimen\mathindent\mathindent\leftmargini}%
-  {}%
-
-\def\resethooks{%
-  \global\let\SaveRestoreHook\empty
-  \global\let\ColumnHook\empty}
-\newcommand*{\savecolumns}[1][default]%
-  {\g@addto@macro\SaveRestoreHook{\savecolumns[#1]}}
-\newcommand*{\restorecolumns}[1][default]%
-  {\g@addto@macro\SaveRestoreHook{\restorecolumns[#1]}}
-\newcommand*{\aligncolumn}[2]%
-  {\g@addto@macro\ColumnHook{\column{#1}{#2}}}
-
-\resethooks
-
-\newcommand{\onelinecommentchars}{\quad-{}- }
-\newcommand{\commentbeginchars}{\enskip\{-}
-\newcommand{\commentendchars}{-\}\enskip}
-
-\newcommand{\visiblecomments}{%
-  \let\onelinecomment=\onelinecommentchars
-  \let\commentbegin=\commentbeginchars
-  \let\commentend=\commentendchars}
-
-\newcommand{\invisiblecomments}{%
-  \let\onelinecomment=\empty
-  \let\commentbegin=\empty
-  \let\commentend=\empty}
-
-\visiblecomments
-
-\newlength{\blanklineskip}
-\setlength{\blanklineskip}{0.66084ex}
-
-\newcommand{\hsindent}[1]{\quad}% default is fixed indentation
-\let\hspre\empty
-\let\hspost\empty
-\newcommand{\NB}{\textbf{NB}}
-\newcommand{\Todo}[1]{$\langle$\textbf{To do:}~#1$\rangle$}
-
-\EndFmtInput
-\makeatother
-%
-%
-%
-%
-%
-%
-% This package provides two environments suitable to take the place
-% of hscode, called "plainhscode" and "arrayhscode". 
-%
-% The plain environment surrounds each code block by vertical space,
-% and it uses \abovedisplayskip and \belowdisplayskip to get spacing
-% similar to formulas. Note that if these dimensions are changed,
-% the spacing around displayed math formulas changes as well.
-% All code is indented using \leftskip.
-%
-% Changed 19.08.2004 to reflect changes in colorcode. Should work with
-% CodeGroup.sty.
-%
-\ReadOnlyOnce{polycode.fmt}%
-\makeatletter
-
-\newcommand{\hsnewpar}[1]%
-  {{\parskip=0pt\parindent=0pt\par\vskip #1\noindent}}
-
-% can be used, for instance, to redefine the code size, by setting the
-% command to \small or something alike
-\newcommand{\hscodestyle}{}
-
-% The command \sethscode can be used to switch the code formatting
-% behaviour by mapping the hscode environment in the subst directive
-% to a new LaTeX environment.
-
-\newcommand{\sethscode}[1]%
-  {\expandafter\let\expandafter\hscode\csname #1\endcsname
-   \expandafter\let\expandafter\endhscode\csname end#1\endcsname}
-
-% "compatibility" mode restores the non-polycode.fmt layout.
-
-\newenvironment{compathscode}%
-  {\par\noindent
-   \advance\leftskip\mathindent
-   \hscodestyle
-   \let\\=\@normalcr
-   \let\hspre\(\let\hspost\)%
-   \pboxed}%
-  {\endpboxed\)%
-   \par\noindent
-   \ignorespacesafterend}
-
-\newcommand{\compaths}{\sethscode{compathscode}}
-
-% "plain" mode is the proposed default.
-% It should now work with \centering.
-% This required some changes. The old version
-% is still available for reference as oldplainhscode.
-
-\newenvironment{plainhscode}%
-  {\hsnewpar\abovedisplayskip
-   \advance\leftskip\mathindent
-   \hscodestyle
-   \let\hspre\(\let\hspost\)%
-   \pboxed}%
-  {\endpboxed%
-   \hsnewpar\belowdisplayskip
-   \ignorespacesafterend}
-
-\newenvironment{oldplainhscode}%
-  {\hsnewpar\abovedisplayskip
-   \advance\leftskip\mathindent
-   \hscodestyle
-   \let\\=\@normalcr
-   \(\pboxed}%
-  {\endpboxed\)%
-   \hsnewpar\belowdisplayskip
-   \ignorespacesafterend}
-
-% Here, we make plainhscode the default environment.
-
-\newcommand{\plainhs}{\sethscode{plainhscode}}
-\newcommand{\oldplainhs}{\sethscode{oldplainhscode}}
-\plainhs
-
-% The arrayhscode is like plain, but makes use of polytable's
-% parray environment which disallows page breaks in code blocks.
-
-\newenvironment{arrayhscode}%
-  {\hsnewpar\abovedisplayskip
-   \advance\leftskip\mathindent
-   \hscodestyle
-   \let\\=\@normalcr
-   \(\parray}%
-  {\endparray\)%
-   \hsnewpar\belowdisplayskip
-   \ignorespacesafterend}
-
-\newcommand{\arrayhs}{\sethscode{arrayhscode}}
-
-% The mathhscode environment also makes use of polytable's parray 
-% environment. It is supposed to be used only inside math mode 
-% (I used it to typeset the type rules in my thesis).
-
-\newenvironment{mathhscode}%
-  {\parray}{\endparray}
-
-\newcommand{\mathhs}{\sethscode{mathhscode}}
-
-% texths is similar to mathhs, but works in text mode.
-
-\newenvironment{texthscode}%
-  {\(\parray}{\endparray\)}
-
-\newcommand{\texths}{\sethscode{texthscode}}
-
-% The framed environment places code in a framed box.
-
-\def\codeframewidth{\arrayrulewidth}
-\RequirePackage{calc}
-
-\newenvironment{framedhscode}%
-  {\parskip=\abovedisplayskip\par\noindent
-   \hscodestyle
-   \arrayrulewidth=\codeframewidth
-   \tabular{@{}|p{\linewidth-2\arraycolsep-2\arrayrulewidth-2pt}|@{}}%
-   \hline\framedhslinecorrect\\{-1.5ex}%
-   \let\endoflinesave=\\
-   \let\\=\@normalcr
-   \(\pboxed}%
-  {\endpboxed\)%
-   \framedhslinecorrect\endoflinesave{.5ex}\hline
-   \endtabular
-   \parskip=\belowdisplayskip\par\noindent
-   \ignorespacesafterend}
-
-\newcommand{\framedhslinecorrect}[2]%
-  {#1[#2]}
-
-\newcommand{\framedhs}{\sethscode{framedhscode}}
-
-% The inlinehscode environment is an experimental environment
-% that can be used to typeset displayed code inline.
-
-\newenvironment{inlinehscode}%
-  {\(\def\column##1##2{}%
-   \let\>\undefined\let\<\undefined\let\\\undefined
-   \newcommand\>[1][]{}\newcommand\<[1][]{}\newcommand\\[1][]{}%
-   \def\fromto##1##2##3{##3}%
-   \def\nextline{}}{\) }%
-
-\newcommand{\inlinehs}{\sethscode{inlinehscode}}
-
-% The joincode environment is a separate environment that
-% can be used to surround and thereby connect multiple code
-% blocks.
-
-\newenvironment{joincode}%
-  {\let\orighscode=\hscode
-   \let\origendhscode=\endhscode
-   \def\endhscode{\def\hscode{\endgroup\def\@currenvir{hscode}\\}\begingroup}
-   %\let\SaveRestoreHook=\empty
-   %\let\ColumnHook=\empty
-   %\let\resethooks=\empty
-   \orighscode\def\hscode{\endgroup\def\@currenvir{hscode}}}%
-  {\origendhscode
-   \global\let\hscode=\orighscode
-   \global\let\endhscode=\origendhscode}%
-
-\makeatother
-\EndFmtInput
-%
+%include lhs2TeX.fmt
+%include lhs2TeX.sty
+%include polycode.fmt
 \DeclareMathAlphabet{\mathkw}{OT1}{cmss}{bx}{n}
 
+%subst numeral a = "\C{" a "}"
+%subst keyword a = "\mathkw{" a "}"
+%subst conid a = "\V{" a "}"
+%subst varid a = "\V{" a "}"
 
+%format forall = "\blue{\forall}"
 
 \newcommand{\type}{\blue{\ast}}
 \newcommand{\hb}{\!:\!}
@@ -305,14 +59,14 @@ Let us first see the system which we are about to reorganise.
 
 \textbf{Really? Actually, I'm just guessing.}
 
-\[\begin{array}{rrl@{\qquad}l}
+\[\begin{array}{rrl@@{\qquad}l}
 f,s,t,S,T & ::= & \type & \mbox{the type of all types} \\
-          &   | & \PI xS T[x] & \mbox{dependent function spaces} \\
-          &   | & \LT xS t[x] & \mbox{typed abstraction} \\
-          &   | & f\:s        & \mbox{application} \\
-          &   | & x           & \mbox{variable} \medskip\\
+          &   || & \PI xS T[x] & \mbox{dependent function spaces} \\
+          &   || & \LT xS t[x] & \mbox{typed abstraction} \\
+          &   || & f\:s        & \mbox{application} \\
+          &   || & x           & \mbox{variable} \medskip\\
 \Gamma,\Delta & ::= & \EC & \mbox{empty context} \\
-              &   | & \Gamma,x\hb S & \mbox{context extension, with freshly chosen $x$}
+              &   || & \Gamma,x\hb S & \mbox{context extension, with freshly chosen $x$}
 \end{array}\]
 
 It is my habit to be explicit (with square brackets) when introducing schematic variables in the scope of a binder: here, $T[x]$ and $t[x]$ may depend on the $x$ bound just before, whereas the domain type $S$ may not. It is, moreover, my habit to substitute such bound variables just by writing terms in the square brackets. For example, the $\beta$-contraction scheme is given thus:
@@ -332,7 +86,7 @@ We have two judgment forms
 \item[type synthesis] \framebox{$\MLSYN\Gamma tT$} ~ asserts that the type $T$ can be \emph{synthesized} for the term $t$.
 \end{description}
 
-\[\begin{array}{l@{\qquad}c}
+\[\begin{array}{l@@{\qquad}c}
 \framebox{$\VALID\Gamma$}&
   \Axiom{\VALID\EC}\qquad
   \Rule{\VALID\Gamma\quad \MLSYN\Gamma S\type}
@@ -396,13 +150,13 @@ The rule for $\type$, often called `Type-in-Type', opens the door to paradox. Fa
 \newcommand{\el}[1]{\green{\underline{\black{#1}}}}
 
 The idea behind bidirectional type systems is to make use of the way we sometimes know type information in advance. If we start from a type, there may be fewer choices to determine an inhabiting term. The type represents a \emph{requirement}, rather than a \emph{measurement}. We work a little more precisely at managing the flow of type information, and we gain some convenience and cleanliness. I like to start by separating the syntactic categories into checkable \emph{constructions} and synthesizable \emph{eliminations}.
-\[\begin{array}{rrl@{\qquad}l}
+\[\begin{array}{rrl@@{\qquad}l}
 s,t,S,T & ::= & \type & \mbox{the type of all types} \\
-        &   | & \PI xS T[x] & \mbox{dependent function spaces} \\
-        &   | & \LA x t[x] & \mbox{untyped abstraction} \\
-        &   | & \el e & \mbox{embedded elimination} \medskip \\
+        &   || & \PI xS T[x] & \mbox{dependent function spaces} \\
+        &   || & \LA x t[x] & \mbox{untyped abstraction} \\
+        &   || & \el e & \mbox{embedded elimination} \medskip \\
 e,f     & ::= & x     & \mbox{variable} \\
-        &   | & f\:s  & \mbox{application} \\
+        &   || & f\:s  & \mbox{application} \\
         &   \vdots &  & \mbox{to be continued\ldots}
 \end{array}\]
 I have omitted one elimination form by way of generating a little suspense: let us see how we get along without it. Type formation and value introduction syntax sits on the \emph{construction} side; variable usage and application sit on the \emph{elimination} side. Eliminations embed into constructions, with a relatively unobtrusive but nontrivial underline: in a real implementation, there is no need to spend characters on this feature, but when studying metatheory, it helps to see where it is used. The reverse embedding is \emph{not} available, and we shall see why when we study the rules.
@@ -414,158 +168,100 @@ At this stage, however, it is worth noting the following:
 \item it is syntactically invalid to substitute a construction for a variable.
 \end{itemize}
 
+%format Set = "\U{Set}"
+%format Sort = "\D{Sort}"
+%format chk = "\C{chk}"
+%format syn = "\C{syn}"
 Let us formalize this syntax in Agda. We may enumerate the choice of syntactic
-category, or \ensuremath{\D{Sort}} (in its universal algebra sense, rather than its `type of
+category, or |Sort| (in its universal algebra sense, rather than its `type of
 types' sense) for short.
 
-\begin{hscode}\SaveRestoreHook
-\column{B}{@{}>{\hspre}l<{\hspost}@{}}%
-\column{E}{@{}>{\hspre}l<{\hspost}@{}}%
-\>[B]{}\mathkw{data}\;\D{Sort}\;\mathbin{:}\;\U{Set}\;\mathkw{where}\;\C{chk}\;\C{syn}\;\mathbin{:}\;\D{Sort}{}\<[E]%
-\ColumnHook
-\end{hscode}\resethooks
+\begin{code}
+data Sort : Set where chk syn : Sort
+\end{code}
 
+%format Nat = "\D{Nat}"
+%format ze = "\C{ze}"
+%format su = "\C{su}"
 The constructor names highlight the distinction between checking and synthesis.
 Variables must be in \emph{scope}. In more complex syntaxes, a scope is a list
-of variable \ensuremath{\D{Sort}}s, but here we have variables only of sort \ensuremath{\C{syn}}, so a
-\ensuremath{\D{Nat}}ural number suffices to represent a valid scope.
+of variable |Sort|s, but here we have variables only of sort |syn|, so a
+|Nat|ural number suffices to represent a valid scope.
 \agdanote{The BUILTIN pragma instructs Agda to allow us decimal numerals for numbers.}
 
-\begin{hscode}\SaveRestoreHook
-\column{B}{@{}>{\hspre}l<{\hspost}@{}}%
-\column{23}{@{}>{\hspre}l<{\hspost}@{}}%
-\column{35}{@{}>{\hspre}l<{\hspost}@{}}%
-\column{E}{@{}>{\hspre}l<{\hspost}@{}}%
-\>[B]{}\mathkw{data}\;\D{Nat}\;\mathbin{:}\;\U{Set}\;\mathkw{where}\;{}\<[23]%
-\>[23]{}\C{ze}\;\mathbin{:}\;\D{Nat};{}\<[35]%
-\>[35]{}\C{su}\;\mathbin{:}\;\D{Nat}\;\to \;\D{Nat}{}\<[E]%
-\\
-\>[B]{}\mbox{\enskip\{-\# BUILTIN NATURAL Nat  \#-\}\enskip}{}\<[E]%
-\ColumnHook
-\end{hscode}\resethooks
+\begin{code}
+data Nat : Set where  ze : Nat ;  su : Nat -> Nat
+{-# BUILTIN NATURAL Nat #-}
+\end{code}
 
+%format <= = "\D{\le}"
+%format _<=_ = _ <= _
+%format <=_ = <= _
+%format oz = "\C{oz}"
+%format os = "\C{os}"
 \newcommand{\apo}{\mbox{\red{'}}}
+%format o' = "\C{o\apo}"
+%format Var = "\F{Var}"
 A syntactically valid term has a scope and a sort.
 \newsavebox{\opebox}
 \savebox{\opebox}{\parbox{4in}{
-\begin{hscode}\SaveRestoreHook
-\column{B}{@{}>{\hspre}l<{\hspost}@{}}%
-\column{3}{@{}>{\hspre}l<{\hspost}@{}}%
-\column{7}{@{}>{\hspre}l<{\hspost}@{}}%
-\column{36}{@{}>{\hspre}l<{\hspost}@{}}%
-\column{40}{@{}>{\hspre}l<{\hspost}@{}}%
-\column{43}{@{}>{\hspre}l<{\hspost}@{}}%
-\column{E}{@{}>{\hspre}l<{\hspost}@{}}%
-\>[B]{}\mathkw{data}\;\anonymous \D{\le}\anonymous \;\mathbin{:}\;\D{Nat}\;\to \;\D{Nat}\;\to \;\U{Set}\;\mathkw{where}{}\<[E]%
-\\
-\>[B]{}\hsindent{3}{}\<[3]%
-\>[3]{}\C{oz}\;{}\<[7]%
-\>[7]{}\mathbin{:}\;{}\<[36]%
-\>[36]{}\C{ze}\;{}\<[43]%
-\>[43]{}\D{\le}\;\C{ze}{}\<[E]%
-\\
-\>[B]{}\hsindent{3}{}\<[3]%
-\>[3]{}\C{os}\;{}\<[7]%
-\>[7]{}\mathbin{:}\;\blue{\forall}\;\{\mskip1.5mu \V{n}\;\V{m}\mskip1.5mu\}\;\to \;\V{n}\;\D{\le}\;\V{m}\;\to \;{}\<[36]%
-\>[36]{}\C{su}\;{}\<[40]%
-\>[40]{}\V{n}\;{}\<[43]%
-\>[43]{}\D{\le}\;\C{su}\;\V{m}{}\<[E]%
-\\
-\>[B]{}\hsindent{3}{}\<[3]%
-\>[3]{}\C{o\apo}\;{}\<[7]%
-\>[7]{}\mathbin{:}\;\blue{\forall}\;\{\mskip1.5mu \V{n}\;\V{m}\mskip1.5mu\}\;\to \;\V{n}\;\D{\le}\;\V{m}\;\to \;{}\<[40]%
-\>[40]{}\V{n}\;{}\<[43]%
-\>[43]{}\D{\le}\;\C{su}\;\V{m}{}\<[E]%
-\\[\blanklineskip]%
-\>[B]{}\F{Var}\;\mathbin{:}\;\D{Nat}\;\to \;\U{Set}{}\<[E]%
-\\
-\>[B]{}\F{Var}\;\mathrel{=}\;(\V{1}\;\D{\le}\anonymous ){}\<[E]%
-\ColumnHook
-\end{hscode}\resethooks
+\begin{code}
+data _<=_ : Nat -> Nat -> Set where
+  oz  :                            ze     <= ze
+  os  : forall {n m} -> n <= m ->  su  n  <= su m
+  o'  : forall {n m} -> n <= m ->      n  <= su m
+
+Var : Nat -> Set
+Var = (1 <=_)
+\end{code}
 }}
 
-\begin{hscode}\SaveRestoreHook
-\column{B}{@{}>{\hspre}l<{\hspost}@{}}%
-\column{3}{@{}>{\hspre}l<{\hspost}@{}}%
-\column{8}{@{}>{\hspre}l<{\hspost}@{}}%
-\column{26}{@{}>{\hspre}l<{\hspost}@{}}%
-\column{47}{@{}>{\hspre}l<{\hspost}@{}}%
-\column{51}{@{}>{\hspre}l<{\hspost}@{}}%
-\column{61}{@{}>{\hspre}l<{\hspost}@{}}%
-\column{E}{@{}>{\hspre}l<{\hspost}@{}}%
-\>[B]{}\mathkw{data}\;\D{Tm}\;(\V{n}\;\mathbin{:}\;\D{Nat})\;\mathbin{:}\;\D{Sort}\;\to \;\U{Set}\;\mathkw{where}\;{}\<[61]%
-\>[61]{}\mbox{\onelinecomment  informally\ldots}{}\<[E]%
-\\[\blanklineskip]%
-\>[B]{}\hsindent{3}{}\<[3]%
-\>[3]{}\C{\ast}\;{}\<[8]%
-\>[8]{}\mathbin{:}\;{}\<[51]%
-\>[51]{}\D{Tm}\;\V{n}\;\C{chk}{}\<[61]%
-\>[61]{}\mbox{\onelinecomment  $\type$}{}\<[E]%
-\\
-\>[B]{}\hsindent{3}{}\<[3]%
-\>[3]{}\C{\Uppi}\;{}\<[8]%
-\>[8]{}\mathbin{:}\;(\V{S}\;\mathbin{:}\;\D{Tm}\;\V{n}\;\C{chk})\;{}\<[26]%
-\>[26]{}(\V{T}\;\mathbin{:}\;\D{Tm}\;(\C{su}\;\V{n})\;\C{chk})\;{}\<[47]%
-\>[47]{}\to \;{}\<[51]%
-\>[51]{}\D{Tm}\;\V{n}\;\C{chk}{}\<[61]%
-\>[61]{}\mbox{\onelinecomment  $\PI xS T[x]$}{}\<[E]%
-\\
-\>[B]{}\hsindent{3}{}\<[3]%
-\>[3]{}\C{\uplambda}\;{}\<[8]%
-\>[8]{}\mathbin{:}\;{}\<[26]%
-\>[26]{}(\V{t}\;\mathbin{:}\;\D{Tm}\;(\C{su}\;\V{n})\;\C{chk})\;{}\<[47]%
-\>[47]{}\to \;{}\<[51]%
-\>[51]{}\D{Tm}\;\V{n}\;\C{chk}{}\<[61]%
-\>[61]{}\mbox{\onelinecomment  $\LA x t[x]$}{}\<[E]%
-\\
-\>[B]{}\hsindent{3}{}\<[3]%
-\>[3]{}\C{\upepsilon}\;{}\<[8]%
-\>[8]{}\mathbin{:}\;(\V{e}\;\mathbin{:}\;\D{Tm}\;\V{n}\;\C{syn})\;{}\<[47]%
-\>[47]{}\to \;{}\<[51]%
-\>[51]{}\D{Tm}\;\V{n}\;\C{chk}{}\<[61]%
-\>[61]{}\mbox{\onelinecomment  $\el e$}{}\<[E]%
-\\[\blanklineskip]%
-\>[B]{}\hsindent{3}{}\<[3]%
-\>[3]{}\C{\#}\;{}\<[8]%
-\>[8]{}\mathbin{:}\;(\V{i}\;\mathbin{:}\;\F{Var}\;\V{n})\;{}\<[47]%
-\>[47]{}\to \;{}\<[51]%
-\>[51]{}\D{Tm}\;\V{n}\;\C{syn}{}\<[61]%
-\>[61]{}\mbox{\onelinecomment  $x$}{}\<[E]%
-\\
-\>[B]{}\hsindent{3}{}\<[3]%
-\>[3]{}\anonymous \C{\raisebox{0.05in}{$\scriptscriptstyle{\$}$}}\anonymous \;{}\<[8]%
-\>[8]{}\mathbin{:}\;(\V{f}\;\mathbin{:}\;\D{Tm}\;\V{n}\;\C{syn})\;(\V{s}\;\mathbin{:}\;\D{Tm}\;\V{n}\;\C{chk})\;{}\<[47]%
-\>[47]{}\to \;{}\<[51]%
-\>[51]{}\D{Tm}\;\V{n}\;\C{syn}{}\<[61]%
-\>[61]{}\mbox{\onelinecomment  $f\:s$}{}\<[E]%
-\ColumnHook
-\end{hscode}\resethooks
+%format Tm = "\D{Tm}"
+%format Ty = "\C{\ast}"
+%format Pi = "\C{\Uppi}"
+%format la = "\C{\uplambda}"
+%format em = "\C{\upepsilon}"
+%format va = "\C{\#}"
+%format $ = "\C{\raisebox{0.05in}{$\scriptscriptstyle{\$}$}}"
+%format _$_ = _ $ _
+%format :: = "\C{:\!:}"
+%format _::_ = _ :: _
+\begin{code}
+data Tm (n : Nat) : Sort -> Set where                       -- informally\ldots
+
+  Ty   :                                          Tm n chk  -- $\type$
+  Pi   : (S : Tm n chk)  (T : Tm (su n) chk)  ->  Tm n chk  -- $\PI xS T[x]$
+  la   :                 (t : Tm (su n) chk)  ->  Tm n chk  -- $\LA x t[x]$
+  em   : (e : Tm n syn)                       ->  Tm n chk  -- $\el e$
+
+  va   : (i : Var n)                          ->  Tm n syn  -- $x$
+  _$_  : (f : Tm n syn)(s : Tm n chk)         ->  Tm n syn  -- $f\:s$
+\end{code}
 \newsavebox{\radbox}\savebox{\radbox}{\parbox{4in}{
-\begin{hscode}\SaveRestoreHook
-\column{B}{@{}>{\hspre}l<{\hspost}@{}}%
-\column{3}{@{}>{\hspre}l<{\hspost}@{}}%
-\column{E}{@{}>{\hspre}l<{\hspost}@{}}%
-\>[3]{}\anonymous \C{:\!:}\anonymous \;\mathbin{:}\;\D{Tm}\;\V{n}\;\C{chk}\;\to \;\D{Tm}\;\V{n}\;\C{chk}\;\to \;\D{Tm}\;\V{n}\;\C{syn}{}\<[E]%
-\ColumnHook
-\end{hscode}\resethooks
+\begin{code}
+  _::_ : Tm n chk -> Tm n chk -> Tm n syn
+\end{code}
 }}
-\agdanote{In the declaration of \ensuremath{\D{Tm}}, we see \ensuremath{(\V{n}\;\mathbin{:}\;\D{Nat})} abstracted left of \ensuremath{\mathbin{:}},
+%format == = "\D{\simeq}"
+%format _==_ = _ == _
+%format refl = "\C{refl}"
+\agdanote{In the declaration of |Tm|, we see |(n : Nat)| abstracted left of |:|,
 scoping over the whole declaration. Some young people might incorrectly refer to
-$n$ as a `parameter' of \ensuremath{\D{Tm}}, but it is not a parameter in Dybjer's definitive
-sense~\cite{dybjer:families}: \ensuremath{\D{Tm}}'s first argument varies in
-recursive positions, so we are taking a least fixpoint on \ensuremath{\D{Nat}\;\to \;\D{Sort}\;\to \;\U{Set}},
-not a number of fixpoints on \ensuremath{\D{Sort}\;\to \;\U{Set}}. The \ensuremath{\V{n}} is thus an \emph{index},
+$n$ as a `parameter' of |Tm|, but it is not a parameter in Dybjer's definitive
+sense~\cite{dybjer:families}: |Tm|'s first argument varies in
+recursive positions, so we are taking a least fixpoint on |Nat -> Sort -> Set|,
+not a number of fixpoints on |Sort -> Set|. The |n| is thus an \emph{index},
 but one in which the constructor return types are \emph{uniform}. Hancock calls
 such indices `protestant' to distinguish them from the `catholic' indices (such
-as our \ensuremath{\D{Sort}}) which may be individually instantiated in constructor return
+as our |Sort|) which may be individually instantiated in constructor return
 types, as paradigmatically done in the inductively defined equality type,
 enabling
 the miracle of transubstantiation.}
 
-Note that the types of \ensuremath{\C{\Uppi}} and \ensuremath{\C{\uplambda}} expose their variable binding power by
+Note that the types of |Pi| and |la| expose their variable binding power by
 incrementing the scope count for the range of function types and the body of
-an abstraction. The \ensuremath{\F{Var}\;\V{n}} type represents a choice of one variable from the
-\ensuremath{\V{n}} available. I shall resolve the mystery of its definition directly.
+an abstraction. The |Var n| type represents a choice of one variable from the
+|n| available. I shall resolve the mystery of its definition directly.
 
 
 \section{Variables as a Line in Pascal's Triangle}
@@ -574,230 +270,173 @@ Choosing \emph{some} variables amounts to constructing an
 \emph{order-preserving embedding} (or a `thinning', for short) from
 the chosen variables into all the variables. Such a choice is possible
 only if we have enough variables, so we acquire a proof-relevant
-version, \ensuremath{\D{\le}}, of the `less or equal' relation, preserved by the
-constructors of numbers (as shown by \ensuremath{\C{oz}} and \ensuremath{\C{os}}), but allowing us
-to omit a `target' variable (with \ensuremath{\C{o\apo}}) whenever we choose, or rather,
+version, |<=|, of the `less or equal' relation, preserved by the
+constructors of numbers (as shown by |oz| and |os|), but allowing us
+to omit a `target' variable (with |o'|) whenever we choose, or rather,
 whenever we choose-not.
 
 \usebox{\opebox}
 
-Our \ensuremath{\F{Var}} is then given as an operator section, fixing the number of variables
-to choose as \ensuremath{\V{1}}.
+Our |Var| is then given as an operator section, fixing the number of variables
+to choose as |1|.
 
-We may tabulate these \ensuremath{\D{\le}} types as a version of Pascal's Triangle,
+We may tabulate these |<=| types as a version of Pascal's Triangle,
 replacing the \emph{number} of paths to a given position by the
 \emph{type} of the embeddings they generate:
-\[\begin{array}{c@{}c@{}c@{}c@{}c@{}c@{}c} &&& \ensuremath{\C{oz}\;\mathbin{:}\;\V{0}\;\D{\le}\;\V{0}} &&&
-\\ &&\;\;\ensuremath{\C{o\apo}}\swarrow && \searrow\ensuremath{\C{os}}\;\;&& \\ &&\ensuremath{\V{0}\;\D{\le}\;\V{1}} && \ensuremath{\V{1}\;\D{\le}\;\V{1}}&& \\ &\ensuremath{\C{o\apo}}\swarrow && \ensuremath{\C{os}}\searrow\;\;\swarrow\ensuremath{\C{o\apo}} &&
-\searrow\ensuremath{\C{os}}&\\ &\ensuremath{\V{0}\;\D{\le}\;\V{2}} && \ensuremath{\V{1}\;\D{\le}\;\V{2}} && \ensuremath{\V{2}\;\D{\le}\;\V{2}}& \\ \ensuremath{\C{o\apo}}\swarrow &&
-\ensuremath{\C{os}}\searrow\;\;\swarrow\ensuremath{\C{o\apo}} && \ensuremath{\C{os}}\searrow\;\;\swarrow\ensuremath{\C{o\apo}} &&
-\searrow\ensuremath{\C{os}}\\ \ensuremath{\V{0}\;\D{\le}\;\V{3}} && \ensuremath{\V{1}\;\D{\le}\;\V{3}} && \ensuremath{\V{2}\;\D{\le}\;\V{3}} && \ensuremath{\V{3}\;\D{\le}\;\V{3}} \\ \vdots
+\[\begin{array}{c@@{}c@@{}c@@{}c@@{}c@@{}c@@{}c} &&& |oz : 0 <= 0| &&&
+\\ &&\;\;|o'|\swarrow && \searrow|os|\;\;&& \\ &&|0 <= 1| && |1 <=
+1|&& \\ &|o'|\swarrow && |os|\searrow\;\;\swarrow|o'| &&
+\searrow|os|&\\ &|0 <= 2| && |1 <= 2| && |2 <= 2|& \\ |o'|\swarrow &&
+|os|\searrow\;\;\swarrow|o'| && |os|\searrow\;\;\swarrow|o'| &&
+\searrow|os|\\ |0 <= 3| && |1 <= 3| && |2 <= 3| && |3 <= 3| \\ \vdots
 && \vdots &\vdots& \vdots && \vdots \end{array}\]
 
 The left spine of the triangle (usually all 1s) gives the unique embedding from the empty scope to any scope. Meanwhile, the right spine gives the identity embedding.
+%format oe = "\F{oe}"
+%format oi = "\F{oi}"
 
 \parbox{3in}{
-\begin{hscode}\SaveRestoreHook
-\column{B}{@{}>{\hspre}l<{\hspost}@{}}%
-\column{12}{@{}>{\hspre}l<{\hspost}@{}}%
-\column{E}{@{}>{\hspre}l<{\hspost}@{}}%
-\>[B]{}\F{oe}\;\mathbin{:}\;\blue{\forall}\;\{\mskip1.5mu \V{n}\mskip1.5mu\}\;\to \;\C{ze}\;\D{\le}\;\V{n}{}\<[E]%
-\\
-\>[B]{}\F{oe}\;\{\mskip1.5mu \C{ze}\mskip1.5mu\}\;{}\<[12]%
-\>[12]{}\mathrel{=}\;\C{oz}{}\<[E]%
-\\
-\>[B]{}\F{oe}\;\{\mskip1.5mu \C{su}\;\V{n}\mskip1.5mu\}\;{}\<[12]%
-\>[12]{}\mathrel{=}\;\C{o\apo}\;(\F{oe}\;\{\mskip1.5mu \V{n}\mskip1.5mu\}){}\<[E]%
-\ColumnHook
-\end{hscode}\resethooks
-}
+\begin{code}
+oe : forall {n} -> ze <= n
+oe {ze}    = oz
+oe {su n}  = o' (oe {n})
+\end{code}}
 \parbox{1.5in}{
-\begin{hscode}\SaveRestoreHook
-\column{B}{@{}>{\hspre}l<{\hspost}@{}}%
-\column{12}{@{}>{\hspre}l<{\hspost}@{}}%
-\column{E}{@{}>{\hspre}l<{\hspost}@{}}%
-\>[B]{}\F{oi}\;\mathbin{:}\;\blue{\forall}\;\{\mskip1.5mu \V{n}\mskip1.5mu\}\;\to \;\V{n}\;\D{\le}\;\V{n}{}\<[E]%
-\\
-\>[B]{}\F{oi}\;\{\mskip1.5mu \C{ze}\mskip1.5mu\}\;{}\<[12]%
-\>[12]{}\mathrel{=}\;\C{oz}{}\<[E]%
-\\
-\>[B]{}\F{oi}\;\{\mskip1.5mu \C{su}\;\V{n}\mskip1.5mu\}\;{}\<[12]%
-\>[12]{}\mathrel{=}\;\C{os}\;(\F{oi}\;\{\mskip1.5mu \V{n}\mskip1.5mu\}){}\<[E]%
-\ColumnHook
-\end{hscode}\resethooks
-}
+\begin{code}
+oi : forall {n} -> n <= n
+oi {ze}    = oz
+oi {su n}  = os (oi {n})
+\end{code}}
 
 \agdanote{Curly braces in function types mark arguments to be suppressed by default.
 Curly braces in applications and abstractions override default suppression, as is
 necessary here for purposes of pattern matching. That is, in a most unmilnerian
 manner, arguments usually delivered by ``type inference'' have relevance in execution.
-We could perfectly well have written \ensuremath{\C{o\apo}\;\F{oe}} and \ensuremath{\C{os}\;\F{oi}} on the right of the above
-step cases, suppressing the \ensuremath{\{\mskip1.5mu \V{n}\mskip1.5mu\}}s. I give them explicitly only to make legible the
+We could perfectly well have written |o' oe| and |os oi| on the right of the above
+step cases, suppressing the |{n}|s. I give them explicitly only to make legible the
 structural justification for the recursion.}
 
-\ensuremath{\F{Var}} is the next south-westerly diagonal down from the left spine, \ensuremath{\V{1}\;\D{\le}\;\V{n}}, where each type has size \ensuremath{\V{n}} and may be taken to represent the
-choice of one variable from \ensuremath{\V{n}} in scope. The $i$th de Bruijn index
-(counting from 0) is given as $\ensuremath{\C{o\apo}}^i\:\ensuremath{(\C{os}\;\F{oe})}$.  I use \ensuremath{(\V{1}\;\D{\le}\anonymous )}
+|Var| is the next south-westerly diagonal down from the left spine, |1
+<= n|, where each type has size |n| and may be taken to represent the
+choice of one variable from |n| in scope. The $i$th de Bruijn index
+(counting from 0) is given as $|o'|^i\:|(os oe)|$.  I use |(1 <=_)|
 rather than the more traditional `Fin' family to emphasize that
-variable sets arise from \ensuremath{\D{\le}}, the category of thinnings. We have the identity
+variable sets arise from |<=|, the category of thinnings. We have the identity
 thinning, so I suppose I should hurry up with the composition, which
 I write diagrammatically.
 
-\begin{hscode}\SaveRestoreHook
-\column{B}{@{}>{\hspre}l<{\hspost}@{}}%
-\column{8}{@{}>{\hspre}l<{\hspost}@{}}%
-\column{19}{@{}>{\hspre}l<{\hspost}@{}}%
-\column{E}{@{}>{\hspre}l<{\hspost}@{}}%
-\>[B]{}\anonymous \F{-\!\!\!\!\!<\!\!\!\!\!-}\anonymous \;\mathbin{:}\;\blue{\forall}\;\{\mskip1.5mu \V{p}\;\V{n}\;\V{m}\mskip1.5mu\}\;\to \;\V{p}\;\D{\le}\;\V{n}\;\to \;\V{n}\;\D{\le}\;\V{m}\;\to \;\V{p}\;\D{\le}\;\V{m}{}\<[E]%
-\\
-\>[B]{}\V{\phi}\;{}\<[8]%
-\>[8]{}\F{-\!\!\!\!\!<\!\!\!\!\!-}\;\C{o\apo}\;\V{\theta}\;{}\<[19]%
-\>[19]{}\mathrel{=}\;\C{o\apo}\;(\V{\phi}\;\F{-\!\!\!\!\!<\!\!\!\!\!-}\;\V{\theta}){}\<[E]%
-\\
-\>[B]{}\C{os}\;\V{\phi}\;{}\<[8]%
-\>[8]{}\F{-\!\!\!\!\!<\!\!\!\!\!-}\;\C{os}\;\V{\theta}\;{}\<[19]%
-\>[19]{}\mathrel{=}\;\C{os}\;(\V{\phi}\;\F{-\!\!\!\!\!<\!\!\!\!\!-}\;\V{\theta}){}\<[E]%
-\\
-\>[B]{}\C{o\apo}\;\V{\phi}\;{}\<[8]%
-\>[8]{}\F{-\!\!\!\!\!<\!\!\!\!\!-}\;\C{os}\;\V{\theta}\;{}\<[19]%
-\>[19]{}\mathrel{=}\;\C{o\apo}\;(\V{\phi}\;\F{-\!\!\!\!\!<\!\!\!\!\!-}\;\V{\theta}){}\<[E]%
-\\
-\>[B]{}\C{oz}\;{}\<[8]%
-\>[8]{}\F{-\!\!\!\!\!<\!\!\!\!\!-}\;\C{oz}\;{}\<[19]%
-\>[19]{}\mathrel{=}\;\C{oz}{}\<[E]%
-\ColumnHook
-\end{hscode}\resethooks
+%format -<- = "\F{-\!\!\!\!\!<\!\!\!\!\!-}"
+%format _-<-_ = _ -<- _
+%format ph = "\V{\phi}"
+%format th = "\V{\theta}"
+\begin{code}
+_-<-_ : forall {p n m} -> p <= n -> n <= m -> p <= m
+ph     -<- o' th  = o' (ph -<- th)
+os ph  -<- os th  = os (ph -<- th)
+o' ph  -<- os th  = o' (ph -<- th)
+oz     -<- oz     = oz
+\end{code}
 
 \agdanote{I have been careful to maximise the laziness of the above definition by
-promoting the line where any \ensuremath{\V{\phi}} will do to the top. Agda translates pattern
+promoting the line where any |ph| will do to the top. Agda translates pattern
 matching to case analysis, and here the top line's laziness is a persuader to
 split the later thinning first, then the earlier thinning only if necessary.}
 
+%format rewrite = "\mathkw{rewrite}"
 Given the aforementioned equality type,
-\begin{hscode}\SaveRestoreHook
-\column{B}{@{}>{\hspre}l<{\hspost}@{}}%
-\column{E}{@{}>{\hspre}l<{\hspost}@{}}%
-\>[B]{}\mathkw{data}\;\anonymous \D{\simeq}\anonymous \;\{\mskip1.5mu \V{l}\mskip1.5mu\}\;\{\mskip1.5mu \V{X}\;\mathbin{:}\;\U{Set}\;\V{l}\mskip1.5mu\}\;(\V{x}\;\mathbin{:}\;\V{X})\;\mathbin{:}\;\V{X}\;\to \;\U{Set}\;\V{l}\;\mathkw{where}\;\C{refl}\;\mathbin{:}\;\V{x}\;\D{\simeq}\;\V{x}{}\<[E]%
-\ColumnHook
-\end{hscode}\resethooks
-we may prove that \ensuremath{\F{oi}} and \ensuremath{\F{-\!\!\!\!\!<\!\!\!\!\!-}} satisfy the laws for a category.
-\begin{hscode}\SaveRestoreHook
-\column{B}{@{}>{\hspre}l<{\hspost}@{}}%
-\column{14}{@{}>{\hspre}l<{\hspost}@{}}%
-\column{17}{@{}>{\hspre}l<{\hspost}@{}}%
-\column{18}{@{}>{\hspre}l<{\hspost}@{}}%
-\column{E}{@{}>{\hspre}l<{\hspost}@{}}%
-\>[B]{}\F{idBeforeOPE}\;{}\<[14]%
-\>[14]{}\mathbin{:}\;{}\<[17]%
-\>[17]{}\blue{\forall}\;\{\mskip1.5mu \V{n}\;\V{m}\mskip1.5mu\}\;(\V{\theta}\;\mathbin{:}\;\V{n}\;\D{\le}\;\V{m})\;\to \;(\F{oi}\;\F{-\!\!\!\!\!<\!\!\!\!\!-}\;\V{\theta})\;\D{\simeq}\;\V{\theta}{}\<[E]%
-\\
-\>[B]{}\F{idAfterOPE}\;{}\<[14]%
-\>[14]{}\mathbin{:}\;{}\<[17]%
-\>[17]{}\blue{\forall}\;\{\mskip1.5mu \V{n}\;\V{m}\mskip1.5mu\}\;(\V{\theta}\;\mathbin{:}\;\V{n}\;\D{\le}\;\V{m})\;\to \;(\V{\theta}\;\F{-\!\!\!\!\!<\!\!\!\!\!-}\;\F{oi})\;\D{\simeq}\;\V{\theta}{}\<[E]%
-\\
-\>[B]{}\F{assocOPE}\;{}\<[14]%
-\>[14]{}\mathbin{:}\;{}\<[17]%
-\>[17]{}\blue{\forall}\;\{\mskip1.5mu \V{q}\;\V{p}\;\V{n}\;\V{m}\mskip1.5mu\}\;(\V{\theta_0}\;\mathbin{:}\;\V{q}\;\D{\le}\;\V{p})\;(\V{\theta_1}\;\mathbin{:}\;\V{p}\;\D{\le}\;\V{n})\;(\V{\theta_2}\;\mathbin{:}\;\V{n}\;\D{\le}\;\V{m})\;\to {}\<[E]%
-\\
-\>[17]{}\hsindent{1}{}\<[18]%
-\>[18]{}((\V{\theta_0}\;\F{-\!\!\!\!\!<\!\!\!\!\!-}\;\V{\theta_1})\;\F{-\!\!\!\!\!<\!\!\!\!\!-}\;\V{\theta_2})\;\D{\simeq}\;(\V{\theta_0}\;\F{-\!\!\!\!\!<\!\!\!\!\!-}\;(\V{\theta_1}\;\F{-\!\!\!\!\!<\!\!\!\!\!-}\;\V{\theta_2})){}\<[E]%
-\ColumnHook
-\end{hscode}\resethooks
+\begin{code}
+data _==_ {l}{X : Set l}(x : X) : X -> Set l where refl : x == x
+\end{code}
+%if False
+\begin{code}
+{-# BUILTIN EQUALITY _==_ #-}
+{-# BUILTIN REFL refl #-}
+\end{code}
+%endif
+we may prove that |oi| and |-<-| satisfy the laws for a category.
+%format idBeforeOPE = "\F{idBeforeOPE}"
+%format idAfterOPE = "\F{idAfterOPE}"
+%format assocOPE = "\F{assocOPE}"
+%format th0 = "\V{\theta_0}"
+%format th1 = "\V{\theta_1}"
+%format th2 = "\V{\theta_2}"
+\begin{code}
+idBeforeOPE  :  forall {n m} (th : n <= m) -> (oi -<- th) == th
+idAfterOPE   :  forall {n m} (th : n <= m) -> (th -<- oi) == th
+assocOPE     :  forall {q p n m} (th0 : q <= p)(th1 : p <= n)(th2 : n <= m) ->
+                 ((th0 -<- th1) -<- th2) == (th0 -<- (th1 -<- th2))
+\end{code}
 
 I omit the unremarkable rewrite-by-inductive-hypothesis proofs.
-\agdanote{BUILTIN pragmas (not shown) for \ensuremath{\D{\simeq}} entitle me to use the
-convenient \ensuremath{\mathkw{rewrite}} syntax when performing the miracle of transubstantiation,
-but insist that I make \ensuremath{\D{\simeq}} polymorphic in its `universe level', unnecessarily for the
+\agdanote{BUILTIN pragmas (not shown) for |==| entitle me to use the
+convenient |rewrite| syntax when performing the miracle of transubstantiation,
+but insist that I make |==| polymorphic in its `universe level', unnecessarily for the
 work in this paper.}
 
+%if False
+\begin{code}
+idBeforeOPE oz = refl
+idBeforeOPE (os th) rewrite idBeforeOPE th = refl
+idBeforeOPE (o' th) rewrite idBeforeOPE th = refl
+idAfterOPE oz = refl
+idAfterOPE (os th) rewrite idAfterOPE th = refl
+idAfterOPE (o' th) rewrite idAfterOPE th = refl
+assocOPE th0 th1 (o' th2) rewrite assocOPE th0 th1 th2 = refl
+assocOPE th0 (o' th1) (os th2) rewrite assocOPE th0 th1 th2 = refl
+assocOPE (o' th0) (os th1) (os th2) rewrite assocOPE th0 th1 th2 = refl
+assocOPE (os th0) (os th1) (os th2) rewrite assocOPE th0 th1 th2 = refl
+assocOPE oz oz oz = refl
+\end{code}
+%endif
 
 The definitions
 \[
-  \ensuremath{\V{i}\;\{\mskip1.5mu \C{su}\;\V{n}\mskip1.5mu\}\;\mathrel{=}\;\C{os}\;(\F{oi}\;\{\mskip1.5mu \V{n}\mskip1.5mu\})} \qquad \ensuremath{\C{os}\;\V{\phi}\;\F{-\!\!\!\!\!<\!\!\!\!\!-}\;\C{os}\;\V{\theta}\;\mathrel{=}\;\C{os}\;(\V{\phi}\;\F{-\!\!\!\!\!<\!\!\!\!\!-}\;\V{\theta})}
+  |i {su n}  = os (oi {n})| \qquad |os ph  -<- os th  = os (ph -<- th)|
 \]
-give us an endofunctor on \ensuremath{\D{\le}}, `weakening', acting as \ensuremath{\C{su}} on objects and \ensuremath{\C{os}}
+give us an endofunctor on |<=|, `weakening', acting as |su| on objects and |os|
 on morphisms.
 
-With this categorical structure in place, we may look back at the declaration of \ensuremath{\D{Tm}}
-and note that it is \emph{strictly positive} in \ensuremath{\V{n}}. Hence, \ensuremath{\D{Tm}\;\anonymous \;\V{sort}} gives a
-\emph{functor} from \ensuremath{\D{\le}} to \ensuremath{\U{Set}}, with thinning its action on morphisms. In fact,
-we get such a functor for any notion of `scope morphism'. For any \ensuremath{\V{M}\;\mathbin{:}\;\D{Nat}\;\to \;\D{Nat}\;\to \;\U{Set}}
+With this categorical structure in place, we may look back at the declaration of |Tm|
+and note that it is \emph{strictly positive} in |n|. Hence, |Tm _ sort| gives a
+\emph{functor} from |<=| to |Set|, with thinning its action on morphisms. In fact,
+we get such a functor for any notion of `scope morphism'. For any |M : Nat -> Nat -> Set|
 (representing the morphisms of some category with scopes as objects), we need to know
 (i) the action on variables which makes terms, and (ii) the weakening
-action on \ensuremath{\V{M}}-morphisms that corresponds to \ensuremath{\C{su}} on objects.
+action on |M|-morphisms that corresponds to |su| on objects.
 
-\begin{hscode}\SaveRestoreHook
-\column{B}{@{}>{\hspre}l<{\hspost}@{}}%
-\column{3}{@{}>{\hspre}l<{\hspost}@{}}%
-\column{5}{@{}>{\hspre}l<{\hspost}@{}}%
-\column{11}{@{}>{\hspre}l<{\hspost}@{}}%
-\column{22}{@{}>{\hspre}l<{\hspost}@{}}%
-\column{E}{@{}>{\hspre}l<{\hspost}@{}}%
-\>[B]{}\mathkw{record}\;\D{ScopeMorphism}\;(\V{M}\;\mathbin{:}\;\D{Nat}\;\to \;\D{Nat}\;\to \;\U{Set})\;\mathbin{:}\;\U{Set}\;\mathkw{where}{}\<[E]%
-\\
-\>[B]{}\hsindent{3}{}\<[3]%
-\>[3]{}\mathkw{field}{}\<[E]%
-\\
-\>[3]{}\hsindent{2}{}\<[5]%
-\>[5]{}\F{actV}\;{}\<[11]%
-\>[11]{}\mathbin{:}\;\blue{\forall}\;\{\mskip1.5mu \V{n}\;\V{m}\mskip1.5mu\}\;\to \;\F{Var}\;\V{n}\;\to \;\V{M}\;\V{n}\;\V{m}\;\to \;\D{Tm}\;\V{m}\;\C{syn}{}\<[E]%
-\\
-\>[3]{}\hsindent{2}{}\<[5]%
-\>[5]{}\F{actW}\;{}\<[11]%
-\>[11]{}\mathbin{:}\;\blue{\forall}\;\{\mskip1.5mu \V{n}\;\V{m}\mskip1.5mu\}\;\to \;\V{M}\;\V{n}\;\V{m}\;\to \;\V{M}\;(\C{su}\;\V{n})\;(\C{su}\;\V{m}){}\<[E]%
-\\
-\>[B]{}\hsindent{3}{}\<[3]%
-\>[3]{}\F{actTm}\;\mathbin{:}\;\blue{\forall}\;\{\mskip1.5mu \V{n}\;\V{m}\mskip1.5mu\}\;\to \;\V{M}\;\V{n}\;\V{m}\;\to \;\blue{\forall}\;\{\mskip1.5mu \V{sort}\mskip1.5mu\}\;\to \;\D{Tm}\;\V{n}\;\V{sort}\;\to \;\D{Tm}\;\V{m}\;\V{sort}{}\<[E]%
-\\
-\>[B]{}\hsindent{3}{}\<[3]%
-\>[3]{}\F{actTm}\;\V{\phi}\;\C{\ast}\;{}\<[22]%
-\>[22]{}\mathrel{=}\;\C{\ast}{}\<[E]%
-\\
-\>[B]{}\hsindent{3}{}\<[3]%
-\>[3]{}\F{actTm}\;\V{\phi}\;(\C{\Uppi}\;\V{S}\;\V{T})\;{}\<[22]%
-\>[22]{}\mathrel{=}\;\C{\Uppi}\;(\F{actTm}\;\V{\phi}\;\V{S})\;(\F{actTm}\;(\F{actW}\;\V{\phi})\;\V{T}){}\<[E]%
-\\
-\>[B]{}\hsindent{3}{}\<[3]%
-\>[3]{}\F{actTm}\;\V{\phi}\;(\C{\uplambda}\;\V{t})\;{}\<[22]%
-\>[22]{}\mathrel{=}\;\C{\uplambda}\;(\F{actTm}\;(\F{actW}\;\V{\phi})\;\V{t}){}\<[E]%
-\\
-\>[B]{}\hsindent{3}{}\<[3]%
-\>[3]{}\F{actTm}\;\V{\phi}\;(\C{\upepsilon}\;\V{e})\;{}\<[22]%
-\>[22]{}\mathrel{=}\;\C{\upepsilon}\;(\F{actTm}\;\V{\phi}\;\V{e}){}\<[E]%
-\\
-\>[B]{}\hsindent{3}{}\<[3]%
-\>[3]{}\F{actTm}\;\V{\phi}\;(\C{\#}\;\V{i})\;{}\<[22]%
-\>[22]{}\mathrel{=}\;\F{actV}\;\V{i}\;\V{\phi}{}\<[E]%
-\\
-\>[B]{}\hsindent{3}{}\<[3]%
-\>[3]{}\F{actTm}\;\V{\phi}\;(\V{f}\;\C{\raisebox{0.05in}{$\scriptscriptstyle{\$}$}}\;\V{s})\;{}\<[22]%
-\>[22]{}\mathrel{=}\;\F{actTm}\;\V{\phi}\;\V{f}\;\C{\raisebox{0.05in}{$\scriptscriptstyle{\$}$}}\;\F{actTm}\;\V{\phi}\;\V{s}{}\<[E]%
-\ColumnHook
-\end{hscode}\resethooks
+%format ScopeMorphism = "\D{ScopeMorphism}"
+%format actV = "\F{actV}"
+%format actW = "\F{actW}"
+%format actTm = "\F{actTm}"
+\begin{code}
+record ScopeMorphism (M : Nat -> Nat -> Set) : Set where
+  field
+    actV  : forall {n m} -> Var n -> M n m -> Tm m syn
+    actW  : forall {n m} -> M n m -> M (su n) (su m)
+  actTm : forall {n m} -> M n m -> forall {sort} -> Tm n sort -> Tm m sort
+  actTm ph Ty        = Ty
+  actTm ph (Pi S T)  = Pi (actTm ph S)(actTm (actW ph) T)
+  actTm ph (la t)    = la (actTm (actW ph) t)
+  actTm ph (em e)    = em (actTm ph e)
+  actTm ph (va i)    = actV i ph
+  actTm ph (f $ s)   = actTm ph f $ actTm ph s
+\end{code}
+%if False
+\begin{code}
+  actTm ph (t :: T) = actTm ph t :: actTm ph T
+\end{code}
+%endif
 
-Directly, \ensuremath{\D{\le}} is such an \ensuremath{\V{M}}, acting on variables by composition, and weakening
-with \ensuremath{\C{os}}.
+Directly, |<=| is such an |M|, acting on variables by composition, and weakening
+with |os|.
 
-\begin{hscode}\SaveRestoreHook
-\column{B}{@{}>{\hspre}l<{\hspost}@{}}%
-\column{9}{@{}>{\hspre}l<{\hspost}@{}}%
-\column{11}{@{}>{\hspre}l<{\hspost}@{}}%
-\column{17}{@{}>{\hspre}l<{\hspost}@{}}%
-\column{E}{@{}>{\hspre}l<{\hspost}@{}}%
-\>[B]{}\F{THIN}\;\mathbin{:}\;\D{ScopeMorphism}\;\anonymous \D{\le}\anonymous {}\<[E]%
-\\
-\>[B]{}\F{THIN}\;\mathrel{=}\;{}\<[9]%
-\>[9]{}\mathkw{record}\;\{\mskip1.5mu {}\<[E]%
-\\
-\>[9]{}\hsindent{2}{}\<[11]%
-\>[11]{}\F{actV}\;{}\<[17]%
-\>[17]{}\mathrel{=}\;\lambda \;\V{i}\;\V{\theta}\;\to \;\C{\#}\;(\V{i}\;\F{-\!\!\!\!\!<\!\!\!\!\!-}\;\V{\theta});{}\<[E]%
-\\
-\>[9]{}\hsindent{2}{}\<[11]%
-\>[11]{}\F{actW}\;{}\<[17]%
-\>[17]{}\mathrel{=}\;\C{os}\mskip1.5mu\}{}\<[E]%
-\ColumnHook
-\end{hscode}\resethooks
+%format THIN = "\F{THIN}"
+\begin{code}
+THIN : ScopeMorphism _<=_
+THIN =  record {
+          actV  = \ i th -> va (i -<- th) ;
+          actW  = os }
+\end{code}
 
 With our basic syntax now in place, let us begin to think about the type system.
 
@@ -823,7 +462,7 @@ In fact, I classify the schematic positions in judgment forms as having one of t
 \end{description}
 
 For the above judgment forms, we shall have
-\[\begin{array}{ccccc@{\qquad\qquad}ccccc}
+\[\begin{array}{ccccc@@{\qquad\qquad}ccccc}
 \CHK{\Gamma&}{&T&}{&t} & \SYN{\Gamma&}{&e&}{&S}\\
 \mbox{input} && \mbox{input} && \mbox{subject} &
 \mbox{input} && \mbox{subject} && \mbox{output}
@@ -846,7 +485,7 @@ There is more to say about the impact of \emph{mode} on valid notions of typing 
 in scope for the subjects of the premises, and they must all occur in at least one premise. Fourthly, a schematic subject variable becomes in scope for \emph{expressions} only after it has been the subject of a premise (and thus achieved some measure of trust). These four conditions form the basis of a kind of `religion' of typing rules: let us obey them for now and consider breaking them when we are older and more aware of the consequences of our actions.
 
 The type checking and context validity rules are as follows:
-\[\begin{array}{l@{\qquad}c}
+\[\begin{array}{l@@{\qquad}c}
 \framebox{$\CHK\Gamma Tt$} & \Axiom{\CHK\Gamma\type\type} \qquad
   \Rule{\CHK\Gamma\type S \quad \CHK{\Gamma,x\hb S}\type T[x]}
        {\CHK\Gamma\type \PI xS T[x]} \qquad
@@ -903,17 +542,13 @@ We had better think it out again.
 
 When we come to instantiate $T[x]$ with $s$, we do at least know $S$, the type of $s$. We can reacquire the ability to substitute if we extend the language of \emph{eliminations} with type-annotated terms, which I call \emph{radicals} by analogy with the chemical notion.
 \[
-e,f ::= \ldots \;|\; t\hb T
+e,f ::= \ldots \;||\; t\hb T
 \]
-(We should also add radicals to the declaration of \ensuremath{\D{Tm}}
-\begin{hscode}\SaveRestoreHook
-\column{B}{@{}>{\hspre}l<{\hspost}@{}}%
-\column{3}{@{}>{\hspre}l<{\hspost}@{}}%
-\column{E}{@{}>{\hspre}l<{\hspost}@{}}%
-\>[3]{}\anonymous \C{:\!:}\anonymous \;\mathbin{:}\;\D{Tm}\;\V{n}\;\C{chk}\;\to \;\D{Tm}\;\V{n}\;\C{chk}\;\to \;\D{Tm}\;\V{n}\;\C{syn}{}\<[E]%
-\ColumnHook
-\end{hscode}\resethooks
-and extend \ensuremath{\F{actTm}} accordingly.)
+(We should also add radicals to the declaration of |Tm|
+\begin{spec}
+  _::_ : Tm n chk -> Tm n chk -> Tm n syn
+\end{spec}
+and extend |actTm| accordingly.)
 
 The associated typing rule allows us to change direction in the other direction from embedding, at the cost of making the intermediate type explicit: the type we synthesize is exactly the type we supply.
 \[\Rule{\CHK\Gamma\type T\quad \CHK\Gamma Tt}
@@ -1026,11 +661,11 @@ It's always struck me as an intensely frustrating business, defining an inductiv
 
 When we model a syntax, an `object language', its terms can be classified into object \emph{sorts}, $\iota$. (Sometimes, we may even identify the notion of `sort' with the object language's notion of `type', but that is far from crucial.) The object sorts for our language are constructions and eliminations.
 \[
-  \iota \quad::=\quad \cns \quad|\quad \elm
+  \iota \quad::=\quad \cns \quad||\quad \elm
 \]
 To account for variable binding, we construct a \emph{meta}-level notion of \emph{kind}, $\kappa$, by closing sorts under what might look to the casual observer like a function space, but is most emphatically weaker than that.
 \[
-  \kappa \quad::=\quad \iota \quad|\quad \bnd\kappa \kappa'
+  \kappa \quad::=\quad \iota \quad||\quad \bnd\kappa \kappa'
 \]
 The kind $\bnd\kappa \kappa'$ means `terms in $\kappa$ which bind a variable of kind $\kappa$', not `functions from terms of kind $\kappa$ to terms of kind $\kappa'$'. The only functions thus represented are those which
 \emph{substitute} the bound variable: functions which do the common functional thing of inspecting their input are absolutely ruled out.
@@ -1039,16 +674,16 @@ The kind $\bnd\kappa \kappa'$ means `terms in $\kappa$ which bind a variable of 
 For each \emph{sort}, $\iota$, we must give the \emph{signature}, $\Sg(\iota)$, of its constructs, specifying the \emph{kind} of each subterm. Here, we may give this translation of our earlier grammar, omitting variables (which are not a notion specific to this theory), and giving explicit prefix forms for the remainder.
 \[\begin{array}{rrl}
 \Sg(\cns) & ::= & \type \\
-          &   | & \pic\; \cns\; \bnd\elm\cns \\
-          &   | & \lac\; \bnd\elm\cns \\
-          &   | & \elc\;\elm \medskip \\
+          &   || & \pic\; \cns\; \bnd\elm\cns \\
+          &   || & \lac\; \bnd\elm\cns \\
+          &   || & \elc\;\elm \medskip \\
 \Sg(\elm) & ::= & \apc\;\elm\;\cns \\
-          &   | & \tyc\;\cns\;\cns
+          &   || & \tyc\;\cns\;\cns
 \end{array}\]
 \newcommand{\Sgc}[2]{\Sg^{\mathsf{c}}(#1,#2)}
 For any kind-indexed family of sets $T(\kappa)$ (for `term'), we may give the set of constructions, $\Sgc T\iota$
 \[
-  \Sgc T\iota = \{c\;\vec{t} \;|\; c\:\vec{\kappa}\in \Sg(\iota), \forall i.\,t_i\in T(\kappa_i)\}
+  \Sgc T\iota = \{c\;\vec{t} \;||\; c\:\vec{\kappa}\in \Sg(\iota), \forall i.\,t_i\in T(\kappa_i)\}
 \]
 These are prefix-Polish terms with $T$s as subterms. Our construction of terms will instantiate $T$ recursively,
 `tying the knot'. We should note that $\Sgc-\iota$ is a functor from the category of kind-indexed sets with kind-preserving
@@ -1060,7 +695,7 @@ Now let us define scoped and kinded syntax.
 
 A \emph{scope} is a list of kinds, growing on the right:
 \[
-\gamma, \delta, \zeta \quad::=\quad \EC \quad|\quad \gamma,\kappa
+\gamma, \delta, \zeta \quad::=\quad \EC \quad||\quad \gamma,\kappa
 \]
 It will often be convenient to give kinds in \emph{spine} form, $\bnd\delta\iota$, loading all the bound variable kinds into a scope, leaving an object sort. These scopes form the objects of a category.
 
@@ -1106,7 +741,7 @@ Moreover, our definitions have ensured that $-,\kappa$, acting as it does both o
 \newcommand{\tct}{\widehat}
 Every thinning $\theta\in\gamma\le\delta$ induces a complementary scope $\tcs\theta$ and a complementary
 thinning $\tct\theta\in\tcs\theta\le\delta$ inverting the selection of scope items included by $\theta$:
-\[\begin{array}{rcl@{\qquad}rcl}
+\[\begin{array}{rcl@@{\qquad}rcl}
 \tcs\EC & = & \EC & \tct\EC & = & \EC \\
 \tcs{\gamma,\kappa} & = & \tcs\gamma & \tct{\gamma,\kappa} & = & \tct\gamma\dag_\kappa \\
 \tcs{\gamma\dag_\kappa} & = & \tcs\gamma,\kappa & \tct{\gamma\dag_\kappa} & = & \tct\gamma,\kappa
@@ -1134,9 +769,9 @@ $\Sgs\gamma\delta$ for scope $\delta$ in scope $\gamma$, are given thus:
 \[\begin{array}{rrl}
 \Sgt\gamma{\bnd\kappa\kappa'} & = & \Sgt{(\gamma,\kappa)}{\kappa'} \\
 \Sgt\gamma{\iota} & = & \Sgc{\Sgt\gamma-}\iota \\
-                  & \cup & \{x[\sss] \;|\; x\in\bnd\delta\iota\fae\gamma,\; \sss\in\Sgs\gamma\delta\} \medskip \\
+                  & \cup & \{x[\sss] \;||\; x\in\bnd\delta\iota\fae\gamma,\; \sss\in\Sgs\gamma\delta\} \medskip \\
 \Sgs\gamma\EC & = & \{\EC\} \\
-\Sgs\gamma{(\delta,\kappa)} & = & \{\sss,t \;|\; \sss\in \Sgs\gamma\delta,\; t\in \Sgt\gamma\kappa\}
+\Sgs\gamma{(\delta,\kappa)} & = & \{\sss,t \;||\; \sss\in \Sgs\gamma\delta,\; t\in \Sgt\gamma\kappa\}
 \end{array}\]
 When a variable has object sort, $x\in\iota\fae\Gamma$, its argument spine is empty, and we may abbreviate the term $x[\EC]$ to plain old $x$. The idea is that to construct a term of a given kind, we bring all of its bound variables into scope, then give either a construction allowed by the signature or a variable suitably instantiated.
 
@@ -1187,10 +822,10 @@ Now let us define
 \newcommand{\vact}{\mathsf{vact}}
 \[\begin{array}{c}
 \Rule{t\in\Sgt\gamma\kappa\quad \sigma\in\act\gamma\zeta\delta}
-     {t\{\kappa | \zeta\}\sigma\in\Sgt\delta\kappa}
+     {t\{\kappa || \zeta\}\sigma\in\Sgt\delta\kappa}
 \qquad
 \Rule{\sss\in\Sgs\gamma{\delta'}\quad \sigma\in\act\gamma\zeta\delta}
-     {\sss\{\delta' | \zeta\}\sigma\in\Sgs\delta{\delta'}}
+     {\sss\{\delta' || \zeta\}\sigma\in\Sgs\delta{\delta'}}
 \\
 \Rule{x\in \bnd{\zeta_x}\iota\fae\gamma \quad \sigma\in\act\gamma\zeta{\delta_0} \quad \theta\in\delta_0\le\delta \quad
       \sss\in\Sgs\delta{\zeta_x}}
@@ -1198,10 +833,10 @@ Now let us define
 \end{array}\]
 In casual usage, I shall omit the details given in $\{\ldots\}$, but for purposes of definition, it is crucial to observe them,
 as they justify the recursion.
-\[\begin{array}{r@{}c@{}lcl@{\qquad}l}
-t&\{ \zeta | \bnd\kappa\kappa'\}&\sigma & = & t\{\zeta | \kappa'\}(\sigma,\kappa) \\
-c\:\vec{t}&\{\zeta | \iota\}&\sigma & = & c\:\vec{t}\{\zeta | -\}\sigma & \mbox{functoriality of $\Sgc-\iota$}\\
-x[\sss]&\{\zeta | \iota\}&\sigma & = & \vact\{\zeta\}\:x\:\sigma\:\delta\:(\sss\{\zeta|\zeta_x\}\sigma)
+\[\begin{array}{r@@{}c@@{}lcl@@{\qquad}l}
+t&\{ \zeta || \bnd\kappa\kappa'\}&\sigma & = & t\{\zeta || \kappa'\}(\sigma,\kappa) \\
+c\:\vec{t}&\{\zeta || \iota\}&\sigma & = & c\:\vec{t}\{\zeta || -\}\sigma & \mbox{functoriality of $\Sgc-\iota$}\\
+x[\sss]&\{\zeta || \iota\}&\sigma & = & \vact\{\zeta\}\:x\:\sigma\:\delta\:(\sss\{\zeta||\zeta_x\}\sigma)
   & \mbox{where}\;\sss\in \Sgs\gamma{\zeta_x} \medskip \\
 \vact\{\zeta\}\;&x\:&(\sigma\dag_\kappa)\:\theta\;\sss & = &
   \vact\{\zeta\}\:x\:&\sigma\:(\dag_\kappa;\theta)\;\sss \\
@@ -1212,9 +847,9 @@ x[\sss]&\{\zeta | \iota\}&\sigma & = & \vact\{\zeta\}\:x\:\sigma\:\delta\:(\sss\
 \vact\{\zeta\}\:&(x,\kappa)\:&(\sigma\dag,\kappa)\:\theta\;\sss & =
    &((\tct{\,},\kappa);\theta)[\sss] & \mbox{act by thinning}\\
 \vact\{\zeta,\bnd{\zeta_x}\iota\}\:&(x,\bnd{\zeta_x}\iota)\:&(\sigma\dag/t)\:\theta\;\sss & =
-   & t\{\zeta_x|\iota\}(\theta+\sss) & \mbox{act by substituting}\medskip\\
-\EC & \{\zeta | \EC\} & \sigma & = & \EC\\
-(\sss,s) & \{\zeta | \delta',\kappa\} & \sigma & = & \sss \{\zeta | \delta'\}\sigma, s\{\zeta | \kappa\}\sigma \\
+   & t\{\zeta_x||\iota\}(\theta+\sss) & \mbox{act by substituting}\medskip\\
+\EC & \{\zeta || \EC\} & \sigma & = & \EC\\
+(\sss,s) & \{\zeta || \delta',\kappa\} & \sigma & = & \sss \{\zeta || \delta'\}\sigma, s\{\zeta || \kappa\}\sigma \\
 \end{array}\]
 The recursion is lexicographic, first on $\zeta$, then on terms. Thinning an action to go under a binder does not alter $\zeta$. As soon as we hit $x[\sss]$, we substitute the spine immediately, then we search the action, $\sigma$ to find the fate of $x$. The $\vact$ operation tears down $\sigma$ and $x$, building up a thinning, $\theta$. As soon as the variable we are looking for is found on top, we must either thin it and reattach the spine, or substitute it, acting hereditarily on its image with an action constructed from the spine. As $\vact$ searches, $\zeta$ is torn down, and in the hereditary substitution case, the substituted scope for the new substitution sits within the kind of the substituted variable.
 

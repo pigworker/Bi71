@@ -66,6 +66,22 @@ module KINDTERM (I : Set) where
                  Tm (de +B scope k) (sort k) ->
                  Act (gas -, k) (ga -, k) de
 
+    data ActX (de : Bwd Kind) : Bwd Kind -> Bwd Kind -> Bwd Kind -> Set where
+      [] : ActX de [] [] []
+      _-,_ : forall {ze' ga' de'} -> ActX de ze' ga' de' -> forall k ->
+              ActX de ze' (ga' -, k) (de' -, k)
+      _-^_ : forall {ze' ga' de'} -> ActX de ze' ga' de' -> forall k ->
+              ActX de ze' ga' (de' -, k)
+      _-$_ : forall {ze' ga' de'} -> ActX de ze' ga' de' -> forall {k} ->
+               Tm ((de +B de') +B scope k) (sort k) -> ActX de (ze' -, k) (ga' -, k) de'
+
+    _+X_ : forall {ze ga de ze' ga' de'} -> Act ze ga de -> ActX de ze' ga' de' ->
+             Act (ze +B ze') (ga +B ga') (de +B de')
+    sg +X [] = sg
+    sg +X (ta -, k) = (sg +X ta) -, k
+    sg +X (ta -^ k) = (sg +X ta) -^ k
+    sg +X (ta -$ t) = (sg +X ta) -$ t
+
     data Tca (gas ga de : Bwd Kind) : Bwd Kind -> Bwd Kind -> Bwd Kind -> Set where
       []   : Tca gas ga de gas ga de
       _,-_ : forall {gas' ga' de'} k
@@ -194,6 +210,9 @@ module KINDTERM (I : Set) where
     spACT ss (_ , sg) = spAct ss sg
     noACT D ts (_ , sg) = noAct D ts sg
 
+    _!-^_ : forall {ga de} -> ACT ga de -> forall k -> ACT ga (de -, k)
+    (_ , sg) !-^ k = _ , (sg -^ k)
+
     coAct : forall {ga' ga de de' ze} -> Act ga' ga de -> Act de' de ze ->
               ACT ga ze
     coAct [] ta = _ , ta
@@ -227,6 +246,20 @@ module KINDTERM (I : Set) where
     wk ga [] = id<= ga
     wk ga (de -, k) = wk ga de -^ k
 
+    coActLig : forall {gas ga de gas' ga' de'}
+                (sg : Act gas ga de)
+                (ta : ActX de gas' ga' de') ->
+                coAct (thAct (wk ga ga')) (sg +X ta)
+                  ==
+                coAct sg (thAct (wk de de'))
+    coActLig sg [] = {!!}
+    coActLig sg@[]       (ta -, k) rewrite coActLig sg ta = refl
+    coActLig sg@(_ -, _) (ta -, k) rewrite coActLig sg ta = refl
+    coActLig sg@(_ -^ _) (ta -, k) rewrite coActLig sg ta = refl
+    coActLig sg@(_ -$ _) (ta -, k) rewrite coActLig sg ta = {!!} -- rewrite coActLig sg ta = {!!}
+    coActLig sg      (ta -^ k) = {!refl!}
+    coActLig sg (ta -$ x) rewrite coActLig sg ta = refl
+
     coActHig : forall {ga de}(th : ga <= de)
                 {des' xi' des xi}
                 (sg : Act des' ga xi')(ta : Tca des' ga xi' des de xi) ->
@@ -235,7 +268,7 @@ module KINDTERM (I : Set) where
                 coAct sg (thAct (tcaTh ta))
     coActHig th sg [] = {!!}
     coActHig th sg (k ,- ta)
-      -- rewrite coActHig th (sg -, k) ta
+      --  rewrite coActHig th (sg -, k) ta
       = {!!}
     coActHig th sg (k ^- ta) = {!!}
     coActHig th sg (x $- ta) = {!!}
@@ -290,6 +323,25 @@ module KINDTERM (I : Set) where
       rewrite noActId D ts | noActId D' ts'
             = refl
     noActId one' <> = refl
+
+    coAcId : forall {gas ga de}(sg : Act gas ga de) ->
+           coAct sg (idAct de) == (gas , sg)
+    coAcId [] = refl
+    coAcId (sg -, k) rewrite coAcId sg = refl
+    coAcId (sg -^ k) rewrite coAcId sg = refl
+    coAcId {de = de} (_-$_ {k = k} sg t)
+      rewrite coAcId sg
+            | idActLemma de (scope k)
+            | tmActId t
+            = refl
+
+    coIdAc : forall {gas ga de}(sg : Act gas ga de) ->
+           coAct (idAct ga) sg == (gas , sg)
+    coIdAc [] = refl
+    coIdAc (sg -, k) rewrite coIdAc sg = refl
+    coIdAc {ga = []} (sg -^ k) = refl
+    coIdAc {ga = ga -, j} (sg -^ k) rewrite coIdAc sg = refl
+    coIdAc (sg -$ t) rewrite coIdAc sg = refl
 
     tmActCo : forall {gas ga des de ze i}
       (t : Tm ga i)(sg : Act gas ga de)(ta : Act des de ze) ->
