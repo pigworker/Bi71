@@ -50,7 +50,18 @@ module TypesNi where
 
 \section{Introduction}
 
-This paper documents a formalization of the basic metatheory for a bidirectional presentation of Martin-L\"of's small and beautiful, but notoriously inconsistent dependent type theory from 1971~\cite{martinloef:atheoryoftypes}. Perhaps more significantly, it introduces a methodology for constructing and validating bidirectional type systems, illustrated with a nontrivial running example. Crucially, the fact that the system is not strongly normalizing is exploited to demonstrate concretely that the methodology relies in no way on strong normalization, which is perhaps peculiar given that bidirectional type systems are often (but not here) given only for terms in $\beta$-normal form~\cite{DBLP:journals/toplas/PierceT00}.
+This paper documents a formalization of the basic metatheory for a
+bidirectional presentation of Martin-L\"of's small and beautiful, but
+notoriously inconsistent dependent type theory from
+1971~\cite{martinloef:atheoryoftypes}. Perhaps more significantly, it
+introduces a methodology for constructing and validating bidirectional
+type systems, illustrated with a nontrivial running
+example. Crucially, the fact that the system is not strongly
+normalizing is exploited to demonstrate concretely that the
+methodology relies in no way on strong normalization, which is perhaps
+peculiar given that bidirectional type systems are often (but not
+here) given only for terms in $\beta$-normal
+form~\cite{DBLP:journals/toplas/PierceT00}.
 
 
 \section{The 1971 Rules}
@@ -194,7 +205,7 @@ data Nat : Set where  ze : Nat ;  su : Nat -> Nat
 {-# BUILTIN NATURAL Nat #-}
 \end{code}
 
-%format <= = "\D{\le}"
+%format <= = "\F{\le}"
 %format _<=_ = _ <= _
 %format <=_ = <= _
 %format oz = "\C{oz}"
@@ -202,14 +213,23 @@ data Nat : Set where  ze : Nat ;  su : Nat -> Nat
 \newcommand{\apo}{\mbox{\red{'}}}
 %format o' = "\C{o\apo}"
 %format Var = "\F{Var}"
+%format Mor = "\D{Mor}"
+%format Zero = "\D{Zero}"
+%format ox = "\C{ox}"
 A syntactically valid term has a scope and a sort.
 \newsavebox{\opebox}
 \savebox{\opebox}{\parbox{4in}{
 \begin{code}
-data _<=_ : Nat -> Nat -> Set where
-  oz  :                            ze     <= ze
-  os  : forall {n m} -> n <= m ->  su  n  <= su m
-  o'  : forall {n m} -> n <= m ->      n  <= su m
+data Mor (X : Nat -> Set) : Nat -> Nat -> Set where
+  oz  :                                      Mor X    ze        ze
+  os  : forall {n m} -> Mor X n m ->         Mor X (  su  n) (  su  m)
+  o'  : forall {n m} -> Mor X n m ->         Mor X        n  (  su  m)
+  ox  : forall {n m} -> Mor X n m -> X m ->  Mor X (  su  n)        m
+
+data Zero : Set where
+
+_<=_ : Nat -> Nat -> Set
+_<=_ = Mor (\ _ -> Zero)
 
 Var : Nat -> Set
 Var = (1 <=_)
@@ -266,14 +286,21 @@ an abstraction. The |Var n| type represents a choice of one variable from the
 
 \section{Variables as a Line in Pascal's Triangle}
 
-Choosing \emph{some} variables amounts to constructing an
+Choosing \emph{one} variable from those in scope is the unitary case
+of choosing \emph{some} variables from those in scope.  Choosing
+\emph{some} variables amounts to constructing an
 \emph{order-preserving embedding} (or a `thinning', for short) from
-the chosen variables into all the variables. Such a choice is possible
-only if we have enough variables, so we acquire a proof-relevant
-version, |<=|, of the `less or equal' relation, preserved by the
-constructors of numbers (as shown by |oz| and |os|), but allowing us
-to omit a `target' variable (with |o'|) whenever we choose, or rather,
-whenever we choose-not.
+the chosen variables into all the variables.  Such a choice is
+possible only if we have enough variables, so we acquire a
+proof-relevant version, |<=|, of the `less or equal' relation,
+preserved by the constructors of numbers (as shown by |oz| and |os|),
+but allowing us to omit a `target' variable (with |o'|) whenever we
+choose, or rather, whenever we choose-not.
+
+With an eye to the future, I introduce a more general notion of
+\emph{scope morphism}, which allows us to embed variables from source
+to target scope, but also to map them to some other sort of image, |X|.
+We acquire |<=| as the special case where |X| is empty.
 
 \usebox{\opebox}
 
@@ -291,19 +318,23 @@ replacing the \emph{number} of paths to a given position by the
 \searrow|os|\\ |0 <= 3| && |1 <= 3| && |2 <= 3| && |3 <= 3| \\ \vdots
 && \vdots &\vdots& \vdots && \vdots \end{array}\]
 
-The left spine of the triangle (usually all 1s) gives the unique embedding from the empty scope to any scope. Meanwhile, the right spine gives the identity embedding.
+The left spine of the triangle (usually all 1s) gives the unique
+embedding from the empty scope to any scope. Meanwhile, the right
+spine gives the identity embedding. In fact, we can and should
+construct these operations for scope morphisms in general.
+
 %format oe = "\F{oe}"
 %format oi = "\F{oi}"
 
 \parbox{3in}{
 \begin{code}
-oe : forall {n} -> ze <= n
+oe : forall {n X} -> Mor X ze n
 oe {ze}    = oz
 oe {su n}  = o' (oe {n})
 \end{code}}
 \parbox{1.5in}{
 \begin{code}
-oi : forall {n} -> n <= n
+oi : forall {n X} -> Mor X n n
 oi {ze}    = oz
 oi {su n}  = os (oi {n})
 \end{code}}
@@ -322,28 +353,224 @@ choice of one variable from |n| in scope. The $i$th de Bruijn index
 (counting from 0) is given as $|o'|^i\:|(os oe)|$.  I use |(1 <=_)|
 rather than the more traditional `Fin' family to emphasize that
 variable sets arise from |<=|, the category of thinnings. We have the identity
-thinning, so I suppose I should hurry up with the composition, which
-I write diagrammatically.
+thinning, but you will have to wait for the composition. Why? Because we shall
+define compositions for |Mor| in general, not just for |<=|, and that will
+demand additional equipment.
 
-%format -<- = "\F{-\!\!\!\!\!<\!\!\!\!\!-}"
-%format _-<-_ = _ -<- _
-%format ph = "\V{\phi}"
-%format th = "\V{\theta}"
+
+\section{Action and Composition of Scope Morphisms}
+
+In any case we must consider how to make our morphisms act on \emph{terms}.
+
+%format + = "\D{+}"
+%format _+_ = _ + _
+%format +m = "\F{+}"
+%format _+m_ = _ +m _
+%format inl = "\C{inl}"
+%format inr = "\C{inr}"
+\newsavebox{\plusbox}\savebox{\plusbox}{\parbox{4in}{
 \begin{code}
-_-<-_ : forall {p n m} -> p <= n -> n <= m -> p <= m
-ph     -<- o' th  = o' (ph -<- th)
-os ph  -<- os th  = os (ph -<- th)
-o' ph  -<- os th  = o' (ph -<- th)
-oz     -<- oz     = oz
+data _+_ (S T : Set) : Set where
+  inl : S -> S + T
+  inr : T -> S + T
+
+_+m_ : forall {S S' T T'} -> (S -> S') -> (T -> T') -> (S + T) -> (S' + T')
+(f +m g) (inl s) = inl (f s)
+(f +m g) (inr t) = inr (g t)
+\end{code}}}
+
+%format ACT = "\mathrm{ACT}"
+%format fetch = "\F{fetch}"
+%format / = "\F{\slash}"
+%format _/_ = _ / _
+%format sg = "\V{\sigma}"
+\begin{code}
+module ACT (X : Nat -> Set)
+           -- operations on |X| will appear as we discover what we need
 \end{code}
 
-\agdanote{I have been careful to maximise the laziness of the above definition by
-promoting the line where any |ph| will do to the top. Agda translates pattern
-matching to case analysis, and here the top line's laziness is a persuader to
-split the later thinning first, then the earlier thinning only if necessary.}
+\vspace*{ -0.28in}
+
+\newsavebox{\tmXbox}\savebox{\tmXbox}{\parbox{4in}{
+\begin{code}
+           (tmX : forall {n} -> X n -> Tm n syn)
+\end{code}}}
+\newsavebox{\wkXbox}\savebox{\wkXbox}{\parbox{4in}{
+\begin{code}
+           (wkX : forall {n} -> X n -> X (su n))
+\end{code}}}
+%% ~ \parbox{5in}{
+\begin{code}
+  where
+\end{code}
+\newsavebox{\fetchTybox}\savebox{\fetchTybox}{\parbox{5in}{
+\begin{code}
+    fetch : forall {n m} -> Var n -> Mor X n m -> Var m + X m
+\end{code}}}
+\newsavebox{\fetchbox}\savebox{\fetchbox}{\parbox{5in}{
+\begin{code}
+    fetch  i          (o' sg)    = (o' +m wkX) (fetch i sg)
+    fetch  (ox i ())  sg
+    fetch  (os i)     (os sg)    = inl (os oe)
+    fetch  (o' i)     (os sg)    = (o' +m wkX) (fetch i sg)
+    fetch  (os i)     (ox sg x)  = inr x
+    fetch  (o' i)     (ox sg x)  = fetch i sg
+\end{code}}}
+
+\vspace*{ -0.35in}
+
+\begin{code}
+    _/_ : forall {n m sort} -> Tm n sort -> Mor X n m -> Tm m sort
+\end{code}
+
+\vspace*{ -0.2in}
+
+\newsavebox{\vabox}\savebox{\vabox}{\parbox{3in}{
+\begin{code}
+    va i      / sg  with  fetch i sg
+    va i      / sg  |     inl j   = va j
+    va i      / sg  |     inr x   = tmX x
+\end{code}}}
+\begin{spec}
+    va i      / sg                = ?
+\end{spec}
+
+\vspace*{ -0.2in}
+
+\begin{code}
+    Ty        / sg                = Ty
+    Pi S T    / sg                = Pi (S / sg) (T / os sg)
+    la t      / sg                = la (t / os sg)
+    em e      / sg                = em (e / sg)
+    (f $ s)   / sg                = (f / sg) $ (s / sg)
+\end{code}
+%if False
+\begin{code}
+    (t :: T)  / sg                = (t / sg) :: (T / sg)
+\end{code}
+%endif
+%%}
+
+We can implement the (functorial, as we shall see) action of a
+morphism for everything but variables, using the (functorial, as we
+shall see) |os| constructor.
+
+Let us think about what the morphism |sg| might do to some source variable |i|.
+It will either be sent to some target variable by |os| or mapped to some |X| by an
+|ox|. Correspondingly, we should be able to implement some operation
+
+\usebox{\fetchTybox}
+
+where |+| is the usual sum type, appropriately functorial
+
+\usebox{\plusbox}
+
+We can then complete our action, provided we know how to turn an |X| into an
+elimination. If we add a parameter to the |ACT| module,
+
+\usebox{\tmXbox}
+
+then we can make some progress:
+
+\usebox{\vabox}
+
+However, to finish the job, we must define |fetch|. This will clearly require us
+to be shift |X|s under binders. |ACT| needs a further module parameter
+
+\usebox{\wkXbox}
+
+so that we may complete the construction:
+
+\usebox{\fetchbox}
+
+We immediately acquire the action of thinnings.
+%format /t = / "_{\!\F{t}}"
+%format _/t = _ /t
+%format _/t_ = _ /t _
+%format ACT._/_ = ACT "." _/_
+\begin{code}
+_/t_ : forall {n m sort} -> Tm n sort -> n <= m -> Tm m sort
+_/t_ = ACT._/_ (\ _ -> Zero) (\ ()) (\ ())
+\end{code}
+
+\agdanote{Unlike in Haskell, where |()| means the boring value in the unit type,
+Agda uses |()| for the \emph{impossible} pattern in an empty type. Moreover, when
+you point out that an input is impossible, you are absolved of the responsibility
+to explain what to do with it. Correspondingly |\ ()| is just the function we need
+to map non-existent |X|s into anything.}
+
+Now that we can thin, \emph{substitution} is easy, too. We may now permit morphisms
+which turn variables into eliminations.
+%format Elim = "\F{Elim}"
+%format >> = "\F{\Rightarrow}"
+%format _>>_ = _ >> _
+%format /s = / "_{\!\F{s}}"
+%format _/s = _ /s
+%format _/s_ = _ /s _
+\begin{code}
+Elim : Nat -> Set
+Elim n = Tm n syn
+
+_>>_ : Nat -> Nat -> Set
+_>>_ = Mor Elim
+
+_/s_ : forall {n m sort} -> Tm n sort -> n >> m -> Tm m sort
+_/s_ = ACT._/_ Elim (\ e -> e) (_/t o' oi)
+\end{code}
+
+We can play the same sort of game when defining composition.
+%format COMP = "\mathrm{COMP}"
+%format /, = "\F{\fatsemi}"
+%format _/,_ = _ /, _
+%format ta = "\V{\tau}"
+\begin{code}
+module COMP  (S T U  : Nat -> Set)
+             (front  : forall {n m} -> S n ->  Mor T n m ->  U m)
+             (back   : forall {m} ->           T m ->        U m)
+  where
+    _/,_ : forall {p n m} -> Mor S p n -> Mor T n m -> Mor U p m
+    sg       /, o' ta    = o' (sg /, ta)
+    ox sg s  /, ta       = ox (sg /, ta) (front s ta)
+    os sg    /, ox ta t  = ox (sg /, ta) (back t)
+    o' sg    /, ox ta t  = sg /, ta
+    os sg    /, os ta    = os (sg /, ta)
+    o' sg    /, os ta    = o' (sg /, ta)
+    oz       /, oz       = oz
+\end{code}
+
+\agdanote{I have been careful to order the lines of this definition
+so that it is lazy in its front argument whenever its back is |o' ta|.
+Agda's translation from pattern matching to case analysis trees is
+quite na\"\i{}ve: the fact that the first line does not split |sg| but
+does match the back argument is what ensures this laziness.
+The first line takes priority over the second: they do overlap.
+Shifting the first two lines later in the definition while retaining their
+order would retain the extensional properties of the function, but
+change the intensional properties.}
+
+As we try to implement composition, we discover that we need the
+means to transport |S| and |T| values (packed by |ox|) across to
+|U|. For thinning, of course, these are vacuous requirements.
+%format /,t = /, "_{\F{t}}"
+%format _/,t_ = _ /,t _
+%format ph = "\V{\phi}"
+%format th = "\V{\theta}"
+%format COMP._/,_ = COMP "." _/,_
+\begin{code}
+_/,t_ : forall {p n m} -> p <= n -> n <= m -> p <= m
+_/,t_ =  COMP._/,_ (\ _ -> Zero) (\ _ -> Zero) (\ _ -> Zero)
+         (\ ()) (\ ())
+\end{code}
+For substitutions, we need merely know how they act.
+%format /,s = /, "_{\F{s}}"
+%format _/,s_ = _ /,s _
+\begin{code}
+_/,s_ : forall {p n m} -> p >> n -> n >> m -> p >> m
+_/,s_ =  COMP._/,_ Elim Elim Elim _/s_ (\ t -> t)
+\end{code}
 
 %format rewrite = "\mathkw{rewrite}"
-Given the aforementioned equality type,
+Now, let us at least state some laws in terms of the equality type:
 \begin{code}
 data _==_ {l}{X : Set l}(x : X) : X -> Set l where refl : x == x
 \end{code}
@@ -353,92 +580,29 @@ data _==_ {l}{X : Set l}(x : X) : X -> Set l where refl : x == x
 {-# BUILTIN REFL refl #-}
 \end{code}
 %endif
-we may prove that |oi| and |-<-| satisfy the laws for a category.
-%format idBeforeOPE = "\F{idBeforeOPE}"
-%format idAfterOPE = "\F{idAfterOPE}"
-%format assocOPE = "\F{assocOPE}"
+
 %format th0 = "\V{\theta_0}"
 %format th1 = "\V{\theta_1}"
 %format th2 = "\V{\theta_2}"
-\begin{code}
-idBeforeOPE  :  forall {n m} (th : n <= m) -> (oi -<- th) == th
-idAfterOPE   :  forall {n m} (th : n <= m) -> (th -<- oi) == th
-assocOPE     :  forall {q p n m} (th0 : q <= p)(th1 : p <= n)(th2 : n <= m) ->
-                 ((th0 -<- th1) -<- th2) == (th0 -<- (th1 -<- th2))
-\end{code}
+%format sg0 = "\V{\sigma_0}"
+%format sg1 = "\V{\sigma_1}"
+%format sg2 = "\V{\sigma_2}"
+I omit the unedifying proofs that show thinnings and substitutions
+both form categories acting functorially on terms.
+\[\begin{array}{c@@{\qquad}c@@{\qquad}c}
+& |(t /t oi) == t| & |((t /t th0) /t th1) == (t /t (th0 /, th1))| \\
+|(oi /,t th) == th| & |(th /,t oi) == th|
+  & |((th0 /,t th1) /,t th2) == (th0 /,t (th1 /,t th2))| \\
+& |(t /s oi) == t| & |((t /t sg0) /t sg1) == (t /s (sg0 /, sg1))| \\
+|(oi /,s sg) == sg| & |(sg /,s oi) == sg|
+  & |((sg0 /,s sg1) /,s sg2) == (sg0 /,s (sg1 /,s sg2))| \\
+\end{array}\]
+The proofs are implemented in the same style as the programs: generic results
+are proved with conditions, then instantiated trivially for thinnings to obtain
+the lemmas needed to show that the conditions hold for substitutions.
 
-I omit the unremarkable rewrite-by-inductive-hypothesis proofs.
-\agdanote{BUILTIN pragmas (not shown) for |==| entitle me to use the
-convenient |rewrite| syntax when performing the miracle of transubstantiation,
-but insist that I make |==| polymorphic in its `universe level', unnecessarily for the
-work in this paper.}
-
-%if False
-\begin{code}
-idBeforeOPE oz = refl
-idBeforeOPE (os th) rewrite idBeforeOPE th = refl
-idBeforeOPE (o' th) rewrite idBeforeOPE th = refl
-idAfterOPE oz = refl
-idAfterOPE (os th) rewrite idAfterOPE th = refl
-idAfterOPE (o' th) rewrite idAfterOPE th = refl
-assocOPE th0 th1 (o' th2) rewrite assocOPE th0 th1 th2 = refl
-assocOPE th0 (o' th1) (os th2) rewrite assocOPE th0 th1 th2 = refl
-assocOPE (o' th0) (os th1) (os th2) rewrite assocOPE th0 th1 th2 = refl
-assocOPE (os th0) (os th1) (os th2) rewrite assocOPE th0 th1 th2 = refl
-assocOPE oz oz oz = refl
-\end{code}
-%endif
-
-The definitions
-\[
-  |i {su n}  = os (oi {n})| \qquad |os ph  -<- os th  = os (ph -<- th)|
-\]
-give us an endofunctor on |<=|, `weakening', acting as |su| on objects and |os|
-on morphisms.
-
-With this categorical structure in place, we may look back at the declaration of |Tm|
-and note that it is \emph{strictly positive} in |n|. Hence, |Tm _ sort| gives a
-\emph{functor} from |<=| to |Set|, with thinning its action on morphisms. In fact,
-we get such a functor for any notion of `scope morphism'. For any |M : Nat -> Nat -> Set|
-(representing the morphisms of some category with scopes as objects), we need to know
-(i) the action on variables which makes terms, and (ii) the weakening
-action on |M|-morphisms that corresponds to |su| on objects.
-
-%format ScopeMorphism = "\D{ScopeMorphism}"
-%format actV = "\F{actV}"
-%format actW = "\F{actW}"
-%format actTm = "\F{actTm}"
-\begin{code}
-record ScopeMorphism (M : Nat -> Nat -> Set) : Set where
-  field
-    actV  : forall {n m} -> Var n -> M n m -> Tm m syn
-    actW  : forall {n m} -> M n m -> M (su n) (su m)
-  actTm : forall {n m} -> M n m -> forall {sort} -> Tm n sort -> Tm m sort
-  actTm ph Ty        = Ty
-  actTm ph (Pi S T)  = Pi (actTm ph S)(actTm (actW ph) T)
-  actTm ph (la t)    = la (actTm (actW ph) t)
-  actTm ph (em e)    = em (actTm ph e)
-  actTm ph (va i)    = actV i ph
-  actTm ph (f $ s)   = actTm ph f $ actTm ph s
-\end{code}
-%if False
-\begin{code}
-  actTm ph (t :: T) = actTm ph t :: actTm ph T
-\end{code}
-%endif
-
-Directly, |<=| is such an |M|, acting on variables by composition, and weakening
-with |os|.
-
-%format THIN = "\F{THIN}"
-\begin{code}
-THIN : ScopeMorphism _<=_
-THIN =  record {
-          actV  = \ i th -> va (i -<- th) ;
-          actW  = os }
-\end{code}
-
-With our basic syntax now in place, let us begin to think about the type system.
+With our basic syntactic machinery now in place, let us
+return to designing the type system.
 
 \section{Type-\emph{has}-Type}
 
@@ -548,7 +712,7 @@ e,f ::= \ldots \;||\; t\hb T
 \begin{spec}
   _::_ : Tm n chk -> Tm n chk -> Tm n syn
 \end{spec}
-and extend |actTm| accordingly.)
+and extend |/| accordingly.)
 
 The associated typing rule allows us to change direction in the other direction from embedding, at the cost of making the intermediate type explicit: the type we synthesize is exactly the type we supply.
 \[\Rule{\CHK\Gamma\type T\quad \CHK\Gamma Tt}

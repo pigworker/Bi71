@@ -296,7 +296,18 @@
 
 \section{Introduction}
 
-This paper documents a formalization of the basic metatheory for a bidirectional presentation of Martin-L\"of's small and beautiful, but notoriously inconsistent dependent type theory from 1971~\cite{martinloef:atheoryoftypes}. Perhaps more significantly, it introduces a methodology for constructing and validating bidirectional type systems, illustrated with a nontrivial running example. Crucially, the fact that the system is not strongly normalizing is exploited to demonstrate concretely that the methodology relies in no way on strong normalization, which is perhaps peculiar given that bidirectional type systems are often (but not here) given only for terms in $\beta$-normal form~\cite{DBLP:journals/toplas/PierceT00}.
+This paper documents a formalization of the basic metatheory for a
+bidirectional presentation of Martin-L\"of's small and beautiful, but
+notoriously inconsistent dependent type theory from
+1971~\cite{martinloef:atheoryoftypes}. Perhaps more significantly, it
+introduces a methodology for constructing and validating bidirectional
+type systems, illustrated with a nontrivial running
+example. Crucially, the fact that the system is not strongly
+normalizing is exploited to demonstrate concretely that the
+methodology relies in no way on strong normalization, which is perhaps
+peculiar given that bidirectional type systems are often (but not
+here) given only for terms in $\beta$-normal
+form~\cite{DBLP:journals/toplas/PierceT00}.
 
 
 \section{The 1971 Rules}
@@ -452,34 +463,58 @@ A syntactically valid term has a scope and a sort.
 \column{B}{@{}>{\hspre}l<{\hspost}@{}}%
 \column{3}{@{}>{\hspre}l<{\hspost}@{}}%
 \column{7}{@{}>{\hspre}l<{\hspost}@{}}%
-\column{36}{@{}>{\hspre}l<{\hspost}@{}}%
-\column{40}{@{}>{\hspre}l<{\hspost}@{}}%
-\column{43}{@{}>{\hspre}l<{\hspost}@{}}%
+\column{46}{@{}>{\hspre}l<{\hspost}@{}}%
+\column{55}{@{}>{\hspre}l<{\hspost}@{}}%
+\column{59}{@{}>{\hspre}l<{\hspost}@{}}%
+\column{62}{@{}>{\hspre}c<{\hspost}@{}}%
+\column{62E}{@{}l@{}}%
+\column{65}{@{}>{\hspre}l<{\hspost}@{}}%
+\column{69}{@{}>{\hspre}l<{\hspost}@{}}%
 \column{E}{@{}>{\hspre}l<{\hspost}@{}}%
-\>[B]{}\mathkw{data}\;\anonymous \D{\le}\anonymous \;\mathbin{:}\;\D{Nat}\;\to \;\D{Nat}\;\to \;\U{Set}\;\mathkw{where}{}\<[E]%
+\>[B]{}\mathkw{data}\;\D{Mor}\;(\V{X}\;\mathbin{:}\;\D{Nat}\;\to \;\U{Set})\;\mathbin{:}\;\D{Nat}\;\to \;\D{Nat}\;\to \;\U{Set}\;\mathkw{where}{}\<[E]%
 \\
 \>[B]{}\hsindent{3}{}\<[3]%
 \>[3]{}\C{oz}\;{}\<[7]%
-\>[7]{}\mathbin{:}\;{}\<[36]%
-\>[36]{}\C{ze}\;{}\<[43]%
-\>[43]{}\D{\le}\;\C{ze}{}\<[E]%
+\>[7]{}\mathbin{:}\;{}\<[46]%
+\>[46]{}\D{Mor}\;\V{X}\;{}\<[55]%
+\>[55]{}\C{ze}\;{}\<[65]%
+\>[65]{}\C{ze}{}\<[E]%
 \\
 \>[B]{}\hsindent{3}{}\<[3]%
 \>[3]{}\C{os}\;{}\<[7]%
-\>[7]{}\mathbin{:}\;\blue{\forall}\;\{\mskip1.5mu \V{n}\;\V{m}\mskip1.5mu\}\;\to \;\V{n}\;\D{\le}\;\V{m}\;\to \;{}\<[36]%
-\>[36]{}\C{su}\;{}\<[40]%
-\>[40]{}\V{n}\;{}\<[43]%
-\>[43]{}\D{\le}\;\C{su}\;\V{m}{}\<[E]%
+\>[7]{}\mathbin{:}\;\blue{\forall}\;\{\mskip1.5mu \V{n}\;\V{m}\mskip1.5mu\}\;\to \;\D{Mor}\;\V{X}\;\V{n}\;\V{m}\;\to \;{}\<[46]%
+\>[46]{}\D{Mor}\;\V{X}\;({}\<[55]%
+\>[55]{}\C{su}\;{}\<[59]%
+\>[59]{}\V{n})\;({}\<[65]%
+\>[65]{}\C{su}\;{}\<[69]%
+\>[69]{}\V{m}){}\<[E]%
 \\
 \>[B]{}\hsindent{3}{}\<[3]%
 \>[3]{}\C{o\apo}\;{}\<[7]%
-\>[7]{}\mathbin{:}\;\blue{\forall}\;\{\mskip1.5mu \V{n}\;\V{m}\mskip1.5mu\}\;\to \;\V{n}\;\D{\le}\;\V{m}\;\to \;{}\<[40]%
-\>[40]{}\V{n}\;{}\<[43]%
-\>[43]{}\D{\le}\;\C{su}\;\V{m}{}\<[E]%
+\>[7]{}\mathbin{:}\;\blue{\forall}\;\{\mskip1.5mu \V{n}\;\V{m}\mskip1.5mu\}\;\to \;\D{Mor}\;\V{X}\;\V{n}\;\V{m}\;\to \;{}\<[46]%
+\>[46]{}\D{Mor}\;\V{X}\;{}\<[59]%
+\>[59]{}\V{n}\;{}\<[62]%
+\>[62]{}({}\<[62E]%
+\>[65]{}\C{su}\;{}\<[69]%
+\>[69]{}\V{m}){}\<[E]%
+\\
+\>[B]{}\hsindent{3}{}\<[3]%
+\>[3]{}\C{ox}\;{}\<[7]%
+\>[7]{}\mathbin{:}\;\blue{\forall}\;\{\mskip1.5mu \V{n}\;\V{m}\mskip1.5mu\}\;\to \;\D{Mor}\;\V{X}\;\V{n}\;\V{m}\;\to \;\V{X}\;\V{m}\;\to \;{}\<[46]%
+\>[46]{}\D{Mor}\;\V{X}\;({}\<[55]%
+\>[55]{}\C{su}\;{}\<[59]%
+\>[59]{}\V{n})\;{}\<[69]%
+\>[69]{}\V{m}{}\<[E]%
+\\[\blanklineskip]%
+\>[B]{}\mathkw{data}\;\D{Zero}\;\mathbin{:}\;\U{Set}\;\mathkw{where}{}\<[E]%
+\\[\blanklineskip]%
+\>[B]{}\anonymous \F{\le}\anonymous \;\mathbin{:}\;\D{Nat}\;\to \;\D{Nat}\;\to \;\U{Set}{}\<[E]%
+\\
+\>[B]{}\anonymous \F{\le}\anonymous \;\mathrel{=}\;\D{Mor}\;(\lambda \;\anonymous \;\to \;\D{Zero}){}\<[E]%
 \\[\blanklineskip]%
 \>[B]{}\F{Var}\;\mathbin{:}\;\D{Nat}\;\to \;\U{Set}{}\<[E]%
 \\
-\>[B]{}\F{Var}\;\mathrel{=}\;(\V{1}\;\D{\le}\anonymous ){}\<[E]%
+\>[B]{}\F{Var}\;\mathrel{=}\;(\V{1}\;\F{\le}\anonymous ){}\<[E]%
 \ColumnHook
 \end{hscode}\resethooks
 }}
@@ -570,38 +605,49 @@ an abstraction. The \ensuremath{\F{Var}\;\V{n}} type represents a choice of one 
 
 \section{Variables as a Line in Pascal's Triangle}
 
-Choosing \emph{some} variables amounts to constructing an
+Choosing \emph{one} variable from those in scope is the unitary case
+of choosing \emph{some} variables from those in scope.  Choosing
+\emph{some} variables amounts to constructing an
 \emph{order-preserving embedding} (or a `thinning', for short) from
-the chosen variables into all the variables. Such a choice is possible
-only if we have enough variables, so we acquire a proof-relevant
-version, \ensuremath{\D{\le}}, of the `less or equal' relation, preserved by the
-constructors of numbers (as shown by \ensuremath{\C{oz}} and \ensuremath{\C{os}}), but allowing us
-to omit a `target' variable (with \ensuremath{\C{o\apo}}) whenever we choose, or rather,
-whenever we choose-not.
+the chosen variables into all the variables.  Such a choice is
+possible only if we have enough variables, so we acquire a
+proof-relevant version, \ensuremath{\F{\le}}, of the `less or equal' relation,
+preserved by the constructors of numbers (as shown by \ensuremath{\C{oz}} and \ensuremath{\C{os}}),
+but allowing us to omit a `target' variable (with \ensuremath{\C{o\apo}}) whenever we
+choose, or rather, whenever we choose-not.
+
+With an eye to the future, I introduce a more general notion of
+\emph{scope morphism}, which allows us to embed variables from source
+to target scope, but also to map them to some other sort of image, \ensuremath{\V{X}}.
+We acquire \ensuremath{\F{\le}} as the special case where \ensuremath{\V{X}} is empty.
 
 \usebox{\opebox}
 
 Our \ensuremath{\F{Var}} is then given as an operator section, fixing the number of variables
 to choose as \ensuremath{\V{1}}.
 
-We may tabulate these \ensuremath{\D{\le}} types as a version of Pascal's Triangle,
+We may tabulate these \ensuremath{\F{\le}} types as a version of Pascal's Triangle,
 replacing the \emph{number} of paths to a given position by the
 \emph{type} of the embeddings they generate:
-\[\begin{array}{c@{}c@{}c@{}c@{}c@{}c@{}c} &&& \ensuremath{\C{oz}\;\mathbin{:}\;\V{0}\;\D{\le}\;\V{0}} &&&
-\\ &&\;\;\ensuremath{\C{o\apo}}\swarrow && \searrow\ensuremath{\C{os}}\;\;&& \\ &&\ensuremath{\V{0}\;\D{\le}\;\V{1}} && \ensuremath{\V{1}\;\D{\le}\;\V{1}}&& \\ &\ensuremath{\C{o\apo}}\swarrow && \ensuremath{\C{os}}\searrow\;\;\swarrow\ensuremath{\C{o\apo}} &&
-\searrow\ensuremath{\C{os}}&\\ &\ensuremath{\V{0}\;\D{\le}\;\V{2}} && \ensuremath{\V{1}\;\D{\le}\;\V{2}} && \ensuremath{\V{2}\;\D{\le}\;\V{2}}& \\ \ensuremath{\C{o\apo}}\swarrow &&
+\[\begin{array}{c@{}c@{}c@{}c@{}c@{}c@{}c} &&& \ensuremath{\C{oz}\;\mathbin{:}\;\V{0}\;\F{\le}\;\V{0}} &&&
+\\ &&\;\;\ensuremath{\C{o\apo}}\swarrow && \searrow\ensuremath{\C{os}}\;\;&& \\ &&\ensuremath{\V{0}\;\F{\le}\;\V{1}} && \ensuremath{\V{1}\;\F{\le}\;\V{1}}&& \\ &\ensuremath{\C{o\apo}}\swarrow && \ensuremath{\C{os}}\searrow\;\;\swarrow\ensuremath{\C{o\apo}} &&
+\searrow\ensuremath{\C{os}}&\\ &\ensuremath{\V{0}\;\F{\le}\;\V{2}} && \ensuremath{\V{1}\;\F{\le}\;\V{2}} && \ensuremath{\V{2}\;\F{\le}\;\V{2}}& \\ \ensuremath{\C{o\apo}}\swarrow &&
 \ensuremath{\C{os}}\searrow\;\;\swarrow\ensuremath{\C{o\apo}} && \ensuremath{\C{os}}\searrow\;\;\swarrow\ensuremath{\C{o\apo}} &&
-\searrow\ensuremath{\C{os}}\\ \ensuremath{\V{0}\;\D{\le}\;\V{3}} && \ensuremath{\V{1}\;\D{\le}\;\V{3}} && \ensuremath{\V{2}\;\D{\le}\;\V{3}} && \ensuremath{\V{3}\;\D{\le}\;\V{3}} \\ \vdots
+\searrow\ensuremath{\C{os}}\\ \ensuremath{\V{0}\;\F{\le}\;\V{3}} && \ensuremath{\V{1}\;\F{\le}\;\V{3}} && \ensuremath{\V{2}\;\F{\le}\;\V{3}} && \ensuremath{\V{3}\;\F{\le}\;\V{3}} \\ \vdots
 && \vdots &\vdots& \vdots && \vdots \end{array}\]
 
-The left spine of the triangle (usually all 1s) gives the unique embedding from the empty scope to any scope. Meanwhile, the right spine gives the identity embedding.
+The left spine of the triangle (usually all 1s) gives the unique
+embedding from the empty scope to any scope. Meanwhile, the right
+spine gives the identity embedding. In fact, we can and should
+construct these operations for scope morphisms in general.
+
 
 \parbox{3in}{
 \begin{hscode}\SaveRestoreHook
 \column{B}{@{}>{\hspre}l<{\hspost}@{}}%
 \column{12}{@{}>{\hspre}l<{\hspost}@{}}%
 \column{E}{@{}>{\hspre}l<{\hspost}@{}}%
-\>[B]{}\F{oe}\;\mathbin{:}\;\blue{\forall}\;\{\mskip1.5mu \V{n}\mskip1.5mu\}\;\to \;\C{ze}\;\D{\le}\;\V{n}{}\<[E]%
+\>[B]{}\F{oe}\;\mathbin{:}\;\blue{\forall}\;\{\mskip1.5mu \V{n}\;\V{X}\mskip1.5mu\}\;\to \;\D{Mor}\;\V{X}\;\C{ze}\;\V{n}{}\<[E]%
 \\
 \>[B]{}\F{oe}\;\{\mskip1.5mu \C{ze}\mskip1.5mu\}\;{}\<[12]%
 \>[12]{}\mathrel{=}\;\C{oz}{}\<[E]%
@@ -616,7 +662,7 @@ The left spine of the triangle (usually all 1s) gives the unique embedding from 
 \column{B}{@{}>{\hspre}l<{\hspost}@{}}%
 \column{12}{@{}>{\hspre}l<{\hspost}@{}}%
 \column{E}{@{}>{\hspre}l<{\hspost}@{}}%
-\>[B]{}\F{oi}\;\mathbin{:}\;\blue{\forall}\;\{\mskip1.5mu \V{n}\mskip1.5mu\}\;\to \;\V{n}\;\D{\le}\;\V{n}{}\<[E]%
+\>[B]{}\F{oi}\;\mathbin{:}\;\blue{\forall}\;\{\mskip1.5mu \V{n}\;\V{X}\mskip1.5mu\}\;\to \;\D{Mor}\;\V{X}\;\V{n}\;\V{n}{}\<[E]%
 \\
 \>[B]{}\F{oi}\;\{\mskip1.5mu \C{ze}\mskip1.5mu\}\;{}\<[12]%
 \>[12]{}\mathrel{=}\;\C{oz}{}\<[E]%
@@ -635,171 +681,409 @@ We could perfectly well have written \ensuremath{\C{o\apo}\;\F{oe}} and \ensurem
 step cases, suppressing the \ensuremath{\{\mskip1.5mu \V{n}\mskip1.5mu\}}s. I give them explicitly only to make legible the
 structural justification for the recursion.}
 
-\ensuremath{\F{Var}} is the next south-westerly diagonal down from the left spine, \ensuremath{\V{1}\;\D{\le}\;\V{n}}, where each type has size \ensuremath{\V{n}} and may be taken to represent the
+\ensuremath{\F{Var}} is the next south-westerly diagonal down from the left spine, \ensuremath{\V{1}\;\F{\le}\;\V{n}}, where each type has size \ensuremath{\V{n}} and may be taken to represent the
 choice of one variable from \ensuremath{\V{n}} in scope. The $i$th de Bruijn index
-(counting from 0) is given as $\ensuremath{\C{o\apo}}^i\:\ensuremath{(\C{os}\;\F{oe})}$.  I use \ensuremath{(\V{1}\;\D{\le}\anonymous )}
+(counting from 0) is given as $\ensuremath{\C{o\apo}}^i\:\ensuremath{(\C{os}\;\F{oe})}$.  I use \ensuremath{(\V{1}\;\F{\le}\anonymous )}
 rather than the more traditional `Fin' family to emphasize that
-variable sets arise from \ensuremath{\D{\le}}, the category of thinnings. We have the identity
-thinning, so I suppose I should hurry up with the composition, which
-I write diagrammatically.
+variable sets arise from \ensuremath{\F{\le}}, the category of thinnings. We have the identity
+thinning, but you will have to wait for the composition. Why? Because we shall
+define compositions for \ensuremath{\D{Mor}} in general, not just for \ensuremath{\F{\le}}, and that will
+demand additional equipment.
+
+
+\section{Action and Composition of Scope Morphisms}
+
+In any case we must consider how to make our morphisms act on \emph{terms}.
+
+\newsavebox{\plusbox}\savebox{\plusbox}{\parbox{4in}{
+\begin{hscode}\SaveRestoreHook
+\column{B}{@{}>{\hspre}l<{\hspost}@{}}%
+\column{3}{@{}>{\hspre}l<{\hspost}@{}}%
+\column{E}{@{}>{\hspre}l<{\hspost}@{}}%
+\>[B]{}\mathkw{data}\;\anonymous \D{+}\anonymous \;(\V{S}\;\V{T}\;\mathbin{:}\;\U{Set})\;\mathbin{:}\;\U{Set}\;\mathkw{where}{}\<[E]%
+\\
+\>[B]{}\hsindent{3}{}\<[3]%
+\>[3]{}\C{inl}\;\mathbin{:}\;\V{S}\;\to \;\V{S}\;\D{+}\;\V{T}{}\<[E]%
+\\
+\>[B]{}\hsindent{3}{}\<[3]%
+\>[3]{}\C{inr}\;\mathbin{:}\;\V{T}\;\to \;\V{S}\;\D{+}\;\V{T}{}\<[E]%
+\\[\blanklineskip]%
+\>[B]{}\anonymous \F{+}\anonymous \;\mathbin{:}\;\blue{\forall}\;\{\mskip1.5mu \V{S}\;\V{S'}\;\V{T}\;\V{T'}\mskip1.5mu\}\;\to \;(\V{S}\;\to \;\V{S'})\;\to \;(\V{T}\;\to \;\V{T'})\;\to \;(\V{S}\;\D{+}\;\V{T})\;\to \;(\V{S'}\;\D{+}\;\V{T'}){}\<[E]%
+\\
+\>[B]{}(\V{f}\;\F{+}\;\V{g})\;(\C{inl}\;\V{s})\;\mathrel{=}\;\C{inl}\;(\V{f}\;\V{s}){}\<[E]%
+\\
+\>[B]{}(\V{f}\;\F{+}\;\V{g})\;(\C{inr}\;\V{t})\;\mathrel{=}\;\C{inr}\;(\V{g}\;\V{t}){}\<[E]%
+\ColumnHook
+\end{hscode}\resethooks
+}}
 
 \begin{hscode}\SaveRestoreHook
 \column{B}{@{}>{\hspre}l<{\hspost}@{}}%
-\column{8}{@{}>{\hspre}l<{\hspost}@{}}%
-\column{19}{@{}>{\hspre}l<{\hspost}@{}}%
+\column{12}{@{}>{\hspre}l<{\hspost}@{}}%
 \column{E}{@{}>{\hspre}l<{\hspost}@{}}%
-\>[B]{}\anonymous \F{-\!\!\!\!\!<\!\!\!\!\!-}\anonymous \;\mathbin{:}\;\blue{\forall}\;\{\mskip1.5mu \V{p}\;\V{n}\;\V{m}\mskip1.5mu\}\;\to \;\V{p}\;\D{\le}\;\V{n}\;\to \;\V{n}\;\D{\le}\;\V{m}\;\to \;\V{p}\;\D{\le}\;\V{m}{}\<[E]%
+\>[B]{}\mathkw{module}\;\mathrm{ACT}\;(\V{X}\;\mathbin{:}\;\D{Nat}\;\to \;\U{Set}){}\<[E]%
 \\
-\>[B]{}\V{\phi}\;{}\<[8]%
-\>[8]{}\F{-\!\!\!\!\!<\!\!\!\!\!-}\;\C{o\apo}\;\V{\theta}\;{}\<[19]%
-\>[19]{}\mathrel{=}\;\C{o\apo}\;(\V{\phi}\;\F{-\!\!\!\!\!<\!\!\!\!\!-}\;\V{\theta}){}\<[E]%
-\\
-\>[B]{}\C{os}\;\V{\phi}\;{}\<[8]%
-\>[8]{}\F{-\!\!\!\!\!<\!\!\!\!\!-}\;\C{os}\;\V{\theta}\;{}\<[19]%
-\>[19]{}\mathrel{=}\;\C{os}\;(\V{\phi}\;\F{-\!\!\!\!\!<\!\!\!\!\!-}\;\V{\theta}){}\<[E]%
-\\
-\>[B]{}\C{o\apo}\;\V{\phi}\;{}\<[8]%
-\>[8]{}\F{-\!\!\!\!\!<\!\!\!\!\!-}\;\C{os}\;\V{\theta}\;{}\<[19]%
-\>[19]{}\mathrel{=}\;\C{o\apo}\;(\V{\phi}\;\F{-\!\!\!\!\!<\!\!\!\!\!-}\;\V{\theta}){}\<[E]%
-\\
-\>[B]{}\C{oz}\;{}\<[8]%
-\>[8]{}\F{-\!\!\!\!\!<\!\!\!\!\!-}\;\C{oz}\;{}\<[19]%
-\>[19]{}\mathrel{=}\;\C{oz}{}\<[E]%
+\>[B]{}\hsindent{12}{}\<[12]%
+\>[12]{}\mbox{\onelinecomment  operations on \ensuremath{\V{X}} will appear as we discover what we need}{}\<[E]%
 \ColumnHook
 \end{hscode}\resethooks
 
-\agdanote{I have been careful to maximise the laziness of the above definition by
-promoting the line where any \ensuremath{\V{\phi}} will do to the top. Agda translates pattern
-matching to case analysis, and here the top line's laziness is a persuader to
-split the later thinning first, then the earlier thinning only if necessary.}
+\vspace*{ -0.28in}
 
-Given the aforementioned equality type,
+\newsavebox{\tmXbox}\savebox{\tmXbox}{\parbox{4in}{
+\begin{hscode}\SaveRestoreHook
+\column{B}{@{}>{\hspre}l<{\hspost}@{}}%
+\column{12}{@{}>{\hspre}l<{\hspost}@{}}%
+\column{E}{@{}>{\hspre}l<{\hspost}@{}}%
+\>[12]{}(\V{tmX}\;\mathbin{:}\;\blue{\forall}\;\{\mskip1.5mu \V{n}\mskip1.5mu\}\;\to \;\V{X}\;\V{n}\;\to \;\D{Tm}\;\V{n}\;\C{syn}){}\<[E]%
+\ColumnHook
+\end{hscode}\resethooks
+}}
+\newsavebox{\wkXbox}\savebox{\wkXbox}{\parbox{4in}{
+\begin{hscode}\SaveRestoreHook
+\column{B}{@{}>{\hspre}l<{\hspost}@{}}%
+\column{12}{@{}>{\hspre}l<{\hspost}@{}}%
+\column{E}{@{}>{\hspre}l<{\hspost}@{}}%
+\>[12]{}(\V{wkX}\;\mathbin{:}\;\blue{\forall}\;\{\mskip1.5mu \V{n}\mskip1.5mu\}\;\to \;\V{X}\;\V{n}\;\to \;\V{X}\;(\C{su}\;\V{n})){}\<[E]%
+\ColumnHook
+\end{hscode}\resethooks
+}}
+%% ~ \parbox{5in}{
+\begin{hscode}\SaveRestoreHook
+\column{B}{@{}>{\hspre}l<{\hspost}@{}}%
+\column{3}{@{}>{\hspre}l<{\hspost}@{}}%
+\column{E}{@{}>{\hspre}l<{\hspost}@{}}%
+\>[3]{}\mathkw{where}{}\<[E]%
+\ColumnHook
+\end{hscode}\resethooks
+\newsavebox{\fetchTybox}\savebox{\fetchTybox}{\parbox{5in}{
+\begin{hscode}\SaveRestoreHook
+\column{B}{@{}>{\hspre}l<{\hspost}@{}}%
+\column{5}{@{}>{\hspre}l<{\hspost}@{}}%
+\column{E}{@{}>{\hspre}l<{\hspost}@{}}%
+\>[5]{}\F{fetch}\;\mathbin{:}\;\blue{\forall}\;\{\mskip1.5mu \V{n}\;\V{m}\mskip1.5mu\}\;\to \;\F{Var}\;\V{n}\;\to \;\D{Mor}\;\V{X}\;\V{n}\;\V{m}\;\to \;\F{Var}\;\V{m}\;\D{+}\;\V{X}\;\V{m}{}\<[E]%
+\ColumnHook
+\end{hscode}\resethooks
+}}
+\newsavebox{\fetchbox}\savebox{\fetchbox}{\parbox{5in}{
+\begin{hscode}\SaveRestoreHook
+\column{B}{@{}>{\hspre}l<{\hspost}@{}}%
+\column{5}{@{}>{\hspre}l<{\hspost}@{}}%
+\column{12}{@{}>{\hspre}l<{\hspost}@{}}%
+\column{23}{@{}>{\hspre}l<{\hspost}@{}}%
+\column{34}{@{}>{\hspre}l<{\hspost}@{}}%
+\column{E}{@{}>{\hspre}l<{\hspost}@{}}%
+\>[5]{}\F{fetch}\;{}\<[12]%
+\>[12]{}\V{i}\;{}\<[23]%
+\>[23]{}(\C{o\apo}\;\V{\sigma})\;{}\<[34]%
+\>[34]{}\mathrel{=}\;(\C{o\apo}\;\F{+}\;\V{wkX})\;(\F{fetch}\;\V{i}\;\V{\sigma}){}\<[E]%
+\\
+\>[5]{}\F{fetch}\;{}\<[12]%
+\>[12]{}(\C{ox}\;\V{i}\;())\;{}\<[23]%
+\>[23]{}\V{\sigma}{}\<[E]%
+\\
+\>[5]{}\F{fetch}\;{}\<[12]%
+\>[12]{}(\C{os}\;\V{i})\;{}\<[23]%
+\>[23]{}(\C{os}\;\V{\sigma})\;{}\<[34]%
+\>[34]{}\mathrel{=}\;\C{inl}\;(\C{os}\;\F{oe}){}\<[E]%
+\\
+\>[5]{}\F{fetch}\;{}\<[12]%
+\>[12]{}(\C{o\apo}\;\V{i})\;{}\<[23]%
+\>[23]{}(\C{os}\;\V{\sigma})\;{}\<[34]%
+\>[34]{}\mathrel{=}\;(\C{o\apo}\;\F{+}\;\V{wkX})\;(\F{fetch}\;\V{i}\;\V{\sigma}){}\<[E]%
+\\
+\>[5]{}\F{fetch}\;{}\<[12]%
+\>[12]{}(\C{os}\;\V{i})\;{}\<[23]%
+\>[23]{}(\C{ox}\;\V{\sigma}\;\V{x})\;{}\<[34]%
+\>[34]{}\mathrel{=}\;\C{inr}\;\V{x}{}\<[E]%
+\\
+\>[5]{}\F{fetch}\;{}\<[12]%
+\>[12]{}(\C{o\apo}\;\V{i})\;{}\<[23]%
+\>[23]{}(\C{ox}\;\V{\sigma}\;\V{x})\;{}\<[34]%
+\>[34]{}\mathrel{=}\;\F{fetch}\;\V{i}\;\V{\sigma}{}\<[E]%
+\ColumnHook
+\end{hscode}\resethooks
+}}
+
+\vspace*{ -0.35in}
+
+\begin{hscode}\SaveRestoreHook
+\column{B}{@{}>{\hspre}l<{\hspost}@{}}%
+\column{5}{@{}>{\hspre}l<{\hspost}@{}}%
+\column{E}{@{}>{\hspre}l<{\hspost}@{}}%
+\>[5]{}\anonymous \F{\slash}\anonymous \;\mathbin{:}\;\blue{\forall}\;\{\mskip1.5mu \V{n}\;\V{m}\;\V{sort}\mskip1.5mu\}\;\to \;\D{Tm}\;\V{n}\;\V{sort}\;\to \;\D{Mor}\;\V{X}\;\V{n}\;\V{m}\;\to \;\D{Tm}\;\V{m}\;\V{sort}{}\<[E]%
+\ColumnHook
+\end{hscode}\resethooks
+
+\vspace*{ -0.2in}
+
+\newsavebox{\vabox}\savebox{\vabox}{\parbox{3in}{
+\begin{hscode}\SaveRestoreHook
+\column{B}{@{}>{\hspre}l<{\hspost}@{}}%
+\column{5}{@{}>{\hspre}l<{\hspost}@{}}%
+\column{15}{@{}>{\hspre}l<{\hspost}@{}}%
+\column{21}{@{}>{\hspre}l<{\hspost}@{}}%
+\column{27}{@{}>{\hspre}l<{\hspost}@{}}%
+\column{35}{@{}>{\hspre}l<{\hspost}@{}}%
+\column{E}{@{}>{\hspre}l<{\hspost}@{}}%
+\>[5]{}\C{\#}\;\V{i}\;{}\<[15]%
+\>[15]{}\F{\slash}\;\V{\sigma}\;{}\<[21]%
+\>[21]{}\mathkw{with}\;{}\<[27]%
+\>[27]{}\F{fetch}\;\V{i}\;\V{\sigma}{}\<[E]%
+\\
+\>[5]{}\C{\#}\;\V{i}\;{}\<[15]%
+\>[15]{}\F{\slash}\;\V{\sigma}\;{}\<[21]%
+\>[21]{}\mid \;{}\<[27]%
+\>[27]{}\C{inl}\;\V{j}\;{}\<[35]%
+\>[35]{}\mathrel{=}\;\C{\#}\;\V{j}{}\<[E]%
+\\
+\>[5]{}\C{\#}\;\V{i}\;{}\<[15]%
+\>[15]{}\F{\slash}\;\V{\sigma}\;{}\<[21]%
+\>[21]{}\mid \;{}\<[27]%
+\>[27]{}\C{inr}\;\V{x}\;{}\<[35]%
+\>[35]{}\mathrel{=}\;\V{tmX}\;\V{x}{}\<[E]%
+\ColumnHook
+\end{hscode}\resethooks
+}}
+\begin{hscode}\SaveRestoreHook
+\column{B}{@{}>{\hspre}l<{\hspost}@{}}%
+\column{5}{@{}>{\hspre}l<{\hspost}@{}}%
+\column{15}{@{}>{\hspre}l<{\hspost}@{}}%
+\column{35}{@{}>{\hspre}l<{\hspost}@{}}%
+\column{E}{@{}>{\hspre}l<{\hspost}@{}}%
+\>[5]{}\C{\#}\;\V{i}\;{}\<[15]%
+\>[15]{}\F{\slash}\;\V{\sigma}\;{}\<[35]%
+\>[35]{}\mathrel{=}\;\V{?}{}\<[E]%
+\ColumnHook
+\end{hscode}\resethooks
+
+\vspace*{ -0.2in}
+
+\begin{hscode}\SaveRestoreHook
+\column{B}{@{}>{\hspre}l<{\hspost}@{}}%
+\column{5}{@{}>{\hspre}l<{\hspost}@{}}%
+\column{15}{@{}>{\hspre}l<{\hspost}@{}}%
+\column{35}{@{}>{\hspre}l<{\hspost}@{}}%
+\column{E}{@{}>{\hspre}l<{\hspost}@{}}%
+\>[5]{}\C{\ast}\;{}\<[15]%
+\>[15]{}\F{\slash}\;\V{\sigma}\;{}\<[35]%
+\>[35]{}\mathrel{=}\;\C{\ast}{}\<[E]%
+\\
+\>[5]{}\C{\Uppi}\;\V{S}\;\V{T}\;{}\<[15]%
+\>[15]{}\F{\slash}\;\V{\sigma}\;{}\<[35]%
+\>[35]{}\mathrel{=}\;\C{\Uppi}\;(\V{S}\;\F{\slash}\;\V{\sigma})\;(\V{T}\;\F{\slash}\;\C{os}\;\V{\sigma}){}\<[E]%
+\\
+\>[5]{}\C{\uplambda}\;\V{t}\;{}\<[15]%
+\>[15]{}\F{\slash}\;\V{\sigma}\;{}\<[35]%
+\>[35]{}\mathrel{=}\;\C{\uplambda}\;(\V{t}\;\F{\slash}\;\C{os}\;\V{\sigma}){}\<[E]%
+\\
+\>[5]{}\C{\upepsilon}\;\V{e}\;{}\<[15]%
+\>[15]{}\F{\slash}\;\V{\sigma}\;{}\<[35]%
+\>[35]{}\mathrel{=}\;\C{\upepsilon}\;(\V{e}\;\F{\slash}\;\V{\sigma}){}\<[E]%
+\\
+\>[5]{}(\V{f}\;\C{\raisebox{0.05in}{$\scriptscriptstyle{\$}$}}\;\V{s})\;{}\<[15]%
+\>[15]{}\F{\slash}\;\V{\sigma}\;{}\<[35]%
+\>[35]{}\mathrel{=}\;(\V{f}\;\F{\slash}\;\V{\sigma})\;\C{\raisebox{0.05in}{$\scriptscriptstyle{\$}$}}\;(\V{s}\;\F{\slash}\;\V{\sigma}){}\<[E]%
+\ColumnHook
+\end{hscode}\resethooks
+%%}
+
+We can implement the (functorial, as we shall see) action of a
+morphism for everything but variables, using the (functorial, as we
+shall see) \ensuremath{\C{os}} constructor.
+
+Let us think about what the morphism \ensuremath{\V{\sigma}} might do to some source variable \ensuremath{\V{i}}.
+It will either be sent to some target variable by \ensuremath{\C{os}} or mapped to some \ensuremath{\V{X}} by an
+\ensuremath{\C{ox}}. Correspondingly, we should be able to implement some operation
+
+\usebox{\fetchTybox}
+
+where \ensuremath{\D{+}} is the usual sum type, appropriately functorial
+
+\usebox{\plusbox}
+
+We can then complete our action, provided we know how to turn an \ensuremath{\V{X}} into an
+elimination. If we add a parameter to the \ensuremath{\mathrm{ACT}} module,
+
+\usebox{\tmXbox}
+
+then we can make some progress:
+
+\usebox{\vabox}
+
+However, to finish the job, we must define \ensuremath{\F{fetch}}. This will clearly require us
+to be shift \ensuremath{\V{X}}s under binders. \ensuremath{\mathrm{ACT}} needs a further module parameter
+
+\usebox{\wkXbox}
+
+so that we may complete the construction:
+
+\usebox{\fetchbox}
+
+We immediately acquire the action of thinnings.
+\begin{hscode}\SaveRestoreHook
+\column{B}{@{}>{\hspre}l<{\hspost}@{}}%
+\column{E}{@{}>{\hspre}l<{\hspost}@{}}%
+\>[B]{}\anonymous \F{\slash}_{\!\F{t}}\anonymous \;\mathbin{:}\;\blue{\forall}\;\{\mskip1.5mu \V{n}\;\V{m}\;\V{sort}\mskip1.5mu\}\;\to \;\D{Tm}\;\V{n}\;\V{sort}\;\to \;\V{n}\;\F{\le}\;\V{m}\;\to \;\D{Tm}\;\V{m}\;\V{sort}{}\<[E]%
+\\
+\>[B]{}\anonymous \F{\slash}_{\!\F{t}}\anonymous \;\mathrel{=}\;\mathrm{ACT}.\anonymous \F{\slash}\anonymous \;(\lambda \;\anonymous \;\to \;\D{Zero})\;(\lambda \;())\;(\lambda \;()){}\<[E]%
+\ColumnHook
+\end{hscode}\resethooks
+
+\agdanote{Unlike in Haskell, where \ensuremath{()} means the boring value in the unit type,
+Agda uses \ensuremath{()} for the \emph{impossible} pattern in an empty type. Moreover, when
+you point out that an input is impossible, you are absolved of the responsibility
+to explain what to do with it. Correspondingly \ensuremath{\lambda \;()} is just the function we need
+to map non-existent \ensuremath{\V{X}}s into anything.}
+
+Now that we can thin, \emph{substitution} is easy, too. We may now permit morphisms
+which turn variables into eliminations.
+\begin{hscode}\SaveRestoreHook
+\column{B}{@{}>{\hspre}l<{\hspost}@{}}%
+\column{E}{@{}>{\hspre}l<{\hspost}@{}}%
+\>[B]{}\F{Elim}\;\mathbin{:}\;\D{Nat}\;\to \;\U{Set}{}\<[E]%
+\\
+\>[B]{}\F{Elim}\;\V{n}\;\mathrel{=}\;\D{Tm}\;\V{n}\;\C{syn}{}\<[E]%
+\\[\blanklineskip]%
+\>[B]{}\anonymous \F{\Rightarrow}\anonymous \;\mathbin{:}\;\D{Nat}\;\to \;\D{Nat}\;\to \;\U{Set}{}\<[E]%
+\\
+\>[B]{}\anonymous \F{\Rightarrow}\anonymous \;\mathrel{=}\;\D{Mor}\;\F{Elim}{}\<[E]%
+\\[\blanklineskip]%
+\>[B]{}\anonymous \F{\slash}_{\!\F{s}}\anonymous \;\mathbin{:}\;\blue{\forall}\;\{\mskip1.5mu \V{n}\;\V{m}\;\V{sort}\mskip1.5mu\}\;\to \;\D{Tm}\;\V{n}\;\V{sort}\;\to \;\V{n}\;\F{\Rightarrow}\;\V{m}\;\to \;\D{Tm}\;\V{m}\;\V{sort}{}\<[E]%
+\\
+\>[B]{}\anonymous \F{\slash}_{\!\F{s}}\anonymous \;\mathrel{=}\;\mathrm{ACT}.\anonymous \F{\slash}\anonymous \;\F{Elim}\;(\lambda \;\V{e}\;\to \;\V{e})\;(\anonymous \F{\slash}_{\!\F{t}}\;\C{o\apo}\;\F{oi}){}\<[E]%
+\ColumnHook
+\end{hscode}\resethooks
+
+We can play the same sort of game when defining composition.
+\begin{hscode}\SaveRestoreHook
+\column{B}{@{}>{\hspre}l<{\hspost}@{}}%
+\column{3}{@{}>{\hspre}l<{\hspost}@{}}%
+\column{5}{@{}>{\hspre}l<{\hspost}@{}}%
+\column{14}{@{}>{\hspre}l<{\hspost}@{}}%
+\column{22}{@{}>{\hspre}l<{\hspost}@{}}%
+\column{26}{@{}>{\hspre}l<{\hspost}@{}}%
+\column{48}{@{}>{\hspre}l<{\hspost}@{}}%
+\column{62}{@{}>{\hspre}l<{\hspost}@{}}%
+\column{E}{@{}>{\hspre}l<{\hspost}@{}}%
+\>[B]{}\mathkw{module}\;\mathrm{COMP}\;{}\<[14]%
+\>[14]{}(\V{S}\;\V{T}\;\V{U}\;{}\<[22]%
+\>[22]{}\mathbin{:}\;\D{Nat}\;\to \;\U{Set})\;{}\<[E]%
+\\
+\>[14]{}(\V{front}\;{}\<[22]%
+\>[22]{}\mathbin{:}\;\blue{\forall}\;\{\mskip1.5mu \V{n}\;\V{m}\mskip1.5mu\}\;\to \;\V{S}\;\V{n}\;\to \;{}\<[48]%
+\>[48]{}\D{Mor}\;\V{T}\;\V{n}\;\V{m}\;\to \;{}\<[62]%
+\>[62]{}\V{U}\;\V{m})\;{}\<[E]%
+\\
+\>[14]{}(\V{back}\;{}\<[22]%
+\>[22]{}\mathbin{:}\;\blue{\forall}\;\{\mskip1.5mu \V{m}\mskip1.5mu\}\;\to \;{}\<[48]%
+\>[48]{}\V{T}\;\V{m}\;\to \;{}\<[62]%
+\>[62]{}\V{U}\;\V{m}){}\<[E]%
+\\
+\>[B]{}\hsindent{3}{}\<[3]%
+\>[3]{}\mathkw{where}{}\<[E]%
+\\
+\>[3]{}\hsindent{2}{}\<[5]%
+\>[5]{}\anonymous \F{\fatsemi}\anonymous \;\mathbin{:}\;\blue{\forall}\;\{\mskip1.5mu \V{p}\;\V{n}\;\V{m}\mskip1.5mu\}\;\to \;\D{Mor}\;\V{S}\;\V{p}\;\V{n}\;\to \;\D{Mor}\;\V{T}\;\V{n}\;\V{m}\;\to \;\D{Mor}\;\V{U}\;\V{p}\;\V{m}{}\<[E]%
+\\
+\>[3]{}\hsindent{2}{}\<[5]%
+\>[5]{}\V{\sigma}\;{}\<[14]%
+\>[14]{}\F{\fatsemi}\;\C{o\apo}\;\V{\tau}\;{}\<[26]%
+\>[26]{}\mathrel{=}\;\C{o\apo}\;(\V{\sigma}\;\F{\fatsemi}\;\V{\tau}){}\<[E]%
+\\
+\>[3]{}\hsindent{2}{}\<[5]%
+\>[5]{}\C{ox}\;\V{\sigma}\;\V{s}\;{}\<[14]%
+\>[14]{}\F{\fatsemi}\;\V{\tau}\;{}\<[26]%
+\>[26]{}\mathrel{=}\;\C{ox}\;(\V{\sigma}\;\F{\fatsemi}\;\V{\tau})\;(\V{front}\;\V{s}\;\V{\tau}){}\<[E]%
+\\
+\>[3]{}\hsindent{2}{}\<[5]%
+\>[5]{}\C{os}\;\V{\sigma}\;{}\<[14]%
+\>[14]{}\F{\fatsemi}\;\C{ox}\;\V{\tau}\;\V{t}\;{}\<[26]%
+\>[26]{}\mathrel{=}\;\C{ox}\;(\V{\sigma}\;\F{\fatsemi}\;\V{\tau})\;(\V{back}\;\V{t}){}\<[E]%
+\\
+\>[3]{}\hsindent{2}{}\<[5]%
+\>[5]{}\C{o\apo}\;\V{\sigma}\;{}\<[14]%
+\>[14]{}\F{\fatsemi}\;\C{ox}\;\V{\tau}\;\V{t}\;{}\<[26]%
+\>[26]{}\mathrel{=}\;\V{\sigma}\;\F{\fatsemi}\;\V{\tau}{}\<[E]%
+\\
+\>[3]{}\hsindent{2}{}\<[5]%
+\>[5]{}\C{os}\;\V{\sigma}\;{}\<[14]%
+\>[14]{}\F{\fatsemi}\;\C{os}\;\V{\tau}\;{}\<[26]%
+\>[26]{}\mathrel{=}\;\C{os}\;(\V{\sigma}\;\F{\fatsemi}\;\V{\tau}){}\<[E]%
+\\
+\>[3]{}\hsindent{2}{}\<[5]%
+\>[5]{}\C{o\apo}\;\V{\sigma}\;{}\<[14]%
+\>[14]{}\F{\fatsemi}\;\C{os}\;\V{\tau}\;{}\<[26]%
+\>[26]{}\mathrel{=}\;\C{o\apo}\;(\V{\sigma}\;\F{\fatsemi}\;\V{\tau}){}\<[E]%
+\\
+\>[3]{}\hsindent{2}{}\<[5]%
+\>[5]{}\C{oz}\;{}\<[14]%
+\>[14]{}\F{\fatsemi}\;\C{oz}\;{}\<[26]%
+\>[26]{}\mathrel{=}\;\C{oz}{}\<[E]%
+\ColumnHook
+\end{hscode}\resethooks
+
+\agdanote{I have been careful to order the lines of this definition
+so that it is lazy in its front argument whenever its back is \ensuremath{\C{o\apo}\;\V{\tau}}.
+Agda's translation from pattern matching to case analysis trees is
+quite na\"\i{}ve: the fact that the first line does not split \ensuremath{\V{\sigma}} but
+does match the back argument is what ensures this laziness.
+The first line takes priority over the second: they do overlap.
+Shifting the first two lines later in the definition while retaining their
+order would retain the extensional properties of the function, but
+change the intensional properties.}
+
+As we try to implement composition, we discover that we need the
+means to transport \ensuremath{\V{S}} and \ensuremath{\V{T}} values (packed by \ensuremath{\C{ox}}) across to
+\ensuremath{\V{U}}. For thinning, of course, these are vacuous requirements.
+\begin{hscode}\SaveRestoreHook
+\column{B}{@{}>{\hspre}l<{\hspost}@{}}%
+\column{10}{@{}>{\hspre}l<{\hspost}@{}}%
+\column{E}{@{}>{\hspre}l<{\hspost}@{}}%
+\>[B]{}\anonymous \F{\fatsemi}_{\F{t}}\anonymous \;\mathbin{:}\;\blue{\forall}\;\{\mskip1.5mu \V{p}\;\V{n}\;\V{m}\mskip1.5mu\}\;\to \;\V{p}\;\F{\le}\;\V{n}\;\to \;\V{n}\;\F{\le}\;\V{m}\;\to \;\V{p}\;\F{\le}\;\V{m}{}\<[E]%
+\\
+\>[B]{}\anonymous \F{\fatsemi}_{\F{t}}\anonymous \;\mathrel{=}\;{}\<[10]%
+\>[10]{}\mathrm{COMP}.\anonymous \F{\fatsemi}\anonymous \;(\lambda \;\anonymous \;\to \;\D{Zero})\;(\lambda \;\anonymous \;\to \;\D{Zero})\;(\lambda \;\anonymous \;\to \;\D{Zero})\;{}\<[E]%
+\\
+\>[10]{}(\lambda \;())\;(\lambda \;()){}\<[E]%
+\ColumnHook
+\end{hscode}\resethooks
+For substitutions, we need merely know how they act.
+\begin{hscode}\SaveRestoreHook
+\column{B}{@{}>{\hspre}l<{\hspost}@{}}%
+\column{10}{@{}>{\hspre}l<{\hspost}@{}}%
+\column{E}{@{}>{\hspre}l<{\hspost}@{}}%
+\>[B]{}\anonymous \F{\fatsemi}_{\F{s}}\anonymous \;\mathbin{:}\;\blue{\forall}\;\{\mskip1.5mu \V{p}\;\V{n}\;\V{m}\mskip1.5mu\}\;\to \;\V{p}\;\F{\Rightarrow}\;\V{n}\;\to \;\V{n}\;\F{\Rightarrow}\;\V{m}\;\to \;\V{p}\;\F{\Rightarrow}\;\V{m}{}\<[E]%
+\\
+\>[B]{}\anonymous \F{\fatsemi}_{\F{s}}\anonymous \;\mathrel{=}\;{}\<[10]%
+\>[10]{}\mathrm{COMP}.\anonymous \F{\fatsemi}\anonymous \;\F{Elim}\;\F{Elim}\;\F{Elim}\;\anonymous \F{\slash}_{\!\F{s}}\anonymous \;(\lambda \;\V{t}\;\to \;\V{t}){}\<[E]%
+\ColumnHook
+\end{hscode}\resethooks
+
+Now, let us at least state some laws in terms of the equality type:
 \begin{hscode}\SaveRestoreHook
 \column{B}{@{}>{\hspre}l<{\hspost}@{}}%
 \column{E}{@{}>{\hspre}l<{\hspost}@{}}%
 \>[B]{}\mathkw{data}\;\anonymous \D{\simeq}\anonymous \;\{\mskip1.5mu \V{l}\mskip1.5mu\}\;\{\mskip1.5mu \V{X}\;\mathbin{:}\;\U{Set}\;\V{l}\mskip1.5mu\}\;(\V{x}\;\mathbin{:}\;\V{X})\;\mathbin{:}\;\V{X}\;\to \;\U{Set}\;\V{l}\;\mathkw{where}\;\C{refl}\;\mathbin{:}\;\V{x}\;\D{\simeq}\;\V{x}{}\<[E]%
 \ColumnHook
 \end{hscode}\resethooks
-we may prove that \ensuremath{\F{oi}} and \ensuremath{\F{-\!\!\!\!\!<\!\!\!\!\!-}} satisfy the laws for a category.
-\begin{hscode}\SaveRestoreHook
-\column{B}{@{}>{\hspre}l<{\hspost}@{}}%
-\column{14}{@{}>{\hspre}l<{\hspost}@{}}%
-\column{17}{@{}>{\hspre}l<{\hspost}@{}}%
-\column{18}{@{}>{\hspre}l<{\hspost}@{}}%
-\column{E}{@{}>{\hspre}l<{\hspost}@{}}%
-\>[B]{}\F{idBeforeOPE}\;{}\<[14]%
-\>[14]{}\mathbin{:}\;{}\<[17]%
-\>[17]{}\blue{\forall}\;\{\mskip1.5mu \V{n}\;\V{m}\mskip1.5mu\}\;(\V{\theta}\;\mathbin{:}\;\V{n}\;\D{\le}\;\V{m})\;\to \;(\F{oi}\;\F{-\!\!\!\!\!<\!\!\!\!\!-}\;\V{\theta})\;\D{\simeq}\;\V{\theta}{}\<[E]%
-\\
-\>[B]{}\F{idAfterOPE}\;{}\<[14]%
-\>[14]{}\mathbin{:}\;{}\<[17]%
-\>[17]{}\blue{\forall}\;\{\mskip1.5mu \V{n}\;\V{m}\mskip1.5mu\}\;(\V{\theta}\;\mathbin{:}\;\V{n}\;\D{\le}\;\V{m})\;\to \;(\V{\theta}\;\F{-\!\!\!\!\!<\!\!\!\!\!-}\;\F{oi})\;\D{\simeq}\;\V{\theta}{}\<[E]%
-\\
-\>[B]{}\F{assocOPE}\;{}\<[14]%
-\>[14]{}\mathbin{:}\;{}\<[17]%
-\>[17]{}\blue{\forall}\;\{\mskip1.5mu \V{q}\;\V{p}\;\V{n}\;\V{m}\mskip1.5mu\}\;(\V{\theta_0}\;\mathbin{:}\;\V{q}\;\D{\le}\;\V{p})\;(\V{\theta_1}\;\mathbin{:}\;\V{p}\;\D{\le}\;\V{n})\;(\V{\theta_2}\;\mathbin{:}\;\V{n}\;\D{\le}\;\V{m})\;\to {}\<[E]%
-\\
-\>[17]{}\hsindent{1}{}\<[18]%
-\>[18]{}((\V{\theta_0}\;\F{-\!\!\!\!\!<\!\!\!\!\!-}\;\V{\theta_1})\;\F{-\!\!\!\!\!<\!\!\!\!\!-}\;\V{\theta_2})\;\D{\simeq}\;(\V{\theta_0}\;\F{-\!\!\!\!\!<\!\!\!\!\!-}\;(\V{\theta_1}\;\F{-\!\!\!\!\!<\!\!\!\!\!-}\;\V{\theta_2})){}\<[E]%
-\ColumnHook
-\end{hscode}\resethooks
 
-I omit the unremarkable rewrite-by-inductive-hypothesis proofs.
-\agdanote{BUILTIN pragmas (not shown) for \ensuremath{\D{\simeq}} entitle me to use the
-convenient \ensuremath{\mathkw{rewrite}} syntax when performing the miracle of transubstantiation,
-but insist that I make \ensuremath{\D{\simeq}} polymorphic in its `universe level', unnecessarily for the
-work in this paper.}
+I omit the unedifying proofs that show thinnings and substitutions
+both form categories acting functorially on terms.
+\[\begin{array}{c@{\qquad}c@{\qquad}c}
+& \ensuremath{(\V{t}\;\F{\slash}_{\!\F{t}}\;\F{oi})\;\D{\simeq}\;\V{t}} & \ensuremath{((\V{t}\;\F{\slash}_{\!\F{t}}\;\V{\theta_0})\;\F{\slash}_{\!\F{t}}\;\V{\theta_1})\;\D{\simeq}\;(\V{t}\;\F{\slash}_{\!\F{t}}\;(\V{\theta_0}\;\F{\fatsemi}\;\V{\theta_1}))} \\
+\ensuremath{(\F{oi}\;\F{\fatsemi}_{\F{t}}\;\V{\theta})\;\D{\simeq}\;\V{\theta}} & \ensuremath{(\V{\theta}\;\F{\fatsemi}_{\F{t}}\;\F{oi})\;\D{\simeq}\;\V{\theta}}
+  & \ensuremath{((\V{\theta_0}\;\F{\fatsemi}_{\F{t}}\;\V{\theta_1})\;\F{\fatsemi}_{\F{t}}\;\V{\theta_2})\;\D{\simeq}\;(\V{\theta_0}\;\F{\fatsemi}_{\F{t}}\;(\V{\theta_1}\;\F{\fatsemi}_{\F{t}}\;\V{\theta_2}))} \\
+& \ensuremath{(\V{t}\;\F{\slash}_{\!\F{s}}\;\F{oi})\;\D{\simeq}\;\V{t}} & \ensuremath{((\V{t}\;\F{\slash}_{\!\F{t}}\;\V{\sigma_0})\;\F{\slash}_{\!\F{t}}\;\V{\sigma_1})\;\D{\simeq}\;(\V{t}\;\F{\slash}_{\!\F{s}}\;(\V{\sigma_0}\;\F{\fatsemi}\;\V{\sigma_1}))} \\
+\ensuremath{(\F{oi}\;\F{\fatsemi}_{\F{s}}\;\V{\sigma})\;\D{\simeq}\;\V{\sigma}} & \ensuremath{(\V{\sigma}\;\F{\fatsemi}_{\F{s}}\;\F{oi})\;\D{\simeq}\;\V{\sigma}}
+  & \ensuremath{((\V{\sigma_0}\;\F{\fatsemi}_{\F{s}}\;\V{\sigma_1})\;\F{\fatsemi}_{\F{s}}\;\V{\sigma_2})\;\D{\simeq}\;(\V{\sigma_0}\;\F{\fatsemi}_{\F{s}}\;(\V{\sigma_1}\;\F{\fatsemi}_{\F{s}}\;\V{\sigma_2}))} \\
+\end{array}\]
+The proofs are implemented in the same style as the programs: generic results
+are proved with conditions, then instantiated trivially for thinnings to obtain
+the lemmas needed to show that the conditions hold for substitutions.
 
-
-The definitions
-\[
-  \ensuremath{\V{i}\;\{\mskip1.5mu \C{su}\;\V{n}\mskip1.5mu\}\;\mathrel{=}\;\C{os}\;(\F{oi}\;\{\mskip1.5mu \V{n}\mskip1.5mu\})} \qquad \ensuremath{\C{os}\;\V{\phi}\;\F{-\!\!\!\!\!<\!\!\!\!\!-}\;\C{os}\;\V{\theta}\;\mathrel{=}\;\C{os}\;(\V{\phi}\;\F{-\!\!\!\!\!<\!\!\!\!\!-}\;\V{\theta})}
-\]
-give us an endofunctor on \ensuremath{\D{\le}}, `weakening', acting as \ensuremath{\C{su}} on objects and \ensuremath{\C{os}}
-on morphisms.
-
-With this categorical structure in place, we may look back at the declaration of \ensuremath{\D{Tm}}
-and note that it is \emph{strictly positive} in \ensuremath{\V{n}}. Hence, \ensuremath{\D{Tm}\;\anonymous \;\V{sort}} gives a
-\emph{functor} from \ensuremath{\D{\le}} to \ensuremath{\U{Set}}, with thinning its action on morphisms. In fact,
-we get such a functor for any notion of `scope morphism'. For any \ensuremath{\V{M}\;\mathbin{:}\;\D{Nat}\;\to \;\D{Nat}\;\to \;\U{Set}}
-(representing the morphisms of some category with scopes as objects), we need to know
-(i) the action on variables which makes terms, and (ii) the weakening
-action on \ensuremath{\V{M}}-morphisms that corresponds to \ensuremath{\C{su}} on objects.
-
-\begin{hscode}\SaveRestoreHook
-\column{B}{@{}>{\hspre}l<{\hspost}@{}}%
-\column{3}{@{}>{\hspre}l<{\hspost}@{}}%
-\column{5}{@{}>{\hspre}l<{\hspost}@{}}%
-\column{11}{@{}>{\hspre}l<{\hspost}@{}}%
-\column{22}{@{}>{\hspre}l<{\hspost}@{}}%
-\column{E}{@{}>{\hspre}l<{\hspost}@{}}%
-\>[B]{}\mathkw{record}\;\D{ScopeMorphism}\;(\V{M}\;\mathbin{:}\;\D{Nat}\;\to \;\D{Nat}\;\to \;\U{Set})\;\mathbin{:}\;\U{Set}\;\mathkw{where}{}\<[E]%
-\\
-\>[B]{}\hsindent{3}{}\<[3]%
-\>[3]{}\mathkw{field}{}\<[E]%
-\\
-\>[3]{}\hsindent{2}{}\<[5]%
-\>[5]{}\F{actV}\;{}\<[11]%
-\>[11]{}\mathbin{:}\;\blue{\forall}\;\{\mskip1.5mu \V{n}\;\V{m}\mskip1.5mu\}\;\to \;\F{Var}\;\V{n}\;\to \;\V{M}\;\V{n}\;\V{m}\;\to \;\D{Tm}\;\V{m}\;\C{syn}{}\<[E]%
-\\
-\>[3]{}\hsindent{2}{}\<[5]%
-\>[5]{}\F{actW}\;{}\<[11]%
-\>[11]{}\mathbin{:}\;\blue{\forall}\;\{\mskip1.5mu \V{n}\;\V{m}\mskip1.5mu\}\;\to \;\V{M}\;\V{n}\;\V{m}\;\to \;\V{M}\;(\C{su}\;\V{n})\;(\C{su}\;\V{m}){}\<[E]%
-\\
-\>[B]{}\hsindent{3}{}\<[3]%
-\>[3]{}\F{actTm}\;\mathbin{:}\;\blue{\forall}\;\{\mskip1.5mu \V{n}\;\V{m}\mskip1.5mu\}\;\to \;\V{M}\;\V{n}\;\V{m}\;\to \;\blue{\forall}\;\{\mskip1.5mu \V{sort}\mskip1.5mu\}\;\to \;\D{Tm}\;\V{n}\;\V{sort}\;\to \;\D{Tm}\;\V{m}\;\V{sort}{}\<[E]%
-\\
-\>[B]{}\hsindent{3}{}\<[3]%
-\>[3]{}\F{actTm}\;\V{\phi}\;\C{\ast}\;{}\<[22]%
-\>[22]{}\mathrel{=}\;\C{\ast}{}\<[E]%
-\\
-\>[B]{}\hsindent{3}{}\<[3]%
-\>[3]{}\F{actTm}\;\V{\phi}\;(\C{\Uppi}\;\V{S}\;\V{T})\;{}\<[22]%
-\>[22]{}\mathrel{=}\;\C{\Uppi}\;(\F{actTm}\;\V{\phi}\;\V{S})\;(\F{actTm}\;(\F{actW}\;\V{\phi})\;\V{T}){}\<[E]%
-\\
-\>[B]{}\hsindent{3}{}\<[3]%
-\>[3]{}\F{actTm}\;\V{\phi}\;(\C{\uplambda}\;\V{t})\;{}\<[22]%
-\>[22]{}\mathrel{=}\;\C{\uplambda}\;(\F{actTm}\;(\F{actW}\;\V{\phi})\;\V{t}){}\<[E]%
-\\
-\>[B]{}\hsindent{3}{}\<[3]%
-\>[3]{}\F{actTm}\;\V{\phi}\;(\C{\upepsilon}\;\V{e})\;{}\<[22]%
-\>[22]{}\mathrel{=}\;\C{\upepsilon}\;(\F{actTm}\;\V{\phi}\;\V{e}){}\<[E]%
-\\
-\>[B]{}\hsindent{3}{}\<[3]%
-\>[3]{}\F{actTm}\;\V{\phi}\;(\C{\#}\;\V{i})\;{}\<[22]%
-\>[22]{}\mathrel{=}\;\F{actV}\;\V{i}\;\V{\phi}{}\<[E]%
-\\
-\>[B]{}\hsindent{3}{}\<[3]%
-\>[3]{}\F{actTm}\;\V{\phi}\;(\V{f}\;\C{\raisebox{0.05in}{$\scriptscriptstyle{\$}$}}\;\V{s})\;{}\<[22]%
-\>[22]{}\mathrel{=}\;\F{actTm}\;\V{\phi}\;\V{f}\;\C{\raisebox{0.05in}{$\scriptscriptstyle{\$}$}}\;\F{actTm}\;\V{\phi}\;\V{s}{}\<[E]%
-\ColumnHook
-\end{hscode}\resethooks
-
-Directly, \ensuremath{\D{\le}} is such an \ensuremath{\V{M}}, acting on variables by composition, and weakening
-with \ensuremath{\C{os}}.
-
-\begin{hscode}\SaveRestoreHook
-\column{B}{@{}>{\hspre}l<{\hspost}@{}}%
-\column{9}{@{}>{\hspre}l<{\hspost}@{}}%
-\column{11}{@{}>{\hspre}l<{\hspost}@{}}%
-\column{17}{@{}>{\hspre}l<{\hspost}@{}}%
-\column{E}{@{}>{\hspre}l<{\hspost}@{}}%
-\>[B]{}\F{THIN}\;\mathbin{:}\;\D{ScopeMorphism}\;\anonymous \D{\le}\anonymous {}\<[E]%
-\\
-\>[B]{}\F{THIN}\;\mathrel{=}\;{}\<[9]%
-\>[9]{}\mathkw{record}\;\{\mskip1.5mu {}\<[E]%
-\\
-\>[9]{}\hsindent{2}{}\<[11]%
-\>[11]{}\F{actV}\;{}\<[17]%
-\>[17]{}\mathrel{=}\;\lambda \;\V{i}\;\V{\theta}\;\to \;\C{\#}\;(\V{i}\;\F{-\!\!\!\!\!<\!\!\!\!\!-}\;\V{\theta});{}\<[E]%
-\\
-\>[9]{}\hsindent{2}{}\<[11]%
-\>[11]{}\F{actW}\;{}\<[17]%
-\>[17]{}\mathrel{=}\;\C{os}\mskip1.5mu\}{}\<[E]%
-\ColumnHook
-\end{hscode}\resethooks
-
-With our basic syntax now in place, let us begin to think about the type system.
+With our basic syntactic machinery now in place, let us
+return to designing the type system.
 
 \section{Type-\emph{has}-Type}
 
@@ -913,7 +1197,7 @@ e,f ::= \ldots \;|\; t\hb T
 \>[3]{}\anonymous \C{:\!:}\anonymous \;\mathbin{:}\;\D{Tm}\;\V{n}\;\C{chk}\;\to \;\D{Tm}\;\V{n}\;\C{chk}\;\to \;\D{Tm}\;\V{n}\;\C{syn}{}\<[E]%
 \ColumnHook
 \end{hscode}\resethooks
-and extend \ensuremath{\F{actTm}} accordingly.)
+and extend \ensuremath{\F{\slash}} accordingly.)
 
 The associated typing rule allows us to change direction in the other direction from embedding, at the cost of making the intermediate type explicit: the type we synthesize is exactly the type we supply.
 \[\Rule{\CHK\Gamma\type T\quad \CHK\Gamma Tt}
