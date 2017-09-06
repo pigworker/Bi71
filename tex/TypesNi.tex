@@ -597,10 +597,19 @@ types, as paradigmatically done in the inductively defined equality type,
 enabling
 the miracle of transubstantiation.}
 
-Note that the types of \ensuremath{\C{\Uppi}} and \ensuremath{\C{\uplambda}} expose their variable binding power by
-incrementing the scope count for the range of function types and the body of
-an abstraction. The \ensuremath{\F{Var}\;\V{n}} type represents a choice of one variable from the
-\ensuremath{\V{n}} available. I shall resolve the mystery of its definition directly.
+It has always struck me as an intensely frustrating business, defining
+an inductive datatype to represent some syntax of terms, and then
+showing that it really works like a syntax by defining operations such
+as substitution and proving that they exhibit the appropriate
+structure. When appropriately viewed, these types are syntactic by
+construction. Sadly, the appropriate view is not the machine's view:
+the business of teaching the machine to see syntax is for another time.
+
+Back to our datatype, note that the types of \ensuremath{\C{\Uppi}} and \ensuremath{\C{\uplambda}} expose
+their variable binding power by incrementing the scope count for the
+range of function types and the body of an abstraction. The \ensuremath{\F{Var}\;\V{n}}
+type represents a choice of one variable from the \ensuremath{\V{n}} available. I
+shall resolve the mystery of its definition directly.
 
 
 \section{Variables as a Line in Pascal's Triangle}
@@ -693,7 +702,7 @@ demand additional equipment.
 
 \section{Action and Composition of Scope Morphisms}
 
-In any case we must consider how to make our morphisms act on \emph{terms}.
+In any case, we must consider how to make our morphisms act on \emph{terms}.
 
 \newsavebox{\plusbox}\savebox{\plusbox}{\parbox{4in}{
 \begin{hscode}\SaveRestoreHook
@@ -708,11 +717,15 @@ In any case we must consider how to make our morphisms act on \emph{terms}.
 \>[B]{}\hsindent{3}{}\<[3]%
 \>[3]{}\C{inr}\;\mathbin{:}\;\V{T}\;\to \;\V{S}\;\D{+}\;\V{T}{}\<[E]%
 \\[\blanklineskip]%
-\>[B]{}\anonymous \F{+}\anonymous \;\mathbin{:}\;\blue{\forall}\;\{\mskip1.5mu \V{S}\;\V{S'}\;\V{T}\;\V{T'}\mskip1.5mu\}\;\to \;(\V{S}\;\to \;\V{S'})\;\to \;(\V{T}\;\to \;\V{T'})\;\to \;(\V{S}\;\D{+}\;\V{T})\;\to \;(\V{S'}\;\D{+}\;\V{T'}){}\<[E]%
+\>[B]{}\anonymous \F{+}_{\F{e}}\anonymous \;\mathbin{:}\;\{\mskip1.5mu \V{S}\;\V{T}\;\V{U}\;\mathbin{:}\;\U{Set}\mskip1.5mu\}\;\to \;(\V{S}\;\to \;\V{U})\;\to \;(\V{T}\;\to \;\V{U})\;\to \;(\V{S}\;\D{+}\;\V{T})\;\to \;\V{U}{}\<[E]%
 \\
-\>[B]{}(\V{f}\;\F{+}\;\V{g})\;(\C{inl}\;\V{s})\;\mathrel{=}\;\C{inl}\;(\V{f}\;\V{s}){}\<[E]%
+\>[B]{}(\V{f}\;\F{+}_{\F{e}}\;\V{g})\;(\C{inl}\;\V{s})\;\mathrel{=}\;\V{f}\;\V{s}{}\<[E]%
 \\
-\>[B]{}(\V{f}\;\F{+}\;\V{g})\;(\C{inr}\;\V{t})\;\mathrel{=}\;\C{inr}\;(\V{g}\;\V{t}){}\<[E]%
+\>[B]{}(\V{f}\;\F{+}_{\F{e}}\;\V{g})\;(\C{inr}\;\V{t})\;\mathrel{=}\;\V{g}\;\V{t}{}\<[E]%
+\\[\blanklineskip]%
+\>[B]{}\anonymous \F{+}\anonymous \;\mathbin{:}\;\{\mskip1.5mu \V{S}\;\V{S'}\;\V{T}\;\V{T'}\;\mathbin{:}\;\U{Set}\mskip1.5mu\}\;\to \;(\V{S}\;\to \;\V{S'})\;\to \;(\V{T}\;\to \;\V{T'})\;\to \;(\V{S}\;\D{+}\;\V{T})\;\to \;(\V{S'}\;\D{+}\;\V{T'}){}\<[E]%
+\\
+\>[B]{}\V{f}\;\F{+}\;\V{g}\;\mathrel{=}\;(\C{inl}\;\F{\circ}\;\V{f})\;\F{+}_{\F{e}}\;(\C{inr}\;\F{\circ}\;\V{g}){}\<[E]%
 \ColumnHook
 \end{hscode}\resethooks
 }}
@@ -748,7 +761,6 @@ In any case we must consider how to make our morphisms act on \emph{terms}.
 \ColumnHook
 \end{hscode}\resethooks
 }}
-%% ~ \parbox{5in}{
 \begin{hscode}\SaveRestoreHook
 \column{B}{@{}>{\hspre}l<{\hspost}@{}}%
 \column{3}{@{}>{\hspre}l<{\hspost}@{}}%
@@ -804,6 +816,17 @@ In any case we must consider how to make our morphisms act on \emph{terms}.
 \ColumnHook
 \end{hscode}\resethooks
 }}
+\newsavebox{\fetchedbox}\savebox{\fetchedbox}{\parbox{5in}{
+\begin{hscode}\SaveRestoreHook
+\column{B}{@{}>{\hspre}l<{\hspost}@{}}%
+\column{5}{@{}>{\hspre}l<{\hspost}@{}}%
+\column{E}{@{}>{\hspre}l<{\hspost}@{}}%
+\>[5]{}\F{fetched}\;\mathbin{:}\;\blue{\forall}\;\{\mskip1.5mu \V{m}\mskip1.5mu\}\;\to \;\F{Var}\;\V{m}\;\D{+}\;\V{X}\;\V{m}\;\to \;\D{Tm}\;\V{m}\;\C{syn}{}\<[E]%
+\\
+\>[5]{}\F{fetched}\;\mathrel{=}\;\C{\#}\;\F{+}_{\F{e}}\;\V{tmX}{}\<[E]%
+\ColumnHook
+\end{hscode}\resethooks
+}}
 
 \vspace*{ -0.35in}
 
@@ -823,25 +846,10 @@ In any case we must consider how to make our morphisms act on \emph{terms}.
 \column{5}{@{}>{\hspre}l<{\hspost}@{}}%
 \column{15}{@{}>{\hspre}l<{\hspost}@{}}%
 \column{21}{@{}>{\hspre}l<{\hspost}@{}}%
-\column{27}{@{}>{\hspre}l<{\hspost}@{}}%
-\column{35}{@{}>{\hspre}l<{\hspost}@{}}%
 \column{E}{@{}>{\hspre}l<{\hspost}@{}}%
 \>[5]{}\C{\#}\;\V{i}\;{}\<[15]%
 \>[15]{}\F{\slash}\;\V{\sigma}\;{}\<[21]%
-\>[21]{}\mathkw{with}\;{}\<[27]%
-\>[27]{}\F{fetch}\;\V{i}\;\V{\sigma}{}\<[E]%
-\\
-\>[5]{}\C{\#}\;\V{i}\;{}\<[15]%
-\>[15]{}\F{\slash}\;\V{\sigma}\;{}\<[21]%
-\>[21]{}\mid \;{}\<[27]%
-\>[27]{}\C{inl}\;\V{j}\;{}\<[35]%
-\>[35]{}\mathrel{=}\;\C{\#}\;\V{j}{}\<[E]%
-\\
-\>[5]{}\C{\#}\;\V{i}\;{}\<[15]%
-\>[15]{}\F{\slash}\;\V{\sigma}\;{}\<[21]%
-\>[21]{}\mid \;{}\<[27]%
-\>[27]{}\C{inr}\;\V{x}\;{}\<[35]%
-\>[35]{}\mathrel{=}\;\V{tmX}\;\V{x}{}\<[E]%
+\>[21]{}\mathrel{=}\;\F{fetched}\;(\F{fetch}\;\V{i}\;\V{\sigma}){}\<[E]%
 \ColumnHook
 \end{hscode}\resethooks
 }}
@@ -886,7 +894,19 @@ In any case we must consider how to make our morphisms act on \emph{terms}.
 \>[35]{}\mathrel{=}\;(\V{f}\;\F{\slash}\;\V{\sigma})\;\C{\raisebox{0.05in}{$\scriptscriptstyle{\$}$}}\;(\V{s}\;\F{\slash}\;\V{\sigma}){}\<[E]%
 \ColumnHook
 \end{hscode}\resethooks
-%%}
+\newsavebox{\radactbox}\savebox{\radactbox}{\parbox{4in}{
+\begin{hscode}\SaveRestoreHook
+\column{B}{@{}>{\hspre}l<{\hspost}@{}}%
+\column{5}{@{}>{\hspre}l<{\hspost}@{}}%
+\column{15}{@{}>{\hspre}l<{\hspost}@{}}%
+\column{35}{@{}>{\hspre}l<{\hspost}@{}}%
+\column{E}{@{}>{\hspre}l<{\hspost}@{}}%
+\>[5]{}(\V{t}\;\C{:\!:}\;\V{T})\;{}\<[15]%
+\>[15]{}\F{\slash}\;\V{\sigma}\;{}\<[35]%
+\>[35]{}\mathrel{=}\;(\V{t}\;\F{\slash}\;\V{\sigma})\;\C{:\!:}\;(\V{T}\;\F{\slash}\;\V{\sigma}){}\<[E]%
+\ColumnHook
+\end{hscode}\resethooks
+}}
 
 We can implement the (functorial, as we shall see) action of a
 morphism for everything but variables, using the (functorial, as we
@@ -894,33 +914,28 @@ shall see) \ensuremath{\C{os}} constructor.
 
 Let us think about what the morphism \ensuremath{\V{\sigma}} might do to some source variable \ensuremath{\V{i}}.
 It will either be sent to some target variable by \ensuremath{\C{os}} or mapped to some \ensuremath{\V{X}} by an
-\ensuremath{\C{ox}}. Correspondingly, we should be able to implement some operation
-
-\usebox{\fetchTybox}
-
-where \ensuremath{\D{+}} is the usual sum type, appropriately functorial
+\ensuremath{\C{ox}}. Correspondingly, we should be able to implement some operation \\
+\usebox{\fetchTybox} \\
+where \ensuremath{\D{+}} is the usual sum type, \ensuremath{\F{+}_{\F{e}}} its case analysis operator, and
+\ensuremath{\F{+}} its functorial action.
 
 \usebox{\plusbox}
 
 We can then complete our action, provided we know how to turn an \ensuremath{\V{X}} into an
-elimination. If we add a parameter to the \ensuremath{\mathrm{ACT}} module,
-
-\usebox{\tmXbox}
-
-then we can make some progress:
-
+elimination. If we add a parameter to the \ensuremath{\mathrm{ACT}} module, \\
+\usebox{\tmXbox} \\
+then we can make some progress. \\
+\usebox{\fetchedbox} \\
 \usebox{\vabox}
 
-However, to finish the job, we must define \ensuremath{\F{fetch}}. This will clearly require us
-to be shift \ensuremath{\V{X}}s under binders. \ensuremath{\mathrm{ACT}} needs a further module parameter
-
-\usebox{\wkXbox}
-
-so that we may complete the construction:
-
+However, to finish the job we must define \ensuremath{\F{fetch}}. This will clearly require us
+to be shift \ensuremath{\V{X}}s under binders. \ensuremath{\mathrm{ACT}} needs a further module parameter\\
+\usebox{\wkXbox}\\
+so that we may complete the construction:\\
 \usebox{\fetchbox}
 
-We immediately acquire the action of thinnings.
+We immediately acquire the action of thinnings: as \ensuremath{\V{X}} is empty, \ensuremath{\V{tmX}} and \ensuremath{\V{wkX}} are
+vacuous.
 \begin{hscode}\SaveRestoreHook
 \column{B}{@{}>{\hspre}l<{\hspost}@{}}%
 \column{E}{@{}>{\hspre}l<{\hspost}@{}}%
@@ -944,14 +959,21 @@ which turn variables into eliminations.
 \>[B]{}\F{Elim}\;\mathbin{:}\;\D{Nat}\;\to \;\U{Set}{}\<[E]%
 \\
 \>[B]{}\F{Elim}\;\V{n}\;\mathrel{=}\;\D{Tm}\;\V{n}\;\C{syn}{}\<[E]%
-\\[\blanklineskip]%
+\ColumnHook
+\end{hscode}\resethooks
+To give the action of a substitution, we need to embed \ensuremath{\F{Elim}} into itself, which is
+the identity, and to weaken \ensuremath{\F{Elim}}, which we do with the thinning \ensuremath{\C{o\apo}\;\F{oi}}, `missing'
+the top variable.
+\begin{hscode}\SaveRestoreHook
+\column{B}{@{}>{\hspre}l<{\hspost}@{}}%
+\column{E}{@{}>{\hspre}l<{\hspost}@{}}%
 \>[B]{}\anonymous \F{\Rightarrow}\anonymous \;\mathbin{:}\;\D{Nat}\;\to \;\D{Nat}\;\to \;\U{Set}{}\<[E]%
 \\
 \>[B]{}\anonymous \F{\Rightarrow}\anonymous \;\mathrel{=}\;\D{Mor}\;\F{Elim}{}\<[E]%
 \\[\blanklineskip]%
 \>[B]{}\anonymous \F{\slash}_{\!\F{s}}\anonymous \;\mathbin{:}\;\blue{\forall}\;\{\mskip1.5mu \V{n}\;\V{m}\;\V{sort}\mskip1.5mu\}\;\to \;\D{Tm}\;\V{n}\;\V{sort}\;\to \;\V{n}\;\F{\Rightarrow}\;\V{m}\;\to \;\D{Tm}\;\V{m}\;\V{sort}{}\<[E]%
 \\
-\>[B]{}\anonymous \F{\slash}_{\!\F{s}}\anonymous \;\mathrel{=}\;\mathrm{ACT}.\anonymous \F{\slash}\anonymous \;\F{Elim}\;(\lambda \;\V{e}\;\to \;\V{e})\;(\anonymous \F{\slash}_{\!\F{t}}\;\C{o\apo}\;\F{oi}){}\<[E]%
+\>[B]{}\anonymous \F{\slash}_{\!\F{s}}\anonymous \;\mathrel{=}\;\mathrm{ACT}.\anonymous \F{\slash}\anonymous \;\F{Elim}\;\V{id}\;(\anonymous \F{\slash}_{\!\F{t}}\;\C{o\apo}\;\F{oi}){}\<[E]%
 \ColumnHook
 \end{hscode}\resethooks
 
@@ -1082,17 +1104,24 @@ The proofs are implemented in the same style as the programs: generic results
 are proved with conditions, then instantiated trivially for thinnings to obtain
 the lemmas needed to show that the conditions hold for substitutions.
 
+It is worth noting that construction of \ensuremath{\F{\slash}_{\!\F{t}}} and \ensuremath{\F{\slash}_{\!\F{s}}}, together with the
+proofs of the laws they satisfy, is entirely generic for syntaxes with binding.
+Really, we should present all the syntaxes as a \emph{universe} and do the
+construction once.
+
 With our basic syntactic machinery now in place, let us
 return to designing the type system.
 
+
+
 \section{Type-\emph{has}-Type}
 
-We have two judgment forms:
+We have two syntactic categories, so we need at least two judgment forms:
 \begin{description}
-\item[type checking] $\CHK\Gamma Tt$ ~ constructions are checked with respect to a given type
-\item[type synthesis] $\SYN\Gamma eS$ ~ eliminations have their types synthesized, from the type of their head variable, which is given in the context
+\item[type checking] $\CHK\Gamma Tt$ ~ constructions are checked with respect to a given type;
+\item[type synthesis] $\SYN\Gamma eS$ ~ eliminations have their types synthesized, from the type of their head variable, which is given in the context.
 \end{description}
-The `forward' $\in$ of type synthesis is pronounced ``in'', with \LaTeX{} macro {\tt $\backslash$in}; its reverse, used for checking, may be pronounced ``ni'', for its \LaTeX{} macro is {\tt $\backslash$ni}, but
+The `forward' $\in$ of type synthesis is pronounced ``in'', with \LaTeX{} macro {\tt $\backslash$in}, or perhaps ``is a(n)'' or ``inhabits''; its reverse, used for checking, may be pronounced ``ni'', for its \LaTeX{} macro is {\tt $\backslash$ni}, but
 might be more intelligibly pronounced ``has'' or ``accepts''.
 
 Many other authors keep terms to the left of types and use arrows (directions vary) to make the checking/synthesis distinction. I insist on retaining the left-to-right flow of \emph{time} through the
@@ -1114,7 +1143,7 @@ For the above judgment forms, we shall have
 \end{array}\]
 
 In order to specify the requirements and guarantees (but not to give the rules themselves), we shall also
-need a context validity judgment, \framebox{$\VALID\Gamma$}, for which $\Gamma$ is considered the subject.
+need a context validity judgment, $\VALID\Gamma$, for which $\Gamma$ is considered the subject.
 We should expect every judgment input to have a requirement for which it is the subject and every judgment output to have a guarantee for which it is the subject. Here,
 \[\begin{array}{lrl}
 \CHK\Gamma Tt & \mbox{requires} & \VALID\Gamma \\
@@ -1126,8 +1155,25 @@ and we are correspondingly not free to write down any old rubbish by way of typi
 rise to proof obligations which we must check. However, in the rule to establish a particular judgment,
 the requirements even to propose the judgment are \emph{presumed}, not revalidated: as it were, ``We would not be asking this question if we did not already know so-and-so.''.
 
-There is more to say about the impact of \emph{mode} on valid notions of typing rule. Firstly, the inputs of conclusions and the outputs of premises must be \emph{patterns}, which may match against any construct of the calculus \emph{except free variables} and are the binding sites for the schematic variables of the rules.  Secondly, the outputs of conclusions and the inputs of premises must be \emph{expressions}, making use of the schematic variables in scope and instantiating any bound variables they may have. Scope flows clockwise round the rules, starting from the inputs of the conclusion, accumulating left-to-right through the premises, finishing with the outputs of the conclusion. Thirdly, only the schematic variables in the conclusion's \emph{subjects} are
-in scope for the subjects of the premises, and they must all occur in at least one premise. Fourthly, a schematic subject variable becomes in scope for \emph{expressions} only after it has been the subject of a premise (and thus achieved some measure of trust). These four conditions form the basis of a kind of `religion' of typing rules: let us obey them for now and consider breaking them when we are older and more aware of the consequences of our actions.
+There is more to say about the impact of \emph{mode} on valid notions of typing rule.
+\begin{enumerate}
+\item The inputs of conclusions and the outputs of premises must be
+\emph{patterns}, which may match against any construct of the calculus
+\emph{except free variables} and are the binding sites for the
+schematic variables of the rules.
+\item The outputs of conclusions and the inputs of premises must
+be \emph{expressions}, making use of the schematic variables in scope
+and instantiating any bound variables they may have. Scope flows
+clockwise round the rules, starting from the inputs of the conclusion,
+accumulating left-to-right through the premises, finishing with the
+outputs of the conclusion.
+\item Only the schematic variables in the conclusion's \emph{subjects} are
+in scope for the subjects of the premises, and they must all occur in exactly one premise.
+\item A schematic subject variable becomes in scope for \emph{expressions} only after it has been the subject of a premise (and thus achieved some measure of trust).
+\end{enumerate}
+These four conditions form the basis of a kind of `religion' of typing
+rules: let us obey them for now and consider breaking them when we are
+older and more aware of the consequences of our actions.
 
 The type checking and context validity rules are as follows:
 \[\begin{array}{l@{\qquad}c}
@@ -1189,15 +1235,10 @@ When we come to instantiate $T[x]$ with $s$, we do at least know $S$, the type o
 \[
 e,f ::= \ldots \;|\; t\hb T
 \]
-(We should also add radicals to the declaration of \ensuremath{\D{Tm}}
-\begin{hscode}\SaveRestoreHook
-\column{B}{@{}>{\hspre}l<{\hspost}@{}}%
-\column{3}{@{}>{\hspre}l<{\hspost}@{}}%
-\column{E}{@{}>{\hspre}l<{\hspost}@{}}%
-\>[3]{}\anonymous \C{:\!:}\anonymous \;\mathbin{:}\;\D{Tm}\;\V{n}\;\C{chk}\;\to \;\D{Tm}\;\V{n}\;\C{chk}\;\to \;\D{Tm}\;\V{n}\;\C{syn}{}\<[E]%
-\ColumnHook
-\end{hscode}\resethooks
-and extend \ensuremath{\F{\slash}} accordingly.)
+
+We should also add radicals to the declaration of \ensuremath{\D{Tm}} and extend \ensuremath{\F{\slash}} accordingly.\\
+\usebox{\radbox}\vspace*{ -0.2in}\\
+\usebox{\radactbox}\\
 
 The associated typing rule allows us to change direction in the other direction from embedding, at the cost of making the intermediate type explicit: the type we synthesize is exactly the type we supply.
 \[\Rule{\CHK\Gamma\type T\quad \CHK\Gamma Tt}
@@ -1287,6 +1328,94 @@ happens both when checking types for introductions and when
 synthesizing types for eliminations.
 
 
+\section{Formalizing Reduction}
+
+To formalize the typing rules, we must first formalize reduction. We may give
+an inductive family capturing exactly \emph{one-step} reduction, with a base
+constructor for each contraction scheme and step constructors for each possible
+contextual closure.
+
+\begin{hscode}\SaveRestoreHook
+\column{B}{@{}>{\hspre}l<{\hspost}@{}}%
+\column{3}{@{}>{\hspre}l<{\hspost}@{}}%
+\column{12}{@{}>{\hspre}l<{\hspost}@{}}%
+\column{15}{@{}>{\hspre}l<{\hspost}@{}}%
+\column{35}{@{}>{\hspre}l<{\hspost}@{}}%
+\column{44}{@{}>{\hspre}l<{\hspost}@{}}%
+\column{E}{@{}>{\hspre}l<{\hspost}@{}}%
+\>[B]{}\mathkw{data}\;\anonymous \D{\leadsto}\anonymous \;\{\mskip1.5mu \V{n}\;\mathbin{:}\;\D{Nat}\mskip1.5mu\}\;\mathbin{:}\;\blue{\forall}\;\{\mskip1.5mu \V{sort}\mskip1.5mu\}\;\to \;\D{Tm}\;\V{n}\;\V{sort}\;\to \;\D{Tm}\;\V{n}\;\V{sort}\;\to \;\U{Set}\;\mathkw{where}{}\<[E]%
+\\[\blanklineskip]%
+\>[B]{}\hsindent{3}{}\<[3]%
+\>[3]{}\C{\upbeta}\;{}\<[12]%
+\>[12]{}\mathbin{:}\;{}\<[15]%
+\>[15]{}\blue{\forall}\;\{\mskip1.5mu \V{t}\;\V{T}\;\V{s}\;\V{S}\mskip1.5mu\}\;\to {}\<[E]%
+\\
+\>[15]{}((\C{\uplambda}\;\V{t}\;\C{:\!:}\;\C{\Uppi}\;\V{S}\;\V{T})\;\C{\raisebox{0.05in}{$\scriptscriptstyle{\$}$}}\;\V{s})\;\D{\leadsto}\;((\V{t}\;\C{:\!:}\;\V{T})\;\F{\slash}_{\!\F{s}}\;(\C{ox}\;\F{oi}\;(\V{s}\;\C{:\!:}\;\V{S}))){}\<[E]%
+\\[\blanklineskip]%
+\>[B]{}\hsindent{3}{}\<[3]%
+\>[3]{}\C{\upupsilon}\;{}\<[12]%
+\>[12]{}\mathbin{:}\;{}\<[15]%
+\>[15]{}\blue{\forall}\;\{\mskip1.5mu \V{t}\;\V{T}\mskip1.5mu\}\;\to {}\<[E]%
+\\
+\>[15]{}\C{\upepsilon}\;(\V{t}\;\C{:\!:}\;\V{T})\;\D{\leadsto}\;\V{t}{}\<[E]%
+\\[\blanklineskip]%
+\>[B]{}\hsindent{3}{}\<[3]%
+\>[3]{}\C{\Uppi}_{\C{L}}\;{}\<[12]%
+\>[12]{}\mathbin{:}\;{}\<[15]%
+\>[15]{}\blue{\forall}\;\{\mskip1.5mu \V{S}\;\V{S'}\;\V{T}\mskip1.5mu\}\;\to \;{}\<[35]%
+\>[35]{}\V{S}\;\D{\leadsto}\;\V{S'}\;{}\<[44]%
+\>[44]{}\to \;\C{\Uppi}\;\V{S}\;\V{T}\;\D{\leadsto}\;\C{\Uppi}\;\V{S'}\;\V{T}{}\<[E]%
+\\
+\>[B]{}\hsindent{3}{}\<[3]%
+\>[3]{}\C{\Uppi}_{\C{R}}\;{}\<[12]%
+\>[12]{}\mathbin{:}\;{}\<[15]%
+\>[15]{}\blue{\forall}\;\{\mskip1.5mu \V{S}\;\V{T}\;\V{T'}\mskip1.5mu\}\;\to \;{}\<[35]%
+\>[35]{}\V{T}\;\D{\leadsto}\;\V{T'}\;{}\<[44]%
+\>[44]{}\to \;\C{\Uppi}\;\V{S}\;\V{T}\;\D{\leadsto}\;\C{\Uppi}\;\V{S}\;\V{T'}{}\<[E]%
+\\
+\>[B]{}\hsindent{3}{}\<[3]%
+\>[3]{}\C{\uplambda}\;{}\<[12]%
+\>[12]{}\mathbin{:}\;{}\<[15]%
+\>[15]{}\blue{\forall}\;\{\mskip1.5mu \V{t}\;\V{t'}\mskip1.5mu\}\;\to \;{}\<[35]%
+\>[35]{}\V{t}\;\D{\leadsto}\;\V{t'}\;{}\<[44]%
+\>[44]{}\to \;\C{\uplambda}\;\V{t}\;\D{\leadsto}\;\C{\uplambda}\;\V{t'}{}\<[E]%
+\\
+\>[B]{}\hsindent{3}{}\<[3]%
+\>[3]{}\C{\upepsilon}\;{}\<[12]%
+\>[12]{}\mathbin{:}\;{}\<[15]%
+\>[15]{}\blue{\forall}\;\{\mskip1.5mu \V{e}\;\V{e'}\mskip1.5mu\}\;\to \;{}\<[35]%
+\>[35]{}\V{e}\;\D{\leadsto}\;\V{e'}\;{}\<[44]%
+\>[44]{}\to \;\C{\upepsilon}\;\V{e}\;\D{\leadsto}\;\C{\upepsilon}\;\V{e'}{}\<[E]%
+\\
+\>[B]{}\hsindent{3}{}\<[3]%
+\>[3]{}\C{ap}_{\C{L}}\;{}\<[12]%
+\>[12]{}\mathbin{:}\;{}\<[15]%
+\>[15]{}\blue{\forall}\;\{\mskip1.5mu \V{f}\;\V{f'}\;\V{s}\mskip1.5mu\}\;\to \;{}\<[35]%
+\>[35]{}\V{f}\;\D{\leadsto}\;\V{f'}\;{}\<[44]%
+\>[44]{}\to \;(\V{f}\;\C{\raisebox{0.05in}{$\scriptscriptstyle{\$}$}}\;\V{s})\;\D{\leadsto}\;(\V{f'}\;\C{\raisebox{0.05in}{$\scriptscriptstyle{\$}$}}\;\V{s}){}\<[E]%
+\\
+\>[B]{}\hsindent{3}{}\<[3]%
+\>[3]{}\C{ap}_{\C{R}}\;{}\<[12]%
+\>[12]{}\mathbin{:}\;{}\<[15]%
+\>[15]{}\blue{\forall}\;\{\mskip1.5mu \V{f}\;\V{s}\;\V{s'}\mskip1.5mu\}\;\to \;{}\<[35]%
+\>[35]{}\V{s}\;\D{\leadsto}\;\V{s'}\;{}\<[44]%
+\>[44]{}\to \;(\V{f}\;\C{\raisebox{0.05in}{$\scriptscriptstyle{\$}$}}\;\V{s})\;\D{\leadsto}\;(\V{f}\;\C{\raisebox{0.05in}{$\scriptscriptstyle{\$}$}}\;\V{s'}){}\<[E]%
+\\
+\>[B]{}\hsindent{3}{}\<[3]%
+\>[3]{}\C{ra}_{\C{L}}\;{}\<[12]%
+\>[12]{}\mathbin{:}\;{}\<[15]%
+\>[15]{}\blue{\forall}\;\{\mskip1.5mu \V{t}\;\V{t'}\;\V{T}\mskip1.5mu\}\;\to \;{}\<[35]%
+\>[35]{}\V{t}\;\D{\leadsto}\;\V{t'}\;{}\<[44]%
+\>[44]{}\to \;(\V{t}\;\C{:\!:}\;\V{T})\;\D{\leadsto}\;(\V{t'}\;\C{:\!:}\;\V{T}){}\<[E]%
+\\
+\>[B]{}\hsindent{3}{}\<[3]%
+\>[3]{}\C{ra}_{\C{R}}\;{}\<[12]%
+\>[12]{}\mathbin{:}\;{}\<[15]%
+\>[15]{}\blue{\forall}\;\{\mskip1.5mu \V{t}\;\V{T}\;\V{T'}\mskip1.5mu\}\;\to \;{}\<[35]%
+\>[35]{}\V{T}\;\D{\leadsto}\;\V{T'}\;{}\<[44]%
+\>[44]{}\to \;(\V{t}\;\C{:\!:}\;\V{T})\;\D{\leadsto}\;(\V{t}\;\C{:\!:}\;\V{T'}){}\<[E]%
+\ColumnHook
+\end{hscode}\resethooks
 
 \newpage
 \appendix
@@ -1305,8 +1434,6 @@ synthesizing types for eliminations.
 \newcommand{\tyc}{\green{\upepsilon}}
 
 \textbf{There's an inevitable dilemma about whether to do this explicitly in Agda.}
-
-It's always struck me as an intensely frustrating business, defining an inductive datatype to represent some syntax of terms, and then showing that it really works like a syntax by defining operations such as substitution and proving that they exhibit the appropriate structure. These types are syntactic by construction.
 
 When we model a syntax, an `object language', its terms can be classified into object \emph{sorts}, $\iota$. (Sometimes, we may even identify the notion of `sort' with the object language's notion of `type', but that is far from crucial.) The object sorts for our language are constructions and eliminations.
 \[

@@ -2,6 +2,20 @@
 %if False
 \begin{code}
 module TypesNi where
+
+id : forall {l}{X : Set l} -> X -> X
+id x = x
+
+_-_ : forall {k l f}{A : Set k}{B : A -> Set l}{C : (a : A) -> B a -> Set f}
+      (f : {a : A}(b : B a) -> C a b)(g : (a : A) -> B a) ->
+      (a : A) -> C a (g a)
+(f - g) a = f (g a)
+
+_-:>_ : forall {I : Set}(S T : I -> Set) -> I -> Set
+(S -:> T) i = S i -> T i
+[_] : forall {I : Set}(P : I -> Set) -> Set
+[ P ] = forall {i} -> P i
+
 \end{code}
 %endif
 
@@ -278,10 +292,19 @@ types, as paradigmatically done in the inductively defined equality type,
 enabling
 the miracle of transubstantiation.}
 
-Note that the types of |Pi| and |la| expose their variable binding power by
-incrementing the scope count for the range of function types and the body of
-an abstraction. The |Var n| type represents a choice of one variable from the
-|n| available. I shall resolve the mystery of its definition directly.
+It has always struck me as an intensely frustrating business, defining
+an inductive datatype to represent some syntax of terms, and then
+showing that it really works like a syntax by defining operations such
+as substitution and proving that they exhibit the appropriate
+structure. When appropriately viewed, these types are syntactic by
+construction. Sadly, the appropriate view is not the machine's view:
+the business of teaching the machine to see syntax is for another time.
+
+Back to our datatype, note that the types of |Pi| and |la| expose
+their variable binding power by incrementing the scope count for the
+range of function types and the body of an abstraction. The |Var n|
+type represents a choice of one variable from the |n| available. I
+shall resolve the mystery of its definition directly.
 
 
 \section{Variables as a Line in Pascal's Triangle}
@@ -360,10 +383,13 @@ demand additional equipment.
 
 \section{Action and Composition of Scope Morphisms}
 
-In any case we must consider how to make our morphisms act on \emph{terms}.
+In any case, we must consider how to make our morphisms act on \emph{terms}.
 
+%format - = "\F{\circ}"
 %format + = "\D{+}"
 %format _+_ = _ + _
+%format +e = "\F{+}_{\F{e}}"
+%format _+e_ = _ +e _
 %format +m = "\F{+}"
 %format _+m_ = _ +m _
 %format inl = "\C{inl}"
@@ -374,13 +400,17 @@ data _+_ (S T : Set) : Set where
   inl : S -> S + T
   inr : T -> S + T
 
-_+m_ : forall {S S' T T'} -> (S -> S') -> (T -> T') -> (S + T) -> (S' + T')
-(f +m g) (inl s) = inl (f s)
-(f +m g) (inr t) = inr (g t)
+_+e_ : {S T U : Set} -> (S -> U) -> (T -> U) -> (S + T) -> U
+(f +e g) (inl s) = f s
+(f +e g) (inr t) = g t
+
+_+m_ : {S S' T T' : Set} -> (S -> S') -> (T -> T') -> (S + T) -> (S' + T')
+f +m g = (inl - f) +e (inr - g)
 \end{code}}}
 
 %format ACT = "\mathrm{ACT}"
 %format fetch = "\F{fetch}"
+%format fetched = "\F{fetched}"
 %format / = "\F{\slash}"
 %format _/_ = _ / _
 %format sg = "\V{\sigma}"
@@ -399,7 +429,6 @@ module ACT (X : Nat -> Set)
 \begin{code}
            (wkX : forall {n} -> X n -> X (su n))
 \end{code}}}
-%% ~ \parbox{5in}{
 \begin{code}
   where
 \end{code}
@@ -416,6 +445,11 @@ module ACT (X : Nat -> Set)
     fetch  (os i)     (ox sg x)  = inr x
     fetch  (o' i)     (ox sg x)  = fetch i sg
 \end{code}}}
+\newsavebox{\fetchedbox}\savebox{\fetchedbox}{\parbox{5in}{
+\begin{code}
+    fetched : forall {m} -> Var m + X m -> Tm m syn
+    fetched = va +e tmX
+\end{code}}}
 
 \vspace*{ -0.35in}
 
@@ -427,9 +461,7 @@ module ACT (X : Nat -> Set)
 
 \newsavebox{\vabox}\savebox{\vabox}{\parbox{3in}{
 \begin{code}
-    va i      / sg  with  fetch i sg
-    va i      / sg  |     inl j   = va j
-    va i      / sg  |     inr x   = tmX x
+    va i      / sg  = fetched (fetch i sg)
 \end{code}}}
 \begin{spec}
     va i      / sg                = ?
@@ -444,12 +476,10 @@ module ACT (X : Nat -> Set)
     em e      / sg                = em (e / sg)
     (f $ s)   / sg                = (f / sg) $ (s / sg)
 \end{code}
-%if False
+\newsavebox{\radactbox}\savebox{\radactbox}{\parbox{4in}{
 \begin{code}
     (t :: T)  / sg                = (t / sg) :: (T / sg)
-\end{code}
-%endif
-%%}
+\end{code}}}
 
 We can implement the (functorial, as we shall see) action of a
 morphism for everything but variables, using the (functorial, as we
@@ -457,33 +487,28 @@ shall see) |os| constructor.
 
 Let us think about what the morphism |sg| might do to some source variable |i|.
 It will either be sent to some target variable by |os| or mapped to some |X| by an
-|ox|. Correspondingly, we should be able to implement some operation
-
-\usebox{\fetchTybox}
-
-where |+| is the usual sum type, appropriately functorial
+|ox|. Correspondingly, we should be able to implement some operation \\
+\usebox{\fetchTybox} \\
+where |+| is the usual sum type, |+e| its case analysis operator, and
+|+m| its functorial action.
 
 \usebox{\plusbox}
 
 We can then complete our action, provided we know how to turn an |X| into an
-elimination. If we add a parameter to the |ACT| module,
-
-\usebox{\tmXbox}
-
-then we can make some progress:
-
+elimination. If we add a parameter to the |ACT| module, \\
+\usebox{\tmXbox} \\
+then we can make some progress. \\
+\usebox{\fetchedbox} \\
 \usebox{\vabox}
 
-However, to finish the job, we must define |fetch|. This will clearly require us
-to be shift |X|s under binders. |ACT| needs a further module parameter
-
-\usebox{\wkXbox}
-
-so that we may complete the construction:
-
+However, to finish the job we must define |fetch|. This will clearly require us
+to be shift |X|s under binders. |ACT| needs a further module parameter\\
+\usebox{\wkXbox}\\
+so that we may complete the construction:\\
 \usebox{\fetchbox}
 
-We immediately acquire the action of thinnings.
+We immediately acquire the action of thinnings: as |X| is empty, |tmX| and |wkX| are
+vacuous.
 %format /t = / "_{\!\F{t}}"
 %format _/t = _ /t
 %format _/t_ = _ /t _
@@ -510,12 +535,16 @@ which turn variables into eliminations.
 \begin{code}
 Elim : Nat -> Set
 Elim n = Tm n syn
-
+\end{code}
+To give the action of a substitution, we need to embed |Elim| into itself, which is
+the identity, and to weaken |Elim|, which we do with the thinning |o' oi|, `missing'
+the top variable.
+\begin{code}
 _>>_ : Nat -> Nat -> Set
 _>>_ = Mor Elim
 
 _/s_ : forall {n m sort} -> Tm n sort -> n >> m -> Tm m sort
-_/s_ = ACT._/_ Elim (\ e -> e) (_/t o' oi)
+_/s_ = ACT._/_ Elim id (_/t o' oi)
 \end{code}
 
 We can play the same sort of game when defining composition.
@@ -601,17 +630,330 @@ The proofs are implemented in the same style as the programs: generic results
 are proved with conditions, then instantiated trivially for thinnings to obtain
 the lemmas needed to show that the conditions hold for substitutions.
 
+It is worth noting that construction of |/t| and |/s|, together with the
+proofs of the laws they satisfy, is entirely generic for syntaxes with binding.
+Really, we should present all the syntaxes as a \emph{universe} and do the
+construction once.
+
 With our basic syntactic machinery now in place, let us
 return to designing the type system.
 
+%if False
+\begin{code}
+self : {X : Set}(x : X) -> x == x
+self x = refl
+_=$=_ : {S T : Set}{f g : S -> T}{x y : S} -> f == g -> x == y -> f x == g y
+refl =$= refl = refl
+infixl 2 _=$=_
+
+
+sym : {X : Set}{x y : X} -> x == y -> y == x
+sym refl = refl
+trans : {X : Set}{x y z : X} -> x == y -> y == z -> x == z
+trans refl = id
+
+_-[_>_ : forall {X : Set} (x : X) {y z} -> x == y -> y == z -> x == z
+x -[ refl > q = q
+
+oeUnique : forall {n}(i : ze <= n) -> oe == i
+oeUnique oz     = refl
+oeUnique (o' i) = self o' =$= oeUnique i
+
+mor : forall {S T : Nat -> Set} -> (forall {n} -> S n -> T n) ->
+       forall {n m} -> Mor S n m -> Mor T n m
+mor f oz = oz
+mor f (os sg) = os (mor f sg)
+mor f (o' sg) = o' (mor f sg)
+mor f (ox sg s) = ox (mor f sg) (f s)
+
+morId : forall {S : Nat -> Set}
+          (f : forall {n} -> S n -> S n)(fq : forall {n}(s : S n) -> f s == s)
+          {n m}(sg : Mor S n m) ->
+          mor f sg == sg
+morId f fq oz = self oz
+morId f fq (os sg) = self os =$= morId f fq sg
+morId f fq (o' sg) = self o' =$= morId f fq sg
+morId f fq (ox sg s) = self ox =$= morId f fq sg =$= fq s
+
+module ACTID (X : Nat -> Set)
+             (tmX : forall {n} -> X n -> Tm n syn)
+             (wkX : forall {n} -> X n -> X (su n))
+  where
+    open ACT X tmX wkX
+
+    fetchId : forall {n}(i : Var n) -> fetch i oi == inl i
+    fetchId (os i) = self inl =$= (self os =$= oeUnique i)
+    fetchId (o' i) rewrite fetchId i = refl
+    fetchId (ox i ())
+
+    actId : forall {n sort}(t : Tm n sort) -> (t / oi) == t
+    actId (va i) with fetch i oi | fetchId i
+    actId (va i) | .(inl i) | refl = refl
+    actId Ty = self Ty
+    actId (Pi S T) = self Pi =$= actId S =$= actId T
+    actId (la t) = self la =$= actId t
+    actId (em e) = self em =$= actId e
+    actId (f $ s) = self _$_ =$= actId f =$= actId s
+    actId (t :: T) = self _::_ =$= actId t =$= actId T
+
+module COMPCAT (S T U : Nat -> Set)
+               (front : forall {n m}(s : S n)(ta : Mor T n m) -> U m)
+               (back  : forall {n} -> T n -> U n)
+  where
+    open COMP S T U front back
+    
+    idComp : forall {n m}(ta : Mor T n m) -> (oi /, ta) == mor back ta
+    idComp oz = self oz
+    idComp (os ta) = self os =$= idComp ta
+    idComp (o' ta) = self o' =$= idComp ta
+    idComp (ox ta t) = self ox =$= idComp ta =$= self (back t)
+
+    compId : forall {n m}(sg : Mor S n m) -> (sg /, oi) == mor (\ s -> front s oi) sg
+    compId oz = self oz
+    compId (os sg) = self os =$= compId sg
+    compId (o' sg) = self o' =$= compId sg
+    compId {m = ze}   (ox sg s) = self ox =$= compId sg =$= self (front s oz)
+    compId {m = su m} (ox sg s) = self ox =$= compId sg =$= self (front s (os oi))
+
+    data CompG : forall {p n m} -> Mor S p n -> Mor T n m -> Mor U p m -> Set where
+      cg-' : forall {p n m}{sg : Mor S p n}{ta : Mor T n m}{up : Mor U p m} ->
+              CompG sg ta up -> CompG sg (o' ta) (o' up)
+      cgx- : forall {p n m}{sg : Mor S p n}{ta : Mor T n m}{up : Mor U p m}(s : S n) ->
+              CompG sg ta up -> CompG (ox sg s) ta (ox up (front s ta))
+      cgsx : forall {p n m}{sg : Mor S p n}{ta : Mor T n m}{up : Mor U p m}(t : T m) ->
+              CompG sg ta up -> CompG (os sg) (ox ta t) (ox up (back t))
+      cg'x : forall {p n m}{sg : Mor S p n}{ta : Mor T n m}{up : Mor U p m}(t : T m) ->
+              CompG sg ta up -> CompG (o' sg) (ox ta t) up
+      cgss : forall {p n m}{sg : Mor S p n}{ta : Mor T n m}{up : Mor U p m} ->
+              CompG sg ta up -> CompG (os sg) (os ta) (os up)
+      cg's : forall {p n m}{sg : Mor S p n}{ta : Mor T n m}{up : Mor U p m} ->
+              CompG sg ta up -> CompG (o' sg) (os ta) (o' up)
+      cgzz : CompG oz oz oz
+
+    compG : forall {p n m}(sg : Mor S p n)(ta : Mor T n m) -> CompG sg ta (sg /, ta)
+    compG sg (o' ta) = cg-' (compG sg ta)
+    compG oz oz = cgzz
+    compG (ox sg s) oz = cgx- s (compG sg oz)
+    compG (os sg) (os ta) = cgss (compG sg ta)
+    compG (o' sg) (os ta) = cg's (compG sg ta)
+    compG (ox sg s) (os ta) = cgx- s (compG sg (os ta))
+    compG (os sg) (ox ta t) = cgsx t (compG sg ta)
+    compG (o' sg) (ox ta t) = cg'x t (compG sg ta)
+    compG (ox sg s) (ox ta t) = cgx- s (compG sg (ox ta t))
+
+    module COMPACT
+      (wkS : [ S -:> (S - su) ])
+      (tmS : [ S -:> Elim ])
+      (wkT : [ T -:> (T - su) ])
+      (tmT : [ T -:> Elim ])
+      (wkU : [ U -:> (U - su) ])
+      (tmU : [ U -:> Elim ])
+      (tmUtmT : forall {n}(t : T n) -> tmT t == tmU (back t))
+      (wkUwkT : forall {n}(t : T n) -> wkU (back t) == back (wkT t))
+      (tmUsTu : forall {n m}(s : S n)(ta : Mor T n m) ->
+                 ACT._/_ T tmT wkT (tmS s) ta == tmU (front s ta))
+      (wkUo'  : forall {n m}(s : S n)(ta : Mor T n m) ->
+                wkU (front s ta) == front s (o' ta))
+      (wkSox  : forall {n m}(s : S n)(ta : Mor T n m)(t : T m) ->
+                front s ta == front (wkS s) (ox ta t))
+      (wkSos  : forall {n m}(s : S n)(ta : Mor T n m) ->
+                wkU (front s ta) == front (wkS s) (os ta))
+      where
+        module SA = ACT S tmS wkS
+        module TA = ACT T tmT wkT
+        module UA = ACT U tmU wkU
+
+        compFetch : forall {p n m}(i : Var p)
+                    {sg : Mor S p n}{ta : Mor T n m}{up : Mor U p m} ->
+                    CompG sg ta up ->
+                    UA.fetch i up == ((\ j -> (id +m back) (TA.fetch j ta))
+                                     +e (inr - (\ s -> front s ta))) (SA.fetch i sg) 
+        compFetch (ox i ()) _
+        compFetch i (cg-' {sg = sg} stu) with SA.fetch i sg | compFetch i stu
+        compFetch i (cg-' {ta = ta} stu) | inl j | q with TA.fetch j ta
+        compFetch i (cg-' stu) | inl j | q | (inl k) rewrite q = refl
+        compFetch i (cg-' stu) | inl j | q | (inr t) rewrite q | wkUwkT t = refl
+        compFetch i (cg-' {ta = ta} stu) | inr s | q rewrite q | wkUo' s ta = refl
+        compFetch (os i) (cgx- s stu) = refl
+        compFetch (o' i) (cgx- {sg = sg} s stu) = compFetch i stu
+        compFetch (os i) (cgsx t stu) = refl
+        compFetch (o' i) (cgsx {sg = sg} t stu) with SA.fetch i sg | compFetch i stu
+        compFetch (o' i) (cgsx {ta = ta} t stu) | inl j | q = q
+        compFetch (o' i) (cgsx {ta = ta} t stu) | inr s | q rewrite q | wkSox s ta t = refl
+        compFetch i (cg'x {sg = sg} t stu) with SA.fetch i sg | compFetch i stu
+        compFetch i (cg'x t stu) | inl j | q = q
+        compFetch i (cg'x {ta = ta} t stu) | inr s | q rewrite q | wkSox s ta t = refl
+        compFetch (os i) (cgss stu) = refl
+        compFetch (o' i) (cgss {sg = sg} stu) with SA.fetch i sg | compFetch i stu
+        compFetch (o' i) (cgss {ta = ta} stu) | inl j | q with TA.fetch j ta
+        compFetch (o' i) (cgss stu) | inl j | q | inl k rewrite q = refl
+        compFetch (o' i) (cgss stu) | inl j | q | inr t rewrite q | wkUwkT t = refl
+        compFetch (o' i) (cgss {ta = ta} stu) | inr s | q rewrite q | wkSos s ta = refl
+        compFetch i (cg's {sg = sg} stu) with SA.fetch i sg | compFetch i stu
+        compFetch i (cg's {ta = ta} stu) | inl j | q with TA.fetch j ta
+        compFetch i (cg's stu) | inl j | q | (inl k) rewrite q = refl
+        compFetch i (cg's stu) | inl j | q | (inr t) rewrite q | wkUwkT t = refl
+        compFetch i (cg's {ta = ta} stu) | inr s | q rewrite q | wkSos s ta = refl
+
+        compAct : forall {p n m}{sort}(t : Tm p sort)
+                  (sg : Mor S p n)(ta : Mor T n m)
+                   ->
+                  ((t SA./ sg) TA./ ta) == (t UA./ (sg /, ta))
+        compAct (va i) sg ta
+          with UA.fetch i (sg /, ta) | SA.fetch i sg
+               | compFetch i (compG sg ta)
+        compAct (va i) sg ta | inl k | inl j | q with TA.fetch j ta
+        compAct (va i) sg ta | inl k | inl j | refl | inl .k = refl
+        compAct (va i) sg ta | inl k | inl j | ()   | inr t
+        compAct (va i) sg ta | inl k | inr s | ()
+        compAct (va i) sg ta | inr u | inl j | q with TA.fetch j ta
+        compAct (va i) sg ta | inr u | inl j | () | (inl k)
+        compAct (va i) sg ta | inr _ | (inl j) | refl | (inr t) = tmUtmT t
+        compAct (va i) sg ta | inr _ | (inr s) | refl = tmUsTu s ta
+        compAct Ty sg ta = self Ty
+        compAct (Pi S T) sg ta = self Pi =$= compAct S sg ta =$= compAct T (os sg) (os ta)
+        compAct (la t) sg ta =  self la =$= compAct t (os sg) (os ta)
+        compAct (em e) sg ta = self em =$= compAct e sg ta
+        compAct (f $ s) sg ta = self _$_ =$= compAct f sg ta =$= compAct s sg ta
+        compAct (t :: T) sg ta = self _::_ =$= compAct t sg ta =$= compAct T sg ta
+
+
+module THINXX (X : Nat -> Set) = COMP (\ _ -> Zero) X X (\ ()) id
+module THINXXCOMP (X : Nat -> Set) = COMPCAT (\ _ -> Zero) X X (\ ()) id
+module THINTHINTHIN = THINXXCOMP.COMPACT (\ _ -> Zero)
+   (\ ()) (\ ()) (\ ()) (\ ()) (\ ()) (\ ())
+   (\ ()) (\ ()) (\ ()) (\ ()) (\ ()) (\ ())
+
+module THINCAT where
+  module C = THINXX (\ _ -> Zero)
+  module C' = THINXXCOMP (\ _ -> Zero)
+  
+  compId : forall {n m}(th : n <= m) -> (th C./, oi) == th
+  compId th = trans (C'.compId th) (morId (\ ()) (\ ()) th)
+  idComp : forall {n m}(th : n <= m) -> (oi C./, th) == th
+  idComp th = trans (C'.idComp th) (morId id (\ _ -> refl) th)
+
+module THINSBSTSBSTCOMP = THINXXCOMP Elim
+module THINSBSTSBST = THINSBSTSBSTCOMP.COMPACT
+  (\ ()) (\ ()) (_/t o' oi) id (_/t o' oi) id
+  (\ _ -> refl) (\ _ -> refl) (\ ()) (\ ()) (\ ()) (\ ())
+
+module SBSTXSBST (X : Nat -> Set)
+           (tmX : [ X -:> Elim ])
+           (wkX : [ X -:> (X - su) ])
+  = COMP Elim X Elim (ACT._/_ X tmX wkX) tmX
+module SBSTXSBSTCOMP  (X : Nat -> Set)
+           (tmX : [ X -:> Elim ])
+           (wkX : [ X -:> (X - su) ])
+  = COMPCAT Elim X Elim (ACT._/_ X tmX wkX) tmX
+
+
+sbstId : forall {n m}(sg : n >> m) ->
+          (sg /,s oi) == sg
+sbstId sg = trans (SBSTXSBSTCOMP.compId Elim id (_/t o' oi) sg)
+                  (morId (_/s oi) (ACTID.actId Elim id (_/t o' oi)) sg)
+idSbst : forall {n m}(sg : n >> m) ->
+          (oi /,s sg) == sg
+idSbst sg = trans (SBSTXSBSTCOMP.idComp Elim id (_/t o' oi) sg)
+              (morId id (\ _ -> refl) sg)
+
+module SBSTTHINSBST = SBSTXSBSTCOMP.COMPACT (\ _ -> Zero) (\ ()) (\ ())
+  (_/t o' oi) id (\ ()) (\ ()) (_/t o' oi) id
+  (\ ()) (\ ())
+  (\ s t -> refl)
+  (\ s ta -> trans (THINTHINTHIN.compAct s ta (o' oi))
+             (self (s /t_) =$= (self o' =$= THINCAT.compId ta)))
+  (\ _ _ ())
+  (\ s ta -> trans (THINTHINTHIN.compAct s ta (o' oi))
+              (trans (self (s /t_) =$= (self o' =$=
+                    trans (THINCAT.compId ta) (sym (THINCAT.idComp ta))))
+                (sym (THINTHINTHIN.compAct s (o' oi) (os ta)))))
+
+
+oiSbst : forall {n m sort}(t : Tm n sort)(sg : n >> m) ->
+             (t /s o' sg) == ((t /s sg) /t o' oi)
+oiSbst t sg = sym (trans (SBSTTHINSBST.compAct t sg (o' oi))
+                (self (t /s_) =$= (self o' =$=
+                 trans (SBSTXSBSTCOMP.compId (\ _ -> Zero) (\ ()) (\ ()) sg)
+                  (morId (_/t oi) (ACTID.actId (\ _ -> Zero) (\ ()) (\ ())) sg))))
+
+module SBSTSBSTSBST = SBSTXSBSTCOMP.COMPACT Elim id (_/t o' oi)
+  (_/t o' oi) id (_/t o' oi) id (_/t o' oi) id
+  (\ _ -> refl) (\ _ -> refl) (\ _ _ -> refl)
+  (\ s ta -> trans (SBSTTHINSBST.compAct s ta (o' oi))
+                (self (s /s_) =$= (self o' =$=
+                 trans (SBSTXSBSTCOMP.compId (\ _ -> Zero) (\ ()) (\ ()) ta)
+                       (morId (_/t oi) (ACTID.actId (\ _ -> Zero) (\ ()) (\ ())) ta)))
+   )
+  (\ s ta t -> sym
+    (trans (THINSBSTSBST.compAct s (o' oi) (ox ta t))
+                          (self (s /s_) =$=
+                            trans (THINXXCOMP.idComp Elim ta) (morId id (\ _ -> refl) ta)))
+   )
+  (\ s ta -> trans (SBSTTHINSBST.compAct s ta (o' oi))
+              (trans (self (s /s_) =$= (self o' =$=
+                 trans (trans (SBSTXSBSTCOMP.compId (\ _ -> Zero) (\ ()) (\ ()) ta)
+                                (morId (_/t oi) (ACTID.actId (\ _ -> Zero) (\ ()) (\ ())) ta))
+                       (sym (trans (THINXXCOMP.idComp Elim ta) (morId id (\ _ -> refl) ta)))))
+               (sym (THINSBSTSBST.compAct s (o' oi) (os ta)))))
+
+oxSbst : forall {p n m sort}(r : Tm (su p) sort)(sg : p >> n)(s : Elim n)(ta : n >> m) ->
+           (r /s (ox sg s /,s ta)) == (r /s (ox (sg /,s ta) (s /s ta)))
+oxSbst r sg s (o' ta) =
+  (r /s (o' (ox sg s /,s ta))) -[ oiSbst r (ox sg s /,s ta) >
+  (((r /s (ox sg s /,s ta)) /t o' oi) -[ self (_/t o' oi) =$= oxSbst r sg s ta >
+  (((r /s ox (sg /,s ta) (s /s ta)) /t o' oi)
+    -[ {!!} >
+  {!!}))
+oxSbst r sg s oz = refl
+oxSbst r sg s (os ta) = refl
+oxSbst r sg s (ox ta x) = refl
+
+module COMPASS (S : Nat -> Set)
+               (_//_ : forall {n m}(s : S n)(ta : Mor S n m) -> S m)
+               (fact : forall {p n m}(s : S p)(sg : Mor S p n)(ta : Mor S n m) ->
+                  ((s // sg) // ta) == (s // (COMP._/,_ S S S _//_ id sg ta)))
+  where
+  open COMP S S S _//_ id
+  open COMPCAT S S S _//_ id
+  compAss : forall {q p n m}(rh : Mor S q p)(sg : Mor S p n)(ta : Mor S n m) ->
+              ((rh /, sg) /, ta) == (rh /, (sg /, ta))
+  compAss rh sg (o' ta) = self o' =$= compAss rh sg ta
+  compAss oz oz oz = refl
+  compAss (ox rh r) oz oz = self ox =$= compAss rh oz oz =$= fact r oz oz
+  compAss (os rh) (ox sg s) oz = self ox =$= compAss rh sg oz =$= refl
+  compAss (o' rh) (ox sg s) oz = compAss rh sg oz
+  compAss (ox rh r) (ox sg s) oz = self ox =$= compAss rh (ox sg s) oz =$= fact r (ox sg s) oz
+  compAss (os rh) (os sg) (os ta) = self os =$= compAss rh sg ta
+  compAss (o' rh) (os sg) (os ta) = self o' =$= compAss rh sg ta
+  compAss (ox rh r) (os sg) (os ta) = self ox =$= compAss rh (os sg) (os ta) =$= fact r _ _
+  compAss rh (o' sg) (os ta) = self o' =$= compAss rh sg ta
+  compAss (os rh) (ox sg s) (os ta) = self ox =$= compAss rh sg (os ta) =$= refl
+  compAss (o' rh) (ox sg s) (os ta) = compAss rh sg (os ta)
+  compAss (ox rh r) (ox sg s) (os ta) = self ox =$= compAss rh (ox sg s) (os ta) =$= fact r _ _
+  compAss (os rh) (os sg) (ox ta t) = self ox =$= compAss rh sg ta =$= refl
+  compAss (o' rh) (os sg) (ox ta t) = compAss rh sg ta
+  compAss (ox rh r) (os sg) (ox ta t) = self ox =$= compAss rh (os sg) (ox ta t) =$= fact r _ _
+  compAss rh (o' sg) (ox ta t) = compAss rh sg ta
+  compAss (os rh) (ox sg s) (ox ta t) = self ox =$= compAss rh sg (ox ta t) =$= refl
+  compAss (o' rh) (ox sg s) (ox ta t) = compAss rh sg (ox ta t)
+  compAss (ox rh r) (ox sg s) (ox ta t) =
+    self ox =$= compAss rh (ox sg s) (ox ta t) =$= fact r _ _
+
+module THINASSOC = COMPASS (\ _ -> Zero) (\ ()) (\ ())
+module SBSTASSOC = COMPASS Elim _/s_ SBSTSBSTSBST.compAct
+\end{code}
+%endif
+
+
 \section{Type-\emph{has}-Type}
 
-We have two judgment forms:
+We have two syntactic categories, so we need at least two judgment forms:
 \begin{description}
-\item[type checking] $\CHK\Gamma Tt$ ~ constructions are checked with respect to a given type
-\item[type synthesis] $\SYN\Gamma eS$ ~ eliminations have their types synthesized, from the type of their head variable, which is given in the context
+\item[type checking] $\CHK\Gamma Tt$ ~ constructions are checked with respect to a given type;
+\item[type synthesis] $\SYN\Gamma eS$ ~ eliminations have their types synthesized, from the type of their head variable, which is given in the context.
 \end{description}
-The `forward' $\in$ of type synthesis is pronounced ``in'', with \LaTeX{} macro {\tt $\backslash$in}; its reverse, used for checking, may be pronounced ``ni'', for its \LaTeX{} macro is {\tt $\backslash$ni}, but
+The `forward' $\in$ of type synthesis is pronounced ``in'', with \LaTeX{} macro {\tt $\backslash$in}, or perhaps ``is a(n)'' or ``inhabits''; its reverse, used for checking, may be pronounced ``ni'', for its \LaTeX{} macro is {\tt $\backslash$ni}, but
 might be more intelligibly pronounced ``has'' or ``accepts''.
 
 Many other authors keep terms to the left of types and use arrows (directions vary) to make the checking/synthesis distinction. I insist on retaining the left-to-right flow of \emph{time} through the
@@ -633,7 +975,7 @@ For the above judgment forms, we shall have
 \end{array}\]
 
 In order to specify the requirements and guarantees (but not to give the rules themselves), we shall also
-need a context validity judgment, \framebox{$\VALID\Gamma$}, for which $\Gamma$ is considered the subject.
+need a context validity judgment, $\VALID\Gamma$, for which $\Gamma$ is considered the subject.
 We should expect every judgment input to have a requirement for which it is the subject and every judgment output to have a guarantee for which it is the subject. Here,
 \[\begin{array}{lrl}
 \CHK\Gamma Tt & \mbox{requires} & \VALID\Gamma \\
@@ -645,8 +987,25 @@ and we are correspondingly not free to write down any old rubbish by way of typi
 rise to proof obligations which we must check. However, in the rule to establish a particular judgment,
 the requirements even to propose the judgment are \emph{presumed}, not revalidated: as it were, ``We would not be asking this question if we did not already know so-and-so.''.
 
-There is more to say about the impact of \emph{mode} on valid notions of typing rule. Firstly, the inputs of conclusions and the outputs of premises must be \emph{patterns}, which may match against any construct of the calculus \emph{except free variables} and are the binding sites for the schematic variables of the rules.  Secondly, the outputs of conclusions and the inputs of premises must be \emph{expressions}, making use of the schematic variables in scope and instantiating any bound variables they may have. Scope flows clockwise round the rules, starting from the inputs of the conclusion, accumulating left-to-right through the premises, finishing with the outputs of the conclusion. Thirdly, only the schematic variables in the conclusion's \emph{subjects} are
-in scope for the subjects of the premises, and they must all occur in at least one premise. Fourthly, a schematic subject variable becomes in scope for \emph{expressions} only after it has been the subject of a premise (and thus achieved some measure of trust). These four conditions form the basis of a kind of `religion' of typing rules: let us obey them for now and consider breaking them when we are older and more aware of the consequences of our actions.
+There is more to say about the impact of \emph{mode} on valid notions of typing rule.
+\begin{enumerate}
+\item The inputs of conclusions and the outputs of premises must be
+\emph{patterns}, which may match against any construct of the calculus
+\emph{except free variables} and are the binding sites for the
+schematic variables of the rules.
+\item The outputs of conclusions and the inputs of premises must
+be \emph{expressions}, making use of the schematic variables in scope
+and instantiating any bound variables they may have. Scope flows
+clockwise round the rules, starting from the inputs of the conclusion,
+accumulating left-to-right through the premises, finishing with the
+outputs of the conclusion.
+\item Only the schematic variables in the conclusion's \emph{subjects} are
+in scope for the subjects of the premises, and they must all occur in exactly one premise.
+\item A schematic subject variable becomes in scope for \emph{expressions} only after it has been the subject of a premise (and thus achieved some measure of trust).
+\end{enumerate}
+These four conditions form the basis of a kind of `religion' of typing
+rules: let us obey them for now and consider breaking them when we are
+older and more aware of the consequences of our actions.
 
 The type checking and context validity rules are as follows:
 \[\begin{array}{l@@{\qquad}c}
@@ -708,11 +1067,10 @@ When we come to instantiate $T[x]$ with $s$, we do at least know $S$, the type o
 \[
 e,f ::= \ldots \;||\; t\hb T
 \]
-(We should also add radicals to the declaration of |Tm|
-\begin{spec}
-  _::_ : Tm n chk -> Tm n chk -> Tm n syn
-\end{spec}
-and extend |/| accordingly.)
+
+We should also add radicals to the declaration of |Tm| and extend |/| accordingly.\\
+\usebox{\radbox}\vspace*{ -0.2in}\\
+\usebox{\radactbox}\\
 
 The associated typing rule allows us to change direction in the other direction from embedding, at the cost of making the intermediate type explicit: the type we synthesize is exactly the type we supply.
 \[\Rule{\CHK\Gamma\type T\quad \CHK\Gamma Tt}
@@ -802,6 +1160,70 @@ happens both when checking types for introductions and when
 synthesizing types for eliminations.
 
 
+\section{Formalizing Reduction}
+
+To formalize the typing rules, we must first formalize reduction. We may give
+an inductive family capturing exactly \emph{one-step} reduction, with a base
+constructor for each contraction scheme and step constructors for each possible
+contextual closure.
+
+%format ~> = "\D{\leadsto}"
+%format _~>_ = _ ~> _
+%format beta = "\C{\upbeta}"
+%format upsilon = "\C{\upupsilon}"
+%format PiL = Pi "_{\C{L}}"
+%format PiR = Pi "_{\C{R}}"
+%format apL = "\C{ap}_{\C{L}}"
+%format apR = "\C{ap}_{\C{R}}"
+%format raL = "\C{ra}_{\C{L}}"
+%format raR = "\C{ra}_{\C{R}}"
+\begin{code}
+data _~>_ {n : Nat} : forall {sort} -> Tm n sort -> Tm n sort -> Set where
+
+  beta     :  forall {t T s S} ->
+              ((la t :: Pi S T) $ s) ~> ((t :: T) /s (ox oi (s :: S)))
+
+  upsilon  :  forall {t T} ->
+              em (t :: T) ~> t
+
+  PiL      :  forall {S S' T} ->  S ~> S'  -> Pi S T ~> Pi S' T
+  PiR      :  forall {S T T'} ->  T ~> T'  -> Pi S T ~> Pi S T'
+  la       :  forall {t t'} ->    t ~> t'  -> la t ~> la t'
+  em       :  forall {e e'} ->    e ~> e'  -> em e ~> em e'
+  apL      :  forall {f f' s} ->  f ~> f'  -> (f $ s) ~> (f' $ s)
+  apR      :  forall {f s s'} ->  s ~> s'  -> (f $ s) ~> (f $ s')
+  raL      :  forall {t t' T} ->  t ~> t'  -> (t :: T) ~> (t' :: T)
+  raR      :  forall {t T T'} ->  T ~> T'  -> (t :: T) ~> (t :: T')
+\end{code}
+
+Note that even though the definition is nondeterministic, it is
+consistent with the mode assignment \emph{input} |~>| \emph{output},
+with \emph{patterns} for the inputs of conclusions and the outputs of
+premises, and \emph{expressions} (where we may use substitution) for
+the outputs of conclusiosn and the inputs of premises.
+As a consequence, it is straightforwardly stable under substitution.
+
+\begin{code}
+_/~>_ : forall {n m sort}{t t' : Tm n sort} -> t ~> t' -> (sg : n >> m) ->
+         (t /s sg) ~> (t' /s sg)
+beta {t = t}{T = T}{s = s}{S = S} /~> sg
+  with beta {t = t /s os sg}{T = T /s os sg}{s = s /s sg}{S = S /s sg}
+... | b rewrite SBSTSBSTSBST.compAct (t :: T) (ox oi (s :: S)) sg
+              | SBSTSBSTSBST.compAct (t :: T) (os sg) (ox oi ((s :: S) /s sg))
+              | oxSbst (t :: T) oi (s :: S) sg
+              | sbstId sg
+              | idSbst sg
+              = b
+upsilon /~> sg = upsilon
+PiL tt' /~> sg = PiL (tt' /~> sg)
+PiR tt' /~> sg = PiR (tt' /~> os sg)
+la tt' /~> sg = la (tt' /~> os sg)
+em tt' /~> sg = em (tt' /~> sg)
+apL tt' /~> sg = apL (tt' /~> sg)
+apR tt' /~> sg = apR (tt' /~> sg)
+raL tt' /~> sg = raL (tt' /~> sg)
+raR tt' /~> sg = raR (tt' /~> sg)
+\end{code}
 
 \newpage
 \appendix
@@ -820,8 +1242,6 @@ synthesizing types for eliminations.
 \newcommand{\tyc}{\green{\upepsilon}}
 
 \textbf{There's an inevitable dilemma about whether to do this explicitly in Agda.}
-
-It's always struck me as an intensely frustrating business, defining an inductive datatype to represent some syntax of terms, and then showing that it really works like a syntax by defining operations such as substitution and proving that they exhibit the appropriate structure. These types are syntactic by construction.
 
 When we model a syntax, an `object language', its terms can be classified into object \emph{sorts}, $\iota$. (Sometimes, we may even identify the notion of `sort' with the object language's notion of `type', but that is far from crucial.) The object sorts for our language are constructions and eliminations.
 \[
